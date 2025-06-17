@@ -14,10 +14,9 @@ mouse.Button1Down.Connect(() => {
             const distance = (clickPosition.sub(playerPosition)).Magnitude;
             //print(`Player is: ${distance} away from where they clicked!`);
             if (distance <= 30) {
-                interactEvent.FireServer(target, clickPosition);
+                const heldItem = player.Character?.FindFirstChildWhichIsA("Tool") as Tool;
+                if (heldItem) interactEvent.FireServer(target, clickPosition, heldItem);
             }
-
         }
-
     }
 })

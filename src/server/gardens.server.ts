@@ -1,6 +1,6 @@
 import { Players, Workspace, ReplicatedStorage } from "@rbxts/services";
 import { Interactable } from "../shared/interactInterface";
-import { PlayerGarden, Garden } from "../shared/Classes";
+import { PlayerGarden, Garden } from "../shared/Garden";
 
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
@@ -85,7 +85,7 @@ Players.PlayerRemoving.Connect(function (player: Player) {
     if (gardensFolder) unassignGarden(player);
 })
 
-interactEvent.OnServerEvent.Connect((player: Player, target: unknown, clickPosition: unknown) => {
+interactEvent.OnServerEvent.Connect((player: Player, target: unknown, clickPosition: unknown, interactable?: unknown) => {
     const instance = target as Instance;
     const hitPos = clickPosition as Vector3;
     const playerGarden = PlayerGardens.get(player.UserId);
@@ -93,7 +93,7 @@ interactEvent.OnServerEvent.Connect((player: Player, target: unknown, clickPosit
         const allotments: Instance[] = playerGarden.getAllotments();
         const allotment: Instance | undefined = allotments.find(value => value.Name === instance.Name);
         if (allotment && playerGarden.getOwner() === player) {
-            playerGarden.interact(player, hitPos, allotment);
+            playerGarden.interact(player, hitPos, allotment, interactable as Tool);
         }
         //print(`PlayerGarden: ${playerGarden}`);
     }
