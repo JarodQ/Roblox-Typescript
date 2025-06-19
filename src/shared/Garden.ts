@@ -29,11 +29,12 @@ export class PlayerGarden implements Interactable {
 
     public interact(player: Player, hitPos: Vector3, interactable: Instance, interactee?: Tool): void {
         if (interactee === undefined) return;
-        const PREFAB: Part | undefined = PREFABS.getPREFAB("seeds", interactee.Name);
-        if (PREFAB) {
+        const PREFABList: Part[] | undefined = PREFABS.getPREFAB("seeds", interactee.Name);
+        //print(PREFABList);
+        if (PREFABList) {
             const definedSeed: Seed = {
                 name: "TestSeed1",
-                PREFAB: PREFAB,
+                PREFABS: PREFABList,
             }
             const newSeed: SeedModule.TestSeed1 = new SeedModule.TestSeed1(definedSeed);
             newSeed.plant(hitPos);

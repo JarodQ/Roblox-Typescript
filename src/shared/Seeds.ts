@@ -7,7 +7,7 @@ export function isSeed(obj: unknown): obj is Seed {
 }
 export type Seed = {
     name: String;
-    PREFAB: Part;
+    PREFABS: Part[];
 }
 
 export type SeedMods = {
@@ -22,6 +22,11 @@ export type SeedMods = {
 
 export class SeedMaster {
     public seed: Seed;
+    private seedPart: Part | undefined;
+    private seedPosition: Vector3 = new Vector3(0, 0, 0);
+    private growthStage: number = 0;
+    private growthRate: number = 1;
+    private growthTime: number = 1;
 
 
     constructor(seed: Seed) {
@@ -29,11 +34,35 @@ export class SeedMaster {
     }
 
     public plant(position: Vector3): void {
-        const newSeed: Part = this.seed.PREFAB.Clone();
-        newSeed.Parent = Workspace;
-        newSeed.Position = position;
+        this.seedPart = this.seed.PREFABS[0].Clone();
+        this.seedPart.Parent = Workspace;
+        this.seedPart.Position = position;
+        this.seedPosition = position;
+        this.growthTime = DateTime.now().UnixTimestamp;
+        this.trackGrowth();
         return;
     }
+
+    private evolveGrowth() {
+        if (this.seedPart) {
+            this.seedPart.Destroy();
+            this.growthStage++;
+            this.seedPart = this.seed.PREFABS[this.growthStage].Clone();
+            this.seedPart.Parent = Workspace;
+            this.seedPart.Position = this.seedPosition;
+            if (this.seed.PREFABS[this.growthStage + 1]) this.trackGrowth();
+        }
+    }
+
+    private trackGrowth(): void {
+        const timeToGrow = 5 * this.growthRate;
+        do {
+            wait();
+        } while (DateTime.now().UnixTimestamp - this.growthTime < timeToGrow);
+        this.growthTime = DateTime.now().UnixTimestamp;
+        this.evolveGrowth();
+    }
+
 }
 
 export class TestSeed1 extends SeedMaster {
