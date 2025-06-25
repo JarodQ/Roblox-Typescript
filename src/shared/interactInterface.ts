@@ -2,7 +2,42 @@ import { Players, Workspace, ReplicatedStorage, RunService } from "@rbxts/servic
 import { TweenService } from "@rbxts/services";
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
-const interactionMap = new Map<Instance, Interactable>();
+export const interactionMap = new Map<Instance, Interactable>();
+
+function rotateIndefinitely(instance: BasePart | Model, duration = 5): void {
+    if (instance.IsA("BasePart")) {
+        // Tween rotation for BasePart
+        const tweenInfo = new TweenInfo(
+            duration,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.In,
+            -1, // infinite loop
+            false,
+            0
+        );
+
+        const goal = {
+            Orientation: instance.Orientation.add(new Vector3(0, 360, 0)),
+        };
+
+        const tween = TweenService.Create(instance, tweenInfo, goal);
+        tween.Play();
+
+    } else if (instance.IsA("Model")) {
+        // Rotate using Heartbeat for Model
+        let angle = 0;
+        const speedRadPerSec = math.rad(360 / duration);
+
+        RunService.Heartbeat.Connect((dt) => {
+            const deltaAngle = speedRadPerSec * dt;
+            angle += deltaAngle;
+
+            const pivot = instance.GetPivot();
+            const rotation = CFrame.Angles(0, deltaAngle, 0);
+            instance.PivotTo(pivot.mul(rotation));
+        });
+    }
+}
 
 export function tweenArcPop(position: Vector3, popPrefab: Instance) {
     const popClone = popPrefab.Clone();
@@ -52,7 +87,7 @@ export function tweenArcPop(position: Vector3, popPrefab: Instance) {
     const connection = driver.GetPropertyChangedSignal("Value").Connect(() => {
         const t = driver.Value;
         const horizontal = arcDistance.mul(0.5 * (1 - math.cos(t * math.pi)));
-        const vertical = new Vector3(0, math.sin(t * math.pi) * arcHeight, 0);
+        const vertical = new Vector3(0, math.sin(t * math.pi) * arcHeight + 1, 0);
         root.CFrame = new CFrame(startPosition.add(horizontal).add(vertical));
     });
 
@@ -61,48 +96,23 @@ export function tweenArcPop(position: Vector3, popPrefab: Instance) {
     tween.Completed.Connect(() => {
         connection.Disconnect();
         driver.Destroy();
-        task.delay(1, () => popClone.Destroy());
+        rotateIndefinitely(root);
+        //task.delay(1, () => popClone.Destroy());
     });
 }
 
-export function playPopEffect(position: Vector3, popPrefab: Instance) {
-    const popClone = popPrefab.Clone();
-    popClone.Parent = Workspace;
-
+export function moveInstance(instance: Instance, position: Vector3) {
     let root: BasePart | undefined;
-
-    if (popClone.IsA("Model")) {
-        root = popClone.PrimaryPart ?? popClone.FindFirstChildWhichIsA("BasePart");
-        if (!root) {
-            warn("No BasePart found in model Prefab");
-            popClone.Destroy();
-            return;
-        }
-        popClone.PivotTo(new CFrame(position.sub(new Vector3(0, 0, 0))));
-    } else if (popClone.IsA("BasePart")) {
-        root = popClone;
-        root.Position = position.sub(new Vector3(0, -2, 0));
-    } else {
-        warn("Unsupported instance type for pop effect");
-        popClone.Destroy();
-        return;
+    if (instance.IsA("Model")) {
+        root = instance.PrimaryPart ?? instance.FindFirstChildWhichIsA("BasePart");
+        print(instance.PrimaryPart);
+        if (root?.Anchored === true) root.Anchored = false;
+        root?.PivotTo(new CFrame(position))
+        if (root) root.Anchored = true;
+    } else if (instance.IsA("BasePart")) {
+        root = instance;
+        root.Position = position;
     }
-    root.Anchored = false;
-
-    root.AssemblyAngularVelocity = new Vector3(
-        math.random() * 10,
-        math.random() * 10,
-        math.random() * 10
-    );
-
-    const direction = new Vector3(0, 1, 0).Unit;
-    const strength = 50;
-    root.AssemblyLinearVelocity = direction.mul(50); // Immediate motion
-    root.ApplyImpulse(direction.mul(strength * root.AssemblyMass));
-
-    //task.delay(2, () => {
-    //    popClone.Destroy();
-    //})
 }
 
 export const InteractionRegistry = {
@@ -136,7 +146,7 @@ function isBasePart(value: unknown): value is BasePart {
 function resolveInteractableFromPart(target: unknown): Interactable | undefined {
     if (isBasePart(target)) {
         const root = target.FindFirstAncestorOfClass("Model") ?? target;
-        return InteractionRegistry.get(target);
+        return InteractionRegistry.get(root);
     }
     return;
 }

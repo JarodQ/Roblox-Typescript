@@ -3,12 +3,22 @@ import { ReplicatedStorage } from "@rbxts/services";
 const PREFABFolder: Folder = ReplicatedStorage.WaitForChild("PREFABS") as Folder;
 const SeedPREFABS: Folder = PREFABFolder.WaitForChild("Seeds") as Folder;
 const uiPREFABS: Folder = PREFABFolder.WaitForChild("UI") as Folder;
+const DropsPREFABS: Folder = PREFABFolder.WaitForChild("Drops") as Folder;
 
+export function identifyInstance(instance: Instance): "Model" | "Part" | "Other" {
+    if (instance.IsA("Model")) {
+        return "Model";
+    } else if (instance.IsA("BasePart")) {
+        return "Part";
+    } else {
+        return "Other";
+    }
+}
 
-function getList(PREFABFolder: Folder): Part[] {
-    const PREFABS: Part[] = [];
-    for (let part of PREFABFolder.GetChildren()) {
-        PREFABS.push(part as Part);
+function getList(PREFABFolder: Folder): Instance[] {
+    const PREFABS: Instance[] = [];
+    for (const item of PREFABFolder.GetChildren()) {
+        PREFABS.push(item);
     }
     //print(PREFABS);
     return PREFABS;
@@ -17,7 +27,7 @@ function getList(PREFABFolder: Folder): Part[] {
 export function getPREFAB(folder: string, targetPREFAB: string): unknown | undefined {
     let PREFAB: Folder | undefined;
     let targetFolder: Folder | undefined;
-    let PREFABSList: Part[] = [];
+    let PREFABSList: Instance[] = [];
     switch (folder) {
         case "seeds":
             targetFolder = seeds?.get(targetPREFAB);
@@ -27,6 +37,10 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
             targetFolder = UI?.get(targetPREFAB);
             if (targetFolder) PREFABSList = getList(targetFolder);
             return PREFABSList;
+        case "Drops":
+            targetFolder = Drops?.get(targetPREFAB);
+            if (targetFolder) PREFABSList = getList(targetFolder);
+            return PREFABSList[0];
         default:
             return;
     }
@@ -40,5 +54,10 @@ for (let seedFolder of SeedPREFABS.GetChildren()) {
 const UI: Map<string, Folder> = new Map();
 for (let uiFolder of uiPREFABS.GetChildren()) {
     UI.set(uiFolder.Name, uiFolder as Folder);
+}
+
+const Drops: Map<string, Folder> = new Map();
+for (let dropsFolder of DropsPREFABS.GetChildren()) {
+    Drops.set(dropsFolder.Name, dropsFolder as Folder);
 }
 

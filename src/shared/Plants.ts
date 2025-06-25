@@ -11,13 +11,13 @@ export function isSeed(obj: unknown): obj is Seed {
     return "name" in obj && "PREFAB" in obj;
 }
 export type Seed = {
-    name: String;
-    PREFABS: Part[];
+    name: string;
+    PREFABS: (Part | Model)[];
     plantProgress: BillboardGui;
 }
 
 export type SeedMods = {
-    seedType: String;
+    seedType: string;
     day: Boolean
     night: Boolean;
     wet: Boolean;
@@ -28,7 +28,7 @@ export type SeedMods = {
 
 export class PlantMaster implements Harvestable {
     public seed: Seed;
-    private plantPart: Part | undefined;
+    private plantPart: Part | Model | undefined;
     private seedPosition: Vector3 = new Vector3(0, 0, 0);
     private seedProgress: BillboardGui;
     private growthStage: number = 0;
@@ -49,9 +49,14 @@ export class PlantMaster implements Harvestable {
     }
 
     public plant(position: Vector3): void {
-        this.plantPart = this.seed.PREFABS[0].Clone();
+        this.plantPart = this.seed.PREFABS.find((part) => part.Name === "Stage0")?.Clone();
+        if (!this.plantPart) {
+            print("Plant PREFAB could not be found!");
+            return;
+        }
         this.plantPart.Parent = Workspace;
-        this.plantPart.Position = position;
+        //this.plantPart.Position = position;
+        InteractInterface.moveInstance(this.plantPart, position);
         this.seedPosition = position;
         this.growthStart = DateTime.now().UnixTimestampMillis;
         this.currentStageTime = DateTime.now().UnixTimestampMillis;
@@ -78,10 +83,21 @@ export class PlantMaster implements Harvestable {
     }
 
     public harvest(player: Player) {
-        const plantPrefab = DropsPrefabsFolder.FindFirstChild("HarvestTest")!.Clone() as BasePart;
-        const plantPosition = this.plantPart!.Position;
+        //const plantPrefab = DropsPrefabsFolder.FindFirstChild("HarvestTest")!.Clone() as BasePart;
+        print(this.seed.name)
+        let plantPrefab: Model | Part = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part
+        print(plantPrefab)
+        plantPrefab = plantPrefab.Clone();
+        let plantPosition: Vector3;
+        if (this.plantPart?.IsA("Model")) {
+            plantPosition = this.plantPart?.GetPivot().Position
+        } else if (this.plantPart?.IsA("BasePart")) {
+            plantPosition = this.plantPart?.Position;
+        } else {
+            return;
+        }
         plantPrefab.Parent = Workspace;
-        plantPrefab.Size = new Vector3(1, 1, 1);
+        //plantPrefab.Size = new Vector3(1, 1, 1);
         this.plantPart?.Destroy();
         print("Harvesting Plant");
         InteractInterface.tweenArcPop(plantPosition, plantPrefab);
@@ -92,12 +108,17 @@ export class PlantMaster implements Harvestable {
 
         if (this.plantPart) {
             this.growthStage++;
-            const newplantPart = this.seed.PREFABS[this.growthStage].Clone();
-            newplantPart.Parent = Workspace;
-            newplantPart.Position = this.seedPosition;
-            this.seedProgress.Parent = newplantPart;
+            //const newPlantPart = this.seed.PREFABS[this.growthStage].Clone();
+            const newPlantPart = this.seed.PREFABS.find((part) => part.Name === `Stage${this.growthStage}`)?.Clone();
+            if (!newPlantPart) {
+                print("Plant PREFAB could not be found!");
+                return;
+            }
+            newPlantPart.Parent = Workspace;
+            InteractInterface.moveInstance(newPlantPart, this.seedPosition);
+            this.seedProgress.Parent = newPlantPart;
             this.plantPart.Destroy();
-            this.plantPart = newplantPart;
+            this.plantPart = newPlantPart;
             if (!this.seed.PREFABS[this.growthStage + 1]) {
                 InteractInterface.InteractionRegistry.register(this.plantPart, this);
             }
