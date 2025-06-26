@@ -105,7 +105,6 @@ export function moveInstance(instance: Instance, position: Vector3) {
     let root: BasePart | undefined;
     if (instance.IsA("Model")) {
         root = instance.PrimaryPart ?? instance.FindFirstChildWhichIsA("BasePart");
-        print(instance.PrimaryPart);
         if (root?.Anchored === true) root.Anchored = false;
         root?.PivotTo(new CFrame(position))
         if (root) root.Anchored = true;

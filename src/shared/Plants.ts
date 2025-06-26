@@ -4,6 +4,7 @@ import * as InteractInterface from "./InteractInterface"
 import { Harvestable } from "./InteractInterface";
 
 
+
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;
 
 export function isSeed(obj: unknown): obj is Seed {
@@ -56,6 +57,7 @@ export class PlantMaster implements Harvestable {
         }
         this.plantPart.Parent = Workspace;
         //this.plantPart.Position = position;
+        print(`Moving ${this.plantPart} to position: ${position}`);
         InteractInterface.moveInstance(this.plantPart, position);
         this.seedPosition = position;
         this.growthStart = DateTime.now().UnixTimestampMillis;

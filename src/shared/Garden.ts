@@ -32,6 +32,7 @@ export class PlayerGarden implements Interactable {
         if (interactee === undefined) return;
         const PREFABList: Part[] = PREFABS.getPREFAB("seeds", interactee.Name) as Part[];
         const progressBar: BillboardGui[] = PREFABS.getPREFAB("UI", "ProgressBar") as BillboardGui[];
+        print(PREFABList);
         if (PREFABList && progressBar) {
             const definedSeed: Seed = {
                 name: interactee.Name,
