@@ -27,9 +27,29 @@ export function getPlayerKey(userId: number): string {
     return `Player_${userId}`;
 }
 
+export function isValidPlayerDataKey(key: string): key is keyof PlayerData {
+    return key in DEFAULT_PLAYER_DATA;
+}
+
 // Loads and returns player data or falls back to defaults
 export async function loadPlayerData(userId: number): Promise<PlayerData> {
     const key = getPlayerKey(userId);
+    const lockKey = getLockKey(userId);
+    const timestamp = os.time();
+
+    const [existingLock] = lockStore.GetAsync(lockKey);
+    if (existingLock && (existingLock as { serverId: String; timestamp: number }).serverId !== SERVER_ID) {
+        const age = timestamp - (existingLock as { serverId: string; timestamp: number }).timestamp;
+        if (age < 30) {
+            warn(`🛑 Lock still active: Player ${userId} on another server`);
+            throw "Player data is locked by another session";
+        }
+        warn(`⚠️ Expired lock detected for Player ${userId}. Overwriting...`);
+    }
+
+    lockStore.UpdateAsync(lockKey, () => {
+        return $tuple({ serverId: SERVER_ID, timestamp });
+    })
 
     const result = await retryAsync(() => {
         const [data] = store.GetAsync(key);
@@ -46,7 +66,7 @@ export async function savePlayerData(userId: number, data: PlayerData): Promise<
     await retryAsync(() => {
         print("📦 About to call UpdateAsync");
         const result = store.UpdateAsync(key, (oldValue) => {
-            print(data);
+            print(`Attempting to save User: ${key}'s date: ${data}`);
             return $tuple(data); // ✅ Wrap the return in $tuple to satisfy roblox-ts
         }) as LuaTuple<[PlayerData | undefined, DataStoreKeyInfo]>;
 
@@ -76,3 +96,4 @@ export async function retryAsync<T>(
         }
     }
 }
+

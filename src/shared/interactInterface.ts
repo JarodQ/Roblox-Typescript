@@ -1,45 +1,14 @@
 import { Players, Workspace, ReplicatedStorage, RunService } from "@rbxts/services";
 import { TweenService } from "@rbxts/services";
+import { DEFAULT_PLAYER_DATA } from "./types/PlayerData";
+import { isValidPlayerDataKey } from "shared/DataStoreWrapper";
+import * as PlayerDataService from "shared/PlayerDataService";
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
 export const interactionMap = new Map<Instance, Interactable>();
 
-function rotateIndefinitely(instance: BasePart | Model, duration = 5): void {
-    if (instance.IsA("BasePart")) {
-        // Tween rotation for BasePart
-        const tweenInfo = new TweenInfo(
-            duration,
-            Enum.EasingStyle.Linear,
-            Enum.EasingDirection.In,
-            -1, // infinite loop
-            false,
-            0
-        );
 
-        const goal = {
-            Orientation: instance.Orientation.add(new Vector3(0, 360, 0)),
-        };
-
-        const tween = TweenService.Create(instance, tweenInfo, goal);
-        tween.Play();
-
-    } else if (instance.IsA("Model")) {
-        // Rotate using Heartbeat for Model
-        let angle = 0;
-        const speedRadPerSec = math.rad(360 / duration);
-
-        RunService.Heartbeat.Connect((dt) => {
-            const deltaAngle = speedRadPerSec * dt;
-            angle += deltaAngle;
-
-            const pivot = instance.GetPivot();
-            const rotation = CFrame.Angles(0, deltaAngle, 0);
-            instance.PivotTo(pivot.mul(rotation));
-        });
-    }
-}
-
-export function tweenArcPop(position: Vector3, popPrefab: Instance) {
+export function tweenArcPop(player: Player, dataName: string, position: Vector3, popPrefab: Instance, range?: number) {
     const popClone = popPrefab.Clone();
     popClone.Parent = Workspace;
 
@@ -62,6 +31,7 @@ export function tweenArcPop(position: Vector3, popPrefab: Instance) {
     }
 
     root.Anchored = true;
+    pickup(player, dataName, root, range);
 
     // Create driver for tween progression
     const driver = new Instance("NumberValue");
@@ -96,9 +66,85 @@ export function tweenArcPop(position: Vector3, popPrefab: Instance) {
     tween.Completed.Connect(() => {
         connection.Disconnect();
         driver.Destroy();
-        rotateIndefinitely(root);
+        const cancelSpin = rotateIndefinitely(root);
+        pickup(player, dataName, root, range, cancelSpin);
         //task.delay(1, () => popClone.Destroy());
     });
+}
+
+function rotateIndefinitely(instance: BasePart | Model, duration = 5): () => void {
+    let cleanup: () => void = () => { };
+
+    if (instance.IsA("BasePart")) {
+        // Tween rotation for BasePart
+        const tweenInfo = new TweenInfo(
+            duration,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.In,
+            -1, // infinite loop
+            false,
+            0
+        );
+
+        const goal = {
+            Orientation: instance.Orientation.add(new Vector3(0, 360, 0)),
+        };
+
+        const tween = TweenService.Create(instance, tweenInfo, goal);
+        tween.Play();
+
+        cleanup = () => tween.Cancel();
+    } else if (instance.IsA("Model")) {
+        let active = true;
+        const connection = RunService.Heartbeat.Connect((dt) => {
+            if (!active) return;
+
+            const delta = CFrame.Angles(0, math.rad(360 * dt / duration), 0);
+            instance.PivotTo(instance.GetPivot().mul(delta));
+        });
+
+        cleanup = () => {
+            active = false;
+            connection.Disconnect();
+        };
+    }
+    return cleanup;
+}
+
+export async function pickup(player: Player, dataName: string, pickupModel: BasePart, range?: number, onPickupReached?: () => void) {
+    if (!range) range = 10;
+    const speed = 1;
+    while (true) {
+        const character = player.Character;
+        if (character) {
+            const humanoidRoot = character.FindFirstChild("HumanoidRootPart") as BasePart;
+            if (humanoidRoot) {
+                const distance = humanoidRoot.Position.sub(pickupModel.Position).Magnitude;
+                if (distance <= range) {
+                    if (onPickupReached) {
+                        onPickupReached();
+                        return;
+                    }
+                    while (pickupModel.Position.sub(humanoidRoot.Position).Magnitude > 3) {
+                        const target = new CFrame(pickupModel.Position, humanoidRoot.Position)
+                            .add((humanoidRoot.Position.sub(pickupModel.Position)).Unit.mul(0.5));
+                        pickupModel.CFrame = pickupModel.CFrame.Lerp(target, speed);
+                        await Promise.delay(0.01);
+                    }
+                    pickupModel.Destroy();
+
+                    dataName = PlayerDataService.lowercaseFirst(dataName);
+                    if (isValidPlayerDataKey(dataName)) {
+                        PlayerDataService.updateData(player, dataName, 5);
+                    } else {
+                        warn(`🚫 Invalid key: ${dataName}`);
+                    }
+                    return;
+                }
+            }
+        }
+        await Promise.delay(0.1);
+    }
 }
 
 export function moveInstance(instance: Instance, position: Vector3) {

@@ -102,7 +102,7 @@ export class PlantMaster implements Harvestable {
         //plantPrefab.Size = new Vector3(1, 1, 1);
         this.plantPart?.Destroy();
         print("Harvesting Plant");
-        InteractInterface.tweenArcPop(plantPosition, plantPrefab);
+        InteractInterface.tweenArcPop(player, this.seed.name, plantPosition, plantPrefab);
         this.grown = false
     }
 
