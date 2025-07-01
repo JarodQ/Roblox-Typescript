@@ -4,7 +4,7 @@ const player = game.GetService("Players").LocalPlayer;
 const mouse = player.GetMouse();
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
-mouse.Button1Down.Connect(() => {
+mouse.Button2Down.Connect(() => {
     const target = mouse.Target;
     if (target) {
         const clickPosition = mouse.Hit.Position;
