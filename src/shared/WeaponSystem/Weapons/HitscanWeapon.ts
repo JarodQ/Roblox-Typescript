@@ -1,12 +1,16 @@
 import { Workspace } from "@rbxts/services";
 import { Weapon } from "./Weapon";
 import { Players } from "@rbxts/services";
+import { TracerPool } from "./TracerPool";
+import { TweenService } from "@rbxts/services";
 
 export class HitscanWeapon extends Weapon {
-    fire(origin: Vector3, direction: Vector3) {
+    fire(origin: Vector3, direction: Vector3, weaponTool: Tool) {
         if (this.currentAmmo <= 0) return;
         this.currentAmmo--;
-        print("Firing Weapon");
+
+        print("Firing Hitscan");
+
         const rayDirection = direction.Unit.mul(this.stats.range);
 
         const raycastParams = new RaycastParams();
@@ -22,6 +26,31 @@ export class HitscanWeapon extends Weapon {
         }
 
         const result = Workspace.Raycast(origin, rayDirection, raycastParams);
+
+        const hitPosition = result ? result.Position : origin.add(rayDirection);
+        const tracer = TracerPool.get();
+
+        //Tracer Logic
+        const weaponHandle = weaponTool.FindFirstChild("Handle") as Part;
+        const muzzle = weaponHandle.FindFirstChild("Muzzle") as Attachment;
+        if (muzzle) {
+            const tracerOrigin = muzzle.WorldPosition;
+            const distance = origin.sub(hitPosition).Magnitude;
+
+            print(tracer.Name);
+            tracer.Size = new Vector3(1, 1, 1);
+            //tracer.CFrame = new CFrame(tracerOrigin, hitPosition).mul(new CFrame(0, 0, -distance / 2));
+            tracer.CFrame = new CFrame(tracerOrigin);
+            tracer.Parent = Workspace;
+
+            const tween = TweenService.Create(tracer, new TweenInfo(.2), { CFrame: new CFrame(hitPosition) });
+            tween.Play();
+            tween.Completed.Once(() => {
+                TracerPool.release(tracer);
+            })
+        }
+
+
         if (result && result.Instance) {
             this.ammoType.effect?.apply(result.Instance);
             print(`Hit ${result.Instance.Name} for ${this.stats.damage} damage`);

@@ -14,17 +14,19 @@ export abstract class Weapon {
     protected reserveAmmo: number;
     protected ammoType: AmmoType;
     protected owner: Instance;
+    protected tool: Tool;
 
-    constructor(owner: Instance, baseStats: WeaponStats, ammoType: AmmoType) {
+    constructor(owner: Instance, baseStats: WeaponStats, ammoType: AmmoType, weaponTool: Tool) {
         this.owner = owner;
+        this.tool = weaponTool;
         this.stats = { ...baseStats };
         this.ammoType = ammoType;
         this.applyAmmoModifiers();
-        this.currentAmmo = 10;
+        this.currentAmmo = 10000000;
         this.reserveAmmo = 30;
     }
 
-    abstract fire(origin: Vector3, direction: Vector3): void;
+    abstract fire(origin: Vector3, direction: Vector3, weaponTool: Tool): void;
 
     reload(): void {
         const needed = 10 - this.currentAmmo;

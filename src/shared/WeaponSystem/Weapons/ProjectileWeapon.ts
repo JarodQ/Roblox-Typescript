@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { Weapon } from "./Weapon";
 
 export class ProjectileWeapon extends Weapon {
-    fire(origin: Vector3, direction: Vector3) {
+    fire(origin: Vector3, direction: Vector3, weaponTool: Tool) {
         if (this.currentAmmo <= 0) return;
         this.currentAmmo--;
 

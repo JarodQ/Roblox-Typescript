@@ -4,6 +4,7 @@ const PREFABFolder: Folder = ReplicatedStorage.WaitForChild("PREFABS") as Folder
 const SeedPREFABS: Folder = PREFABFolder.WaitForChild("Seeds") as Folder;
 const uiPREFABS: Folder = PREFABFolder.WaitForChild("UI") as Folder;
 const DropsPREFABS: Folder = PREFABFolder.WaitForChild("Drops") as Folder;
+const TracersPREFABS: Folder = PREFABFolder.WaitForChild("Tracers") as Folder;
 
 export function identifyInstance(instance: Instance): "Model" | "Part" | "Other" {
     if (instance.IsA("Model")) {
@@ -41,6 +42,10 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
             targetFolder = Drops?.get(targetPREFAB);
             if (targetFolder) PREFABSList = getList(targetFolder);
             return PREFABSList[0];
+        case "Tracers":
+            targetFolder = Tracers.get(targetPREFAB);
+            if (targetFolder) PREFABSList = getList(targetFolder);
+            return PREFABSList[0];
         default:
             return;
     }
@@ -61,3 +66,7 @@ for (let dropsFolder of DropsPREFABS.GetChildren()) {
     Drops.set(dropsFolder.Name, dropsFolder as Folder);
 }
 
+const Tracers: Map<string, Folder> = new Map();
+for (let tracerFolder of TracersPREFABS.GetChildren()) {
+    Tracers.set(tracerFolder.Name, tracerFolder as Folder);
+}

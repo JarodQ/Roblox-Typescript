@@ -11,25 +11,28 @@ function isWeaponType(value: string): value is "hitscan" | "projectile" {
 
 FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     const [origin, direction, weaponType, ammo] = args as [Vector3, Vector3, string, string];
-    print("Attempting to fire weapon");
     let weapon = playerWeapons.get(player);
     const character = player.Character
-    if (!weapon && character) {
+    const weaponTool = character?.FindFirstChildOfClass("Tool");
+    print(character, weaponTool);
+    if (!weapon && character && weaponTool) {
         print("Past first check");
 
         if (isWeaponType(weaponType)) {
             print("Past second check. Going to fire!");
 
-            weapon = createWeapon(character, weaponType, ammo);
+            weapon = createWeapon(character, weaponType, ammo, weaponTool);
+            print(weapon);
+
             playerWeapons.set(player, weapon);
         } else {
             warn(`Invalid weapon type: ${weaponType}`);
             return;
         }
     }
-    if (weapon) {
+    if (weapon && weaponTool) {
         print(`Weapon already exists! Firing!`);
-        weapon.fire(origin, direction);
+        weapon.fire(origin, direction, weaponTool);
     }
 });
 

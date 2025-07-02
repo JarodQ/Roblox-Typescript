@@ -4,7 +4,7 @@ import { AmmoRegistry } from "../Ammo/AmmoRegistry";
 import { Weapon } from "./Weapon";
 
 
-export function createWeapon(owner: Instance, weaponType: "hitscan" | "projectile", ammoName: string): Weapon {
+export function createWeapon(owner: Instance, weaponType: "hitscan" | "projectile", ammoName: string, weaponTool: Tool): Weapon {
 
     const baseStats = {
         fireRate: 1,
@@ -17,8 +17,8 @@ export function createWeapon(owner: Instance, weaponType: "hitscan" | "projectil
     if (!ammo) error(`Unknown ammo type: ${ammoName}`);
 
     if (weaponType === "hitscan") {
-        return new HitscanWeapon(owner, baseStats, ammo);
+        return new HitscanWeapon(owner, baseStats, ammo, weaponTool);
     } else {
-        return new ProjectileWeapon(owner, baseStats, ammo);
+        return new ProjectileWeapon(owner, baseStats, ammo, weaponTool);
     }
 }
