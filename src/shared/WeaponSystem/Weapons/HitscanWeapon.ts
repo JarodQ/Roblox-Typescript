@@ -42,12 +42,19 @@ export class HitscanWeapon extends Weapon {
             //tracer.CFrame = new CFrame(tracerOrigin, hitPosition).mul(new CFrame(0, 0, -distance / 2));
             tracer.CFrame = new CFrame(tracerOrigin);
             tracer.Parent = Workspace;
-
-            const tween = TweenService.Create(tracer, new TweenInfo(.2), { CFrame: new CFrame(hitPosition) });
+            tracer.CFrame = CFrame.lookAt(tracerOrigin, hitPosition);
+            const duration = distance / 200;
+            //const tween = TweenService.Create(tracer, new TweenInfo(1), { CFrame: new CFrame(hitPosition) });
+            const tween = TweenService.Create(tracer, new TweenInfo(duration), { Position: hitPosition });
             tween.Play();
             tween.Completed.Once(() => {
                 TracerPool.release(tracer);
             })
+            for (let muzzleFlash of muzzle.GetChildren()) {
+                if (muzzleFlash.IsA("ParticleEmitter")) {
+                    muzzleFlash.Emit(1);
+                }
+            }
         }
 
 
