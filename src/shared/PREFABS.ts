@@ -6,6 +6,7 @@ const uiPREFABS: Folder = PREFABFolder.WaitForChild("UI") as Folder;
 const DropsPREFABS: Folder = PREFABFolder.WaitForChild("Drops") as Folder;
 const TracersPREFABS: Folder = PREFABFolder.WaitForChild("Tracers") as Folder;
 const NumbersPREFABS: Folder = PREFABFolder.WaitForChild("Numbers") as Folder;
+const SoundsPREFABS: Folder = PREFABFolder.WaitForChild("Sounds") as Folder;
 
 
 export function identifyInstance(instance: Instance): "Model" | "Part" | "Other" {
@@ -50,7 +51,9 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
             return PREFABSList[0];
         case "Numbers":
             targetFolder = Numbers?.get(targetPREFAB);
-            print(targetFolder);
+            return targetFolder;
+        case "Sounds":
+            targetFolder = Sounds?.get(targetPREFAB);
             return targetFolder;
         default:
             return;
@@ -80,6 +83,10 @@ for (let tracerFolder of TracersPREFABS.GetChildren()) {
 const Numbers: Map<string, Folder> = new Map();
 for (let numberFolder of NumbersPREFABS.GetChildren()) {
     Numbers.set(numberFolder.Name, numberFolder as Folder);
-    print(Numbers);
+}
+
+const Sounds: Map<string, Folder> = new Map();
+for (let soundFolder of SoundsPREFABS.GetChildren()) {
+    Sounds.set(soundFolder.Name, soundFolder as Folder);
 }
 
