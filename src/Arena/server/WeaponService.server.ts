@@ -1,12 +1,12 @@
 import { Workspace } from "@rbxts/services";
-import FireWeapon = require("GardenWars/shared/GardenWars/WeaponSystemOLD/Remotes/FireWeapon");
-import ReloadWeapon = require("GardenWars/shared/GardenWars/WeaponSystemOLD/Remotes/ReloadWeapon");
-import { Weapon } from "GardenWars/shared/GardenWars/WeaponSystemOLD/Weapons/Weapon";
-import { createWeapon } from "GardenWars/shared/GardenWars/WeaponSystemOLD/Weapons/WeaponFactory";
+import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
+import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
+import { Weapon } from "Arena/shared/WeaponSystemOLD/Weapons/Weapon";
+import { createWeapon } from "Arena/shared/WeaponSystemOLD/Weapons/WeaponFactory";
 
 const playerWeapons = new Map<Player, Weapon>();
 const lastFireTimestamps = new Map<Player, number>();
-const FIRE_RATE = 0.5;
+const FIRE_RATE = 0.2;
 function isWeaponType(value: string): value is "hitscan" | "projectile" {
     return value === "hitscan" || value === "projectile";
 }
@@ -26,15 +26,15 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     let weapon = playerWeapons.get(player);
     const character = player.Character
     const weaponTool = character?.FindFirstChildOfClass("Tool");
-    print(character, weaponTool);
+    //print(character, weaponTool);
     if (!weapon && character && weaponTool) {
         print("Past first check");
 
         if (isWeaponType(weaponType)) {
-            print("Past second check. Going to fire!");
+            //print("Past second check. Going to fire!");
 
             weapon = createWeapon(character, weaponType, ammo, weaponTool);
-            print(weapon);
+            //print(weapon);
 
             playerWeapons.set(player, weapon);
         } else {
@@ -43,7 +43,7 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
         }
     }
     if (weapon && weaponTool) {
-        print(`Weapon already exists! Firing!`);
+        //print(`Weapon already exists! Firing!`);
         weapon.fire(origin, direction, weaponTool);
     }
 });

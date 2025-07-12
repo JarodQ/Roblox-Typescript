@@ -1,5 +1,5 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { getPREFAB } from "GardenWars/shared/GardenWars/PREFABS";
+import { getPREFAB } from "Arena/shared/PREFABS";
 
 const carrotTracer = getPREFAB("Tracers", "CarrotTracer") as MeshPart;
 //const TestPart = getPREFAB("Tracers", "TestPart") as Part;
@@ -20,7 +20,7 @@ const pool: (Part | MeshPart)[] = [];
 
 export const TracerPool = {
     get(): Part | MeshPart {
-        print("Getting Tracer");
+        //print("Getting Tracer");
         return pool.pop() || tracerTemplate.Clone();
     },
 

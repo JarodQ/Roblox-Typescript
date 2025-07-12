@@ -1,7 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 
 const PREFABFolder: Folder = ReplicatedStorage.WaitForChild("PREFABS") as Folder;
-const SeedPREFABS: Folder = PREFABFolder.WaitForChild("Seeds") as Folder;
 const uiPREFABS: Folder = PREFABFolder.WaitForChild("UI") as Folder;
 const DropsPREFABS: Folder = PREFABFolder.WaitForChild("Drops") as Folder;
 const TracersPREFABS: Folder = PREFABFolder.WaitForChild("Tracers") as Folder;
@@ -33,10 +32,6 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
     let targetFolder: Folder | undefined;
     let PREFABSList: Instance[] = [];
     switch (folder) {
-        case "seeds":
-            targetFolder = seeds?.get(targetPREFAB);
-            if (targetFolder) PREFABSList = getList(targetFolder);
-            return PREFABSList;
         case "UI":
             targetFolder = UI?.get(targetPREFAB);
             if (targetFolder) PREFABSList = getList(targetFolder);
@@ -60,10 +55,6 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
     }
 }
 
-const seeds: Map<string, Folder> = new Map();
-for (let seedFolder of SeedPREFABS.GetChildren()) {
-    seeds.set(seedFolder.Name, seedFolder as Folder);
-}
 
 const UI: Map<string, Folder> = new Map();
 for (let uiFolder of uiPREFABS.GetChildren()) {

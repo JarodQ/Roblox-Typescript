@@ -87,9 +87,7 @@ export class PlantMaster implements Harvestable {
 
     public harvest(player: Player) {
         //const plantPrefab = DropsPrefabsFolder.FindFirstChild("HarvestTest")!.Clone() as BasePart;
-        print(this.seed.name)
         let plantPrefab: Model | Part = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part
-        print(plantPrefab)
         plantPrefab = plantPrefab.Clone();
         let plantPosition: Vector3;
         if (this.plantPart?.IsA("Model")) {

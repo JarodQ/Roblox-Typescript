@@ -9,7 +9,7 @@ export class HitscanWeapon extends Weapon {
         if (this.currentAmmo <= 0) return;
         this.currentAmmo--;
 
-        print("Firing Hitscan");
+        //print("Firing Hitscan");
 
         const rayDirection = direction.Unit.mul(this.stats.range);
 
@@ -37,7 +37,7 @@ export class HitscanWeapon extends Weapon {
             const tracerOrigin = muzzle.WorldPosition;
             const distance = origin.sub(hitPosition).Magnitude;
 
-            print(tracer.Name);
+            //print(tracer.Name);
             tracer.Size = new Vector3(1, 1, 1);
             //tracer.CFrame = new CFrame(tracerOrigin, hitPosition).mul(new CFrame(0, 0, -distance / 2));
             tracer.CFrame = new CFrame(tracerOrigin);
