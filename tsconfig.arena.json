@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noLib": true,
+    "strict": true,
+    "module": "commonjs",
+    "moduleDetection": "force",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["./node_modules/@rbxts"],
+    "rootDir": "src/Arena",
+    "outDir": "out/Arena"
+  },
+  "include": ["src/Arena/**/*"]
+}

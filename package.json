@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "build": "rbxtsc",
-    "watch": "rbxtsc -w"
+    "watch": "rbxtsc -w",
+    "build:arena": "npx roblox-ts build --project tsconfig.arena.json --rojo arena.project.json",
+    "build:gardenWars": "npx roblox-ts build --project tsconfig.gardenwars.json --rojo gardenwars.project.json",
+    "watch:arena": "npx rbxtsc -w --project tsconfig.arena.json --rojo arena.project.json",
+    "watch:gardenWars": "npx rbxtsc -w --project tsconfig.gardenWars.json --rojo gardenWars.project.json"
   },
   "keywords": [],
   "author": "",
@@ -26,4 +30,5 @@
   "dependencies": {
     "@rbxts/services": "^1.5.5"
   }
+  
 }
