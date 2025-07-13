@@ -1,6 +1,8 @@
 import { Players, UserInputService, RunService, Workspace } from "@rbxts/services";
 import { Constants } from "Arena/shared/Weapon/Constants";
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
+import { PitchRecoil } from "./PitchRecoil";
+import { AdaptiveRecoil } from "./AdaptiveRecoil";
 
 const player = Players.LocalPlayer;
 const character = player.Character ?? player.CharacterAdded.Wait()[0];
@@ -61,6 +63,12 @@ RunService.RenderStepped.Connect((dt) => {
     // 🔁 Z-axis tilt effect (screen shake)
     CameraTilt.step(dt);
     const zTilt = CameraTilt.get();
+
+    /* PitchRecoil.step(dt);
+    const recoilPitch = PitchRecoil.consume();
+    pitch += recoilPitch; */
+    AdaptiveRecoil.step(dt);
+    pitch += AdaptiveRecoil.getTotal();
 
     const baseCFrame = new CFrame(finalPosition, finalPosition.add(rotation.LookVector));
     const finalCFrame = baseCFrame.mul(CFrame.Angles(0, 0, zTilt));

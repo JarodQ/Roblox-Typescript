@@ -2,6 +2,8 @@ import { Workspace, UserInputService, RunService, ReplicatedStorage, Players } f
 import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
 import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
+import { PitchRecoil } from "./Camera/PitchRecoil";
+import { AdaptiveRecoil } from "./Camera/AdaptiveRecoil";
 
 let currentAmmo = "Standard";
 let weaponType: "hitscan" | "projectile" = "hitscan";
@@ -39,6 +41,8 @@ function startFiring(): void {
             print(angle);
             //const randomTilt = math.rad(math.random(-maxTilt, maxTilt));
             CameraTilt.setTarget(randomTilt, fireRate);
+            //PitchRecoil.apply(math.rad(1.5)); // tweak for more or less kick
+            AdaptiveRecoil.apply(math.rad(.7)); // Don't make > 2.0 math.random() -- too impredictable maybe? or maybe use withing a small interval
 
             task.wait(fireRate); // Adjust fire rate
         }
