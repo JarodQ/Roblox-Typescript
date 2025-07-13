@@ -1,4 +1,6 @@
 import { Players, UserInputService, RunService, Workspace } from "@rbxts/services";
+import { Constants } from "Arena/shared/Weapon/Constants";
+import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 
 const player = Players.LocalPlayer;
 const character = player.Character ?? player.CharacterAdded.Wait()[0];
@@ -14,8 +16,8 @@ let yaw = 0;
 let pitch = 0;
 const sensitivity = 0.002;
 
+const shoulderOffset = new Vector3(4, 2, 6); // Right, Up, Back
 
-// 🎯 Pitch limits
 const pitchLimit = {
     up: math.rad(60),
     down: math.rad(80),
@@ -34,22 +36,21 @@ UserInputService.InputChanged.Connect((input: InputObject) => {
         yaw -= deltaX;
     }
 });
-const shoulderOffset = new Vector3(4, 2, 5); // Left, Up, Back
 
-RunService.RenderStepped.Connect(() => {
+RunService.RenderStepped.Connect((dt) => {
     const rotation = CFrame.Angles(0, yaw, 0).mul(CFrame.Angles(pitch, 0, 0));
     const pivot = rootPart.Position;
 
-    // ✅ Rotate character horizontally with camera
+    // 🔁 Rotate character to match aim
     const lookDirection = rotation.LookVector;
     const flatDirection = new Vector3(lookDirection.X, 0, lookDirection.Z).Unit;
     rootPart.CFrame = new CFrame(pivot, pivot.add(flatDirection));
 
-    // ✅ Apply offset in rotated space
+    // 🎯 Camera target offset (shoulder follow)
     const offsetWorld = rotation.VectorToWorldSpace(shoulderOffset);
     const desiredPosition = pivot.add(offsetWorld);
 
-    // ✅ Raycast to avoid clipping
+    // 🧱 Raycast to prevent clipping
     const rayParams = new RaycastParams();
     rayParams.FilterDescendantsInstances = [character];
     rayParams.FilterType = Enum.RaycastFilterType.Exclude;
@@ -57,7 +58,12 @@ RunService.RenderStepped.Connect(() => {
     const result = Workspace.Raycast(pivot, desiredPosition.sub(pivot), rayParams);
     const finalPosition = result ? result.Position : desiredPosition;
 
-    // ✅ Look forward from camera position
-    //const lookDirection = rotation.LookVector;
-    camera.CFrame = new CFrame(finalPosition, finalPosition.add(lookDirection));
+    // 🔁 Z-axis tilt effect (screen shake)
+    CameraTilt.step(dt);
+    const zTilt = CameraTilt.get();
+
+    const baseCFrame = new CFrame(finalPosition, finalPosition.add(rotation.LookVector));
+    const finalCFrame = baseCFrame.mul(CFrame.Angles(0, 0, zTilt));
+
+    camera.CFrame = finalCFrame;
 });

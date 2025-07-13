@@ -1,13 +1,14 @@
-import { UserInputService } from "@rbxts/services";
-import { ReplicatedStorage } from "@rbxts/services";
+import { Workspace, UserInputService, RunService, ReplicatedStorage, Players } from "@rbxts/services";
 import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
 import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
-import { Players } from "@rbxts/services";
+import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 
 let currentAmmo = "Standard";
 let weaponType: "hitscan" | "projectile" = "hitscan";
 
 let isFiring = false;
+const maxTilt = 2;
+const fireRate = 0.2;
 
 function startFiring(): void {
     isFiring = true;
@@ -23,16 +24,30 @@ function startFiring(): void {
 
             const mouse = player.GetMouse();
             const direction = mouse.Hit.Position.sub(head.Position).Unit;
-            //print(`Firing!`);
+
+            // 🔫 Fire the weapon
             FireWeapon.FireServer(head.Position, direction, weaponType, currentAmmo);
 
-            task.wait(0.2); // Adjust fire rate here
+            // 💥 Trigger camera tilt via lockCamera system
+            // 💥 Apply random tilt and lerp over fireRate
+            let angle: number;
+            do {
+                angle = math.random(-maxTilt, maxTilt);
+            } while (math.abs(angle) < 1);
+
+            const randomTilt = math.rad(angle);
+            print(angle);
+            //const randomTilt = math.rad(math.random(-maxTilt, maxTilt));
+            CameraTilt.setTarget(randomTilt, fireRate);
+
+            task.wait(fireRate); // Adjust fire rate
         }
     });
 }
 
 function stopFiring(): void {
     isFiring = false;
+    CameraTilt.reset();
 }
 
 UserInputService.InputBegan.Connect((input, gameProcessed) => {
