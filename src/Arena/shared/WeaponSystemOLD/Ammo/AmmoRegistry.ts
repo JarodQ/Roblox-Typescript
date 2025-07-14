@@ -1,6 +1,6 @@
 import { AmmoType } from "./AmmoType";
-import { ShockEffect } from "../Effects/Effects";
-import { IceEffect } from "../Effects/Effects";
+import { ShockEffect } from "../WeaponEffects/Effects";
+import { IceEffect } from "../WeaponEffects/Effects";
 
 export const AmmoRegistry: Record<string, AmmoType> = {
     Standard: {

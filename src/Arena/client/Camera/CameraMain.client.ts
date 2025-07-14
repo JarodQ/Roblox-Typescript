@@ -3,6 +3,7 @@ import { Constants } from "Arena/shared/Weapon/Constants";
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 import { PitchRecoil } from "./PitchRecoil";
 import { AdaptiveRecoil } from "./AdaptiveRecoil";
+import { ReticleScaler } from "Arena/shared/WeaponSystemOLD/UI/Reticle";
 
 const player = Players.LocalPlayer;
 const character = player.Character ?? player.CharacterAdded.Wait()[0];
@@ -13,6 +14,12 @@ const camera = Workspace.CurrentCamera!;
 camera.CameraType = Enum.CameraType.Scriptable;
 UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter;
 UserInputService.MouseIconEnabled = false;
+
+//Reticle
+const playerGui = player.WaitForChild("PlayerGui");
+const reticlGui = playerGui.WaitForChild("ReticleGui");
+const mainFrame = reticlGui.WaitForChild("Main") as Frame;
+const reticle = mainFrame.WaitForChild("Reticle") as CanvasGroup;
 
 let yaw = 0;
 let pitch = 0;
@@ -69,6 +76,8 @@ RunService.RenderStepped.Connect((dt) => {
     pitch += recoilPitch; */
     AdaptiveRecoil.step(dt);
     pitch += AdaptiveRecoil.getTotal();
+
+    ReticleScaler.step(dt, reticle);
 
     const baseCFrame = new CFrame(finalPosition, finalPosition.add(rotation.LookVector));
     const finalCFrame = baseCFrame.mul(CFrame.Angles(0, 0, zTilt));

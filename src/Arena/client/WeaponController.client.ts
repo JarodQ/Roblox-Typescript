@@ -4,12 +4,21 @@ import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 import { PitchRecoil } from "./Camera/PitchRecoil";
 import { AdaptiveRecoil } from "./Camera/AdaptiveRecoil";
+import { ReticleScaler } from "Arena/shared/WeaponSystemOLD/UI/Reticle";
+import { ArmRecoilController } from "Arena/shared/WeaponSystemOLD/VisualEffects/ArmRecoilController";
 
 let currentAmmo = "Standard";
 let weaponType: "hitscan" | "projectile" = "hitscan";
 
+const player = Players.LocalPlayer;
+const character = player.Character ?? player.CharacterAdded.Wait()[0];
+const rightArm = character.FindFirstChild("RightUpperArm")!;
+const shoulder = rightArm.FindFirstChild("RightShoulder") as Motor6D;
+
+const armRecoil = new ArmRecoilController(shoulder);
+
 let isFiring = false;
-const maxTilt = 2;
+const maxTilt = .95;
 const fireRate = 0.2;
 
 function startFiring(): void {
@@ -33,17 +42,19 @@ function startFiring(): void {
             // 💥 Trigger camera tilt via lockCamera system
             // 💥 Apply random tilt and lerp over fireRate
             let angle: number;
-            do {
-                angle = math.random(-maxTilt, maxTilt);
-            } while (math.abs(angle) < 1);
+            //do {
+            angle = math.random(-maxTilt, maxTilt);
+            //} while (math.abs(angle) < 1);
 
             const randomTilt = math.rad(angle);
             print(angle);
             //const randomTilt = math.rad(math.random(-maxTilt, maxTilt));
-            CameraTilt.setTarget(randomTilt, fireRate);
+            //CameraTilt.setTarget(randomTilt, fireRate);
             //PitchRecoil.apply(math.rad(1.5)); // tweak for more or less kick
-            AdaptiveRecoil.apply(math.rad(.7)); // Don't make > 2.0 math.random() -- too impredictable maybe? or maybe use withing a small interval
+            AdaptiveRecoil.apply(math.rad(.5)); // Don't make > 2.0 math.random() -- too impredictable maybe? or maybe use withing a small interval
 
+            ReticleScaler.boost();
+            armRecoil.triggerRecoil();
             task.wait(fireRate); // Adjust fire rate
         }
     });
