@@ -1,0 +1,18 @@
+import PlaySound = require("Arena/shared/WeaponSystemOLD/Remotes/FireTracer");
+
+
+PlaySound.OnClientEvent.Connect((soundString: string, weaponTool) => {
+    playSound(soundString, weaponTool);
+});
+
+function playSound(soundString: string, weaponTool: Tool): void {
+    const soundFolder = weaponTool.FindFirstChild("Sounds") as Folder;
+    const soundSubFolder = soundFolder.FindFirstChild(soundString) as Folder;
+    const variants = soundSubFolder.GetChildren()
+    const sound = variants[math.random(0, variants.size() - 1)] as Sound;
+
+    if (!sound) return;
+    const pitch = math.clamp(math.random() * 0.4 + 0.8, 0.8, 1.2); // Random between 0.8–1.2
+    sound.PlaybackSpeed = pitch;
+    sound.Play();
+}

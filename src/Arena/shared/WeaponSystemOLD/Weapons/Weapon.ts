@@ -1,4 +1,6 @@
+import { DamageContext } from "Arena/shared/Damage/DamageService";
 import { AmmoType } from "../Ammo/AmmoType";
+import { FindFirstChild } from "../Remotes/FireWeapon";
 
 export interface WeaponStats {
     fireRate: number;
@@ -26,7 +28,7 @@ export abstract class Weapon {
         this.reserveAmmo = 30;
     }
 
-    abstract fire(origin: Vector3, direction: Vector3, weaponTool: Tool): void;
+    abstract fire(origin: Vector3, direction: Vector3, weaponTool: Tool): DamageContext | undefined;
 
     reload(): void {
         const needed = 10 - this.currentAmmo;
@@ -43,6 +45,18 @@ export abstract class Weapon {
                 this.stats[key as keyof WeaponStats] += value;
             }
         }
+    }
+
+    public playFireSound(soundString: string): void {
+        const soundFolder = this.tool.FindFirstChild("Sounds") as Folder;
+        const soundSubFolder = soundFolder.FindFirstChild(soundString) as Folder;
+        const variants = soundSubFolder.GetChildren()
+        const sound = variants[math.random(0, variants.size() - 1)] as Sound;
+
+        if (!sound) return;
+        const pitch = math.clamp(math.random() * 0.4 + 0.8, 0.8, 1.2); // Random between 0.8–1.2
+        sound.PlaybackSpeed = pitch;
+        sound.Play();
     }
 }
 

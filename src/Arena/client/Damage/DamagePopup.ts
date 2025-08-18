@@ -1,0 +1,1 @@
+import { StatusEffect } from "Arena/shared/Damage/StatusEffectRegistry";

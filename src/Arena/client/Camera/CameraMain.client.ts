@@ -1,5 +1,5 @@
 import { Players, UserInputService, RunService, Workspace } from "@rbxts/services";
-import { Constants } from "Arena/shared/Weapon/Constants";
+import { Constants } from "Arena/shared/Constants";
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 import { PitchRecoil } from "./PitchRecoil";
 import { AdaptiveRecoil } from "./AdaptiveRecoil";

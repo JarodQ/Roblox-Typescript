@@ -1,5 +1,6 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { getPREFAB } from "Arena/shared/PREFABS";
+import { Debris } from "@rbxts/services";
 
 const carrotTracer = getPREFAB("Tracers", "CarrotTracer") as MeshPart;
 //const TestPart = getPREFAB("Tracers", "TestPart") as Part;
@@ -26,6 +27,6 @@ export const TracerPool = {
 
     release(tracer: Part | MeshPart) {
         tracer.Parent = undefined;
-        pool.push(tracer);
+        //pool.push(tracer);
     }
 }

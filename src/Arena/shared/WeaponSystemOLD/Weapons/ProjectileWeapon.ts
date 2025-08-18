@@ -1,8 +1,9 @@
 import { Workspace } from "@rbxts/services";
 import { Weapon } from "./Weapon";
+import { DamageContext } from "Arena/shared/Damage/DamageService";
 
 export class ProjectileWeapon extends Weapon {
-    fire(origin: Vector3, direction: Vector3, weaponTool: Tool) {
+    fire(origin: Vector3, direction: Vector3, weaponTool: Tool): DamageContext | undefined {
         if (this.currentAmmo <= 0) return;
         this.currentAmmo--;
 

@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { Constants } from "Arena/shared/Weapon/Constants";
+import { Constants } from "Arena/shared/Constants";
 import { lerp } from "Arena/shared/Utility/lerp";
 
 // 🔫 Internal camera recoil state

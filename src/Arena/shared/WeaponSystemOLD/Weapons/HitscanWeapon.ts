@@ -3,10 +3,14 @@ import { Weapon } from "./Weapon";
 import { Players } from "@rbxts/services";
 import { TracerPool } from "./TracerPool";
 import { TweenService } from "@rbxts/services";
+import FireTracer = require("Arena/shared/WeaponSystemOLD/Remotes/FireTracer");
+import PlaySound = require("../Remotes/PlaySound");
+import { DamageContext } from "Arena/shared/Damage/DamageService";
+
 
 export class HitscanWeapon extends Weapon {
-    fire(origin: Vector3, direction: Vector3, weaponTool: Tool) {
-        if (this.currentAmmo <= 0) return;
+    fire(origin: Vector3, direction: Vector3, weaponTool: Tool): DamageContext | undefined {
+        if (this.currentAmmo <= 0) return undefined;
         this.currentAmmo--;
 
         //print("Firing Hitscan");
@@ -19,7 +23,8 @@ export class HitscanWeapon extends Weapon {
         raycastParams.IgnoreWater = true;
 
         const player = Players.GetPlayerFromCharacter(this.owner);
-        if (player && player.Character) {
+        if (!player) return;
+        if (player.Character) {
             raycastParams.FilterDescendantsInstances = [player.Character];
         } else {
             raycastParams.FilterDescendantsInstances = [];
@@ -28,39 +33,36 @@ export class HitscanWeapon extends Weapon {
         const result = Workspace.Raycast(origin, rayDirection, raycastParams);
 
         const hitPosition = result ? result.Position : origin.add(rayDirection);
-        const tracer = TracerPool.get();
 
         //Tracer Logic
-        const weaponHandle = weaponTool.FindFirstChild("Handle") as Part;
-        const muzzle = weaponHandle.FindFirstChild("Muzzle") as Attachment;
-        if (muzzle) {
-            const tracerOrigin = muzzle.WorldPosition;
-            const distance = origin.sub(hitPosition).Magnitude;
-
-            //print(tracer.Name);
-            tracer.Size = new Vector3(1, 1, 1);
-            //tracer.CFrame = new CFrame(tracerOrigin, hitPosition).mul(new CFrame(0, 0, -distance / 2));
-            tracer.CFrame = new CFrame(tracerOrigin);
-            tracer.Parent = Workspace;
-            tracer.CFrame = CFrame.lookAt(tracerOrigin, hitPosition);
-            const duration = distance / 200;
-            //const tween = TweenService.Create(tracer, new TweenInfo(1), { CFrame: new CFrame(hitPosition) });
-            const tween = TweenService.Create(tracer, new TweenInfo(duration), { Position: hitPosition });
-            tween.Play();
-            tween.Completed.Once(() => {
-                TracerPool.release(tracer);
-            })
-            for (let muzzleFlash of muzzle.GetChildren()) {
-                if (muzzleFlash.IsA("ParticleEmitter")) {
-                    muzzleFlash.Emit(1);
-                }
+        // Need to Test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        for (const otherPlayer of Players.GetPlayers()) {
+            if (otherPlayer !== player) {
+                FireTracer.FireClient(otherPlayer, origin, direction, weaponTool);
+                PlaySound.FireClient(otherPlayer, "Fire", this.tool);
             }
         }
+        if (result) {
+            const hit = result.Instance.FindFirstAncestorOfClass("Model");
+            const hitPlayer = Players.GetPlayerFromCharacter(hit);
+            if (!hit) return undefined;
 
-
-        if (result && result.Instance) {
-            this.ammoType.effect?.apply(result.Instance);
-            print(`Hit ${result.Instance.Name} for ${this.stats.damage} damage`);
+            const damageContext = {
+                attacker: player,
+                victimModel: hit,
+                victimPlayer: hitPlayer,
+                weaponId: "Placeholder",
+                damageAmount: 25,
+                hitPosition: result.Position,
+                hitNormal: result.Normal,
+                statusEffects: [],
+            }
+            return damageContext;
+            //this.ammoType.effect?.apply(result.Instance);
+            //print(`Hit ${result.Instance.Name} for ${this.stats.damage} damage`);
         }
+        return undefined;
+
+
     }
 }

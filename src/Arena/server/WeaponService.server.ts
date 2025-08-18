@@ -3,6 +3,7 @@ import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
 import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
 import { Weapon } from "Arena/shared/WeaponSystemOLD/Weapons/Weapon";
 import { createWeapon } from "Arena/shared/WeaponSystemOLD/Weapons/WeaponFactory";
+import { applyDamage } from "Arena/shared/Damage/DamageService";
 
 const playerWeapons = new Map<Player, Weapon>();
 const lastFireTimestamps = new Map<Player, number>();
@@ -16,8 +17,8 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
 
     const now = Workspace.GetServerTimeNow();
     const lastFire = lastFireTimestamps.get(player) ?? 0;
-    if (now - lastFire < FIRE_RATE) {
-        warn(`Fire rate violation by ${player.Name}`);
+    if (now - lastFire < FIRE_RATE - .05) {
+        warn(`Server Side Fire rate violation by ${player.Name}`);
         return;
     };
 
@@ -33,7 +34,7 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
         if (isWeaponType(weaponType)) {
             //print("Past second check. Going to fire!");
 
-            weapon = createWeapon(character, weaponType, ammo, weaponTool);
+            const weapon = createWeapon(character, weaponType, ammo, weaponTool);
             //print(weapon);
 
             playerWeapons.set(player, weapon);
@@ -44,8 +45,14 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     }
     if (weapon && weaponTool) {
         //print(`Weapon already exists! Firing!`);
-        weapon.fire(origin, direction, weaponTool);
+        const damageContext = weapon.fire(origin, direction, weaponTool);
+        if (damageContext === undefined) return;
+        print(damageContext);
+        applyDamage(damageContext);
+
+        //weapon.playFireSound("Fire");
     }
+
 });
 
 ReloadWeapon.OnServerEvent.Connect((player: Player) => {

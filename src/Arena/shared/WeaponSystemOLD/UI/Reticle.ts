@@ -7,7 +7,6 @@ let initialSize: UDim2 | undefined;
 export const ReticleScaler = {
     boost() {
         targetScale = 1 + recoilBoost;
-        print("currentScale:", currentScale, "targetScale:", targetScale);
     },
 
     step(dt: number, reticle: GuiObject) {
