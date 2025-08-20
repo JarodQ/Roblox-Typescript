@@ -35,12 +35,10 @@ function runTracerEffect(origin: Vector3, direction: Vector3, weaponTool: Tool):
     const tween = TweenService.Create(tracer, new TweenInfo(duration), { Position: hitPosition });
     tween.Play();
     tween.Completed.Once(() => TracerPool.release(tracer));
-
     for (const muzzleFlash of muzzle.GetChildren()) {
         if (muzzleFlash.IsA("ParticleEmitter")) {
             muzzleFlash.Emit(1);
         }
     }
-    print("Succesfully copied tracer effect to other clients");
 }
 

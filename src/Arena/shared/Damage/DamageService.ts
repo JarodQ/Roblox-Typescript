@@ -2,7 +2,7 @@ import { StatusEffect } from "./StatusEffectRegistry";
 import { ReplicatedStorage } from "@rbxts/services";
 
 export interface DamageContext {
-    attacker: Player;
+    attacker: Player | undefined;
     victimModel: Instance;
     victimPlayer: Player | undefined;
     weaponId: string;
@@ -16,7 +16,10 @@ export function applyDamage(context: DamageContext) {
     const humanoid = context.victimModel.FindFirstChildOfClass("Humanoid");
     if (!humanoid) return;
 
-    humanoid.TakeDamage(context.damageAmount);
+    //humanoid.TakeDamage(context.damageAmount);
+    print(`Damage amount: ${context.damageAmount}`)
+    humanoid.Health -= context.damageAmount;
+    print(`Players current health is: ${humanoid.Health} | Players max health is: ${humanoid.MaxHealth}`);
 
     for (const effect of context.statusEffects) {
         effect.apply(context.victimModel, context);
@@ -26,7 +29,8 @@ export function applyDamage(context: DamageContext) {
     const toAttacker = damageEvent.WaitForChild("DamageConfirmed") as RemoteEvent;
     const toVictim = damageEvent.WaitForChild("DamageTaken") as RemoteEvent;
 
-    toAttacker.FireClient(context.attacker, context);
-    if (!context.victimPlayer) return;
-    toVictim.FireClient(context.victimPlayer, context);
+    print(context.victimPlayer)
+    if (context.attacker) toAttacker.FireClient(context.attacker, context);
+    // if (context.victimPlayer) toVictim.FireClient(context.victimPlayer, context);
+
 }

@@ -46,10 +46,6 @@ FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     if (weapon && weaponTool) {
         //print(`Weapon already exists! Firing!`);
         const damageContext = weapon.fire(origin, direction, weaponTool);
-        if (damageContext === undefined) return;
-        print(damageContext);
-        applyDamage(damageContext);
-
         //weapon.playFireSound("Fire");
     }
 

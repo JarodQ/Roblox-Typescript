@@ -26,60 +26,129 @@ const lastFireTimestamps = new Map<Player, number>();
 const FIRE_RATE = 0.2;
 
 let firingThread: thread | undefined;
+// function startFiring(): void {
+//     if (isFiring || firingThread) return; // ✅ Prevent multiple spawns
+
+//     isFiring = true;
+
+//     firingThread = task.spawn(() => {
+//         let lastShotTime = Workspace.GetServerTimeNow();
+//         while (isFiring) {
+//             const now = Workspace.GetServerTimeNow();
+//             const timeSinceLastShot = now - lastShotTime;
+
+//             if (timeSinceLastShot >= FIRE_RATE) {
+//                 lastShotTime = now;
+//                 const player = Players.LocalPlayer;
+//                 const character = player.Character;
+//                 const weaponTool = character?.FindFirstChildOfClass("Tool");
+//                 if (!character) break;
+
+//                 const head = character.FindFirstChild("Head") as BasePart;
+//                 if (!head) break;
+
+//                 const mouse = player.GetMouse();
+//                 const direction = mouse.Hit.Position.sub(head.Position).Unit;
+
+//                 // 🔫 Fire the weapon
+
+//                 FireWeapon.FireServer(head.Position, direction, weaponType, currentAmmo, {
+
+//                 });
+
+//                 //Apply tracer to local player who fired weapon
+
+//                 if (weaponTool) {
+//                     localTracer(head.Position, weaponTool);
+//                     localSound("Fire", weaponTool);
+//                 }
+
+//                 // 💥 Trigger camera tilt via lockCamera system
+//                 // 💥 Apply random tilt and lerp over fireRate
+//                 let angle: number;
+//                 //do {
+//                 angle = math.random(-maxTilt, maxTilt);
+//                 //} while (math.abs(angle) < 1);
+
+//                 const randomTilt = math.rad(angle);
+//                 //const randomTilt = math.rad(math.random(-maxTilt, maxTilt));
+//                 //CameraTilt.setTarget(randomTilt, fireRate);
+//                 //PitchRecoil.apply(math.rad(1.5)); // tweak for more or less kick
+//                 AdaptiveRecoil.apply(math.rad(.5)); // Don't make > 2.0 math.random() -- too impredictable maybe? or maybe use withing a small interval
+
+//                 ReticleScaler.boost();
+//                 armRecoil.triggerRecoil();
+//                 //task.wait(FIRE_RATE); // Adjust fire rate
+//             }
+//             RunService.Heartbeat.Wait();
+//         }
+//         firingThread = undefined;
+//     });
+// }
 function startFiring(): void {
-    if (isFiring || firingThread) return; // ✅ Prevent multiple spawns
+    if (isFiring || firingThread) return;
 
     isFiring = true;
 
+    const player = Players.LocalPlayer;
+    const character = player.Character;
+    const weaponTool = character?.FindFirstChildOfClass("Tool");
+    const head = character?.FindFirstChild("Head") as BasePart;
+    const mouse = player.GetMouse();
+
+    if (!character || !head || !mouse) return;
+
+    const direction = mouse.Hit.Position.sub(head.Position).Unit;
+
+    // 🔫 Fire immediately
+    FireWeapon.FireServer(head.Position, direction, weaponType, currentAmmo, {});
+    if (weaponTool) {
+        localTracer(head.Position, weaponTool);
+        localSound("Fire", weaponTool);
+    }
+
+    const angle = math.random(-maxTilt, maxTilt);
+    const randomTilt = math.rad(angle);
+    AdaptiveRecoil.apply(math.rad(.5));
+    ReticleScaler.boost();
+    armRecoil.triggerRecoil();
+
+    let lastShotTime = Workspace.GetServerTimeNow();
+
+    // 🔁 Continue firing loop
     firingThread = task.spawn(() => {
-        let lastShotTime = Workspace.GetServerTimeNow();
         while (isFiring) {
             const now = Workspace.GetServerTimeNow();
             const timeSinceLastShot = now - lastShotTime;
 
             if (timeSinceLastShot >= FIRE_RATE) {
                 lastShotTime = now;
-                const player = Players.LocalPlayer;
+
                 const character = player.Character;
                 const weaponTool = character?.FindFirstChildOfClass("Tool");
-                if (!character) break;
-
-                const head = character.FindFirstChild("Head") as BasePart;
-                if (!head) break;
-
+                const head = character?.FindFirstChild("Head") as BasePart;
                 const mouse = player.GetMouse();
+
+                if (!character || !head || !mouse) break;
+
                 const direction = mouse.Hit.Position.sub(head.Position).Unit;
 
-                // 🔫 Fire the weapon
-
-                FireWeapon.FireServer(head.Position, direction, weaponType, currentAmmo);
-
-                //Apply tracer to local player who fired weapon
-
+                FireWeapon.FireServer(head.Position, direction, weaponType, currentAmmo, {});
                 if (weaponTool) {
                     localTracer(head.Position, weaponTool);
                     localSound("Fire", weaponTool);
                 }
 
-                // 💥 Trigger camera tilt via lockCamera system
-                // 💥 Apply random tilt and lerp over fireRate
-                let angle: number;
-                //do {
-                angle = math.random(-maxTilt, maxTilt);
-                //} while (math.abs(angle) < 1);
-
+                const angle = math.random(-maxTilt, maxTilt);
                 const randomTilt = math.rad(angle);
-                //const randomTilt = math.rad(math.random(-maxTilt, maxTilt));
-                //CameraTilt.setTarget(randomTilt, fireRate);
-                //PitchRecoil.apply(math.rad(1.5)); // tweak for more or less kick
-                AdaptiveRecoil.apply(math.rad(.5)); // Don't make > 2.0 math.random() -- too impredictable maybe? or maybe use withing a small interval
-
+                AdaptiveRecoil.apply(math.rad(.5));
                 ReticleScaler.boost();
                 armRecoil.triggerRecoil();
-                //task.wait(FIRE_RATE); // Adjust fire rate
             }
+
             RunService.Heartbeat.Wait();
         }
+
         firingThread = undefined;
     });
 }
