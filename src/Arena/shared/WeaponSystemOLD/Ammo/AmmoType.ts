@@ -1,4 +1,4 @@
-import { WeaponStats } from "../Weapons/Weapon";
+import { WeaponStats } from "../Weapons/Base/Weapon";
 import { WeaponEffect } from "../WeaponEffects/WeaponEffect";
 
 export interface AmmoType {

@@ -1,10 +1,11 @@
 import { Workspace } from "@rbxts/services";
-import { createWeapon } from "Arena/shared/WeaponSystemOLD/Weapons/WeaponFactory";
+import { createWeapon } from "Arena/shared/WeaponSystemOLD/Weapons/Factory/WeaponFactoryV2";
 
+let TURNOFF = false;
 const weaponOwner = Workspace.WaitForChild("FireTester") as Instance;
 const weaponNozzle = weaponOwner.WaitForChild("Nozzle") as Part
 const weaponTool = weaponOwner?.WaitForChild("CarrotShooter_w") as Tool;
-const weapon = createWeapon(weaponOwner, "hitscan", "Standard", weaponTool);
+const weapon = createWeapon("CarrotShooter_w", weaponOwner, weaponTool);
 const weaponHandle = weaponTool.FindFirstChild("Handle") as Instance;
 const weaponMuzzle = weaponHandle.FindFirstChild("Muzzle") as Attachment;
 const origin = weaponMuzzle.WorldPosition;
@@ -12,7 +13,8 @@ const origin = weaponMuzzle.WorldPosition;
 const direction = new Vector3(-1, 0, 0)
 
 let weaponType: "hitscan" | "projectile" = "hitscan";
-while (true) {
+while (!TURNOFF) {
     wait(1);
-    const damageContext = weapon.fire(origin, direction, weaponTool);
+    // print(`Firing!!!`)
+    const damageContext = weapon.startFiring(origin, direction);
 }
