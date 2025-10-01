@@ -1,4 +1,4 @@
-import PlaySound = require("Arena/shared/WeaponSystemOLD/Remotes/PlaySound");
+import PlaySound = require("Arena/shared/WeaponSystem/Remotes/PlaySound");
 
 
 PlaySound.OnClientEvent.Connect((soundString: string, weaponTool: Tool) => {

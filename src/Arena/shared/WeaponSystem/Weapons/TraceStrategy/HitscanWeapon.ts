@@ -5,7 +5,7 @@ import { Weapon } from "../Base/Weapon";
 import { Players } from "@rbxts/services";
 import { TracerPool } from "../Utils/TracerPool";
 import { TweenService } from "@rbxts/services";
-import FireTracer = require("Arena/shared/WeaponSystemOLD/Remotes/FireTracer");
+import FireTracer = require("Arena/shared/WeaponSystem/Remotes/FireTracer");
 import PlaySound = require("../../Remotes/PlaySound");
 import { DamageContext } from "Arena/shared/Damage/DamageService";
 import { applyDamage } from "Arena/shared/Damage/DamageService";

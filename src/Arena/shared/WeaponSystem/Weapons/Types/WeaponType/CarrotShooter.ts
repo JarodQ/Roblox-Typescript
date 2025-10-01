@@ -1,6 +1,6 @@
 import { Weapon } from "../../Base/Weapon";
 import { SemiAutoFiring } from "../../FiringModes/SemiAutoFiring";
-import { AmmoType } from "Arena/shared/WeaponSystemOLD/Ammo/AmmoType";
+import { AmmoType } from "Arena/shared/WeaponSystem/Ammo/AmmoType";
 import { TraceStrategy } from "../../TraceStrategy/TraceStrategy";
 import { WeaponStats } from "../../Base/Weapon";
 import { HitscanTrace } from "../../TraceStrategy/Traces";

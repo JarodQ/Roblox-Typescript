@@ -1,9 +1,10 @@
+throw "This module is disabled temporarily";
 import { Players, UserInputService, RunService, Workspace } from "@rbxts/services";
 import { Constants } from "Arena/shared/Constants";
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 import { PitchRecoil } from "./PitchRecoil";
 import { AdaptiveRecoil } from "./AdaptiveRecoil";
-import { ReticleScaler } from "Arena/shared/WeaponSystemOLD/UI/Reticle";
+import { ReticleScaler } from "Arena/shared/WeaponSystem/UI/Reticle";
 
 const player = Players.LocalPlayer;
 const character = player.Character ?? player.CharacterAdded.Wait()[0];

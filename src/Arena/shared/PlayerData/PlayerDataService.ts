@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { PlayerData } from "./types/PlayerData";
+import { PlayerData, PlayerFlags } from "./PlayerData";
 import { loadPlayerData, savePlayerData, getPlayerKey } from "./DataStoreWrapper";
 import { DataStoreService } from "@rbxts/services";
 
@@ -44,24 +44,43 @@ export function lowercaseFirst(str: string): string {
     return first + rest;
 }
 
-export function updateData<T extends keyof PlayerData>(
+// export function updateData<T extends keyof PlayerData>(
+//     player: Player,
+//     key: T,
+//     value: PlayerData[T],
+// ) {
+//     const data = playerCache.get(player.UserId);
+//     const current = data?.[key];
+
+//     if (typeIs(current, 'number') && typeIs(value, 'number')) {
+//         data![key] = current + value as PlayerData[T];
+//         print(`Changed: ${value} amount to ${tostring(key)} to Player: ${player}`);
+//     }
+//     if (typeIs(current, 'boolean') && typeIs(value, 'boolean')) {
+//         if (value === true) return;
+//         data![key] = !current as PlayerData[T];
+//         print(`Changed: ${value} boolean to ${tostring(key)} for Player: ${player}`);
+//     }
+
+// }
+
+export function updateFlag<
+    G extends keyof PlayerData,
+    K extends keyof PlayerData[G]
+>(
     player: Player,
-    key: T,
-    value: PlayerData[T],
+    group: G,
+    key: K,
+    value: PlayerData[G][K],
 ) {
     const data = playerCache.get(player.UserId);
-    const current = data?.[key];
+    if (!data) return;
 
-    if (typeIs(current, 'number') && typeIs(value, 'number')) {
-        data![key] = current + value as PlayerData[T];
-        print(`Changed: ${value} amount to ${tostring(key)} to Player: ${player}`);
+    const current = data[group][key];
+    if (typeIs(current, typeOf(value))) {
+        data[group][key] = value;
+        print(`Updated ${group}.${tostring(key)} to ${value} for Player: ${player}`);
     }
-    if (typeIs(current, 'boolean') && typeIs(value, 'boolean')) {
-        if (value === true) return;
-        data![key] = !current as PlayerData[T];
-        print(`Changed: ${value} boolean to ${tostring(key)} for Player: ${player}`);
-    }
-
 }
 
 

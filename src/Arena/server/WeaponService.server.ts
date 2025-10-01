@@ -1,8 +1,8 @@
 import { Workspace } from "@rbxts/services";
-import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
-import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
-import { Weapon } from "Arena/shared/WeaponSystemOLD/Weapons/Base/Weapon";
-import { createWeapon } from "Arena/shared/WeaponSystemOLD/Weapons/Factory/WeaponFactoryV2";
+import FireWeapon = require("Arena/shared/WeaponSystem/Remotes/FireWeapon");
+import ReloadWeapon = require("Arena/shared/WeaponSystem/Remotes/ReloadWeapon");
+import { Weapon } from "Arena/shared/WeaponSystem/Weapons/Base/Weapon";
+import { createWeapon } from "Arena/shared/WeaponSystem/Weapons/Factory/WeaponFactoryV2";
 import { applyDamage } from "Arena/shared/Damage/DamageService";
 
 const playerWeapons = new Map<Player, Weapon>();

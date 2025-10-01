@@ -1,12 +1,12 @@
 import { Workspace, UserInputService, RunService, ReplicatedStorage, Players, TweenService } from "@rbxts/services";
-import FireWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/FireWeapon");
-import ReloadWeapon = require("Arena/shared/WeaponSystemOLD/Remotes/ReloadWeapon");
+import FireWeapon = require("Arena/shared/WeaponSystem/Remotes/FireWeapon");
+import ReloadWeapon = require("Arena/shared/WeaponSystem/Remotes/ReloadWeapon");
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";
 import { PitchRecoil } from "./Camera/PitchRecoil";
 import { AdaptiveRecoil } from "./Camera/AdaptiveRecoil";
-import { ReticleScaler } from "Arena/shared/WeaponSystemOLD/UI/Reticle";
-import { ArmRecoilController } from "Arena/shared/WeaponSystemOLD/VisualEffects/ArmRecoilController";
-import { TracerPool } from "Arena/shared/WeaponSystemOLD/Weapons/Utils/TracerPool";
+import { ReticleScaler } from "Arena/shared/WeaponSystem/UI/Reticle";
+import { ArmRecoilController } from "Arena/shared/WeaponSystem/VisualEffects/ArmRecoilController";
+import { TracerPool } from "Arena/shared/WeaponSystem/Weapons/Utils/TracerPool";
 
 
 

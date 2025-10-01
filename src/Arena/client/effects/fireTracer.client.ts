@@ -1,6 +1,6 @@
 import { Workspace, TweenService } from "@rbxts/services";
-import FireTracer = require("Arena/shared/WeaponSystemOLD/Remotes/FireTracer");
-import { TracerPool } from "Arena/shared/WeaponSystemOLD/Weapons/Utils/TracerPool";
+import FireTracer = require("Arena/shared/WeaponSystem/Remotes/FireTracer");
+import { TracerPool } from "Arena/shared/WeaponSystem/Weapons/Utils/TracerPool";
 
 
 FireTracer.OnClientEvent.Connect((origin, direction, weaponTool) => {
