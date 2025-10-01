@@ -1,3 +1,5 @@
+import { Loadouts, Loadout } from "./PlayerData";
+
 export function getTrueFlags<T extends object>(flags: T): (keyof T)[] {
     const result: (keyof T)[] = [];
 
@@ -8,4 +10,31 @@ export function getTrueFlags<T extends object>(flags: T): (keyof T)[] {
     }
 
     return result;
+}
+
+
+//Loadout Functions
+export function getLoadouts<T extends object>(loadouts: T): [keyof T, T[keyof T]][] {
+    const result: [keyof T, T[keyof T]][] = [];
+
+    for (const [key] of pairs(loadouts)) {
+        const value = loadouts[key as keyof T];
+        result.push([key as keyof T, value]);
+    }
+
+    return result;
+}
+
+export function getSortedLoadouts(loadouts: Loadouts): [keyof Loadouts, Loadout][] {
+    const keys: (keyof Loadouts)[] = [];
+
+    for (const [key] of pairs(loadouts)) {
+        keys.push(key as keyof Loadouts);
+    }
+    keys.sort(); // sorts alphabetically: "loadout1", "loadout2", ...
+    return keys.map((key) => [key, loadouts[key]]);
+}
+
+export function saveLoadoutChanges() {
+
 }

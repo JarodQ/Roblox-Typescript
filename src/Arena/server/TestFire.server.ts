@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { createWeapon } from "Arena/shared/WeaponSystem/Weapons/Factory/WeaponFactoryV2";
 
-let TURNOFF = false;
+let TURNOFF = true;
 const weaponOwner = Workspace.WaitForChild("FireTester") as Instance;
 const weaponNozzle = weaponOwner.WaitForChild("Nozzle") as Part
 const weaponTool = weaponOwner?.WaitForChild("CarrotShooter_w") as Tool;

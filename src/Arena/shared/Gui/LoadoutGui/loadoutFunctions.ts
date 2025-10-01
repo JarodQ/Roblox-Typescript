@@ -1,7 +1,9 @@
-import { WeaponFlags } from "Arena/shared/PlayerData/PlayerData";
+import { ReplicatedStorage } from "@rbxts/services";
+import { WeaponFlags, Loadouts, Loadout } from "Arena/shared/PlayerData/PlayerData";
 import { WeaponSlot, WEAPON_SLOT_RULES } from "./loadoutRules";
 import { WEAPON_IMAGES } from "./loadoutImages";
 import { GuiElements } from "./guiManager";
+const updatePlayerDataRemote = ReplicatedStorage.WaitForChild("updatePlayerDataRemote") as RemoteEvent;
 
 
 export function getGui<T extends GuiObject>(map: Map<string, T>, name: string): T | undefined {
@@ -16,16 +18,24 @@ export function getGui<T extends GuiObject>(map: Map<string, T>, name: string): 
 export const loadoutFunctions = {
     onLoadoutClicked(instance: Instance, guiElements: GuiElements) {
         print("Loadout Selected!");
-        const slot1 = instance.FindFirstChild("Slot1");
-        const slot2 = instance.FindFirstChild("Slot2");
-        const slot3 = instance.FindFirstChild("Slot3");
+        const loadoutName = instance.FindFirstChild("LoadoutName") as TextLabel;
+        const slot1 = instance.FindFirstChild("primary");
+        const slot2 = instance.FindFirstChild("secondary");
+        const slot3 = instance.FindFirstChild("utility");
         const slot1Item = slot1?.FindFirstChildOfClass("ImageLabel");
         const slot2Item = slot2?.FindFirstChildOfClass("ImageLabel");
         const slot3Item = slot3?.FindFirstChildOfClass("ImageLabel");
 
+        const currentLoadout = getGui(guiElements.txtLabels, "CurrentLoadout");
         const primarySelectFrame = getGui(guiElements.frames, "PrimarySelect");
         const secondarySelectFrame = getGui(guiElements.frames, "SecondarySelect");
         const utilitySelectFrame = getGui(guiElements.frames, "UtilitySelect");
+
+        if (currentLoadout && loadoutName) {
+            currentLoadout.SetAttribute("Loadout", instance.GetAttribute("Loadout"));
+            currentLoadout.Text = loadoutName.Text;
+        }
+
         let tempVar;
         let tempImage;
         if (slot1Item) {
@@ -92,7 +102,24 @@ export const loadoutFunctions = {
 
     },
     saveChanges(instance: Instance, guiElements: GuiElements) {
+        print("Saving Changes to Player's Data!!!")
+        const loadout = getGui(guiElements.txtLabels, "CurrentLoadout");
+        const primarySelect = getGui(guiElements.frames, "PrimarySelect");
+        const secondarySelect = getGui(guiElements.frames, "SecondarySelect");
+        const utilitySelect = getGui(guiElements.frames, "UtilitySelect");
+        const primaryAttribute = primarySelect?.GetAttribute("Weapon");
+        const secondaryAttribute = secondarySelect?.GetAttribute("Weapon");
+        const utilityAttribute = utilitySelect?.GetAttribute("Weapon");
 
+        const loadoutName = loadout?.GetAttribute("Loadout");
+        updatePlayerDataRemote.FireServer("loadouts", loadoutName, {
+            name: "Close Quarters",
+            weapons: {
+                primary: primaryAttribute,
+                secondary: secondaryAttribute,
+                utility: utilityAttribute,
+            },
+        });
     },
     confirmLoadout(instance: Instance, guiElements: GuiElements) {
 
@@ -102,16 +129,21 @@ export const loadoutFunctions = {
             const primarySelect = getGui(guiElements.frames, "PrimarySelect");
             const imageLabel = primarySelect?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
             if (imageLabel) imageLabel.Image = instance.GetAttribute("WeaponImage") as string;
+            if (primarySelect) primarySelect.SetAttribute("Weapon", instance.GetAttribute("Weapon") as string);
         }
         else if (instance.Name === "SecondaryWeapon") {
             const secondarySelect = getGui(guiElements.frames, "SecondarySelect");
             const imageLabel = secondarySelect?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
             if (imageLabel) imageLabel.Image = instance.GetAttribute("WeaponImage") as string;
+            if (secondarySelect) secondarySelect.SetAttribute("Weapon", instance.GetAttribute("Weapon") as string);
+
         }
         else if (instance.Name === "UtilityWeapon") {
             const utilitySelect = getGui(guiElements.frames, "UtilitySelect");
             const imageLabel = utilitySelect?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
             if (imageLabel) imageLabel.Image = instance.GetAttribute("WeaponImage") as string;
+            if (utilitySelect) utilitySelect.SetAttribute("Weapon", instance.GetAttribute("Weapon") as string);
+
         }
 
     }
@@ -127,16 +159,24 @@ function addWeaponOption(frame: Frame, slot: number, buttonPREFAB: GuiButton, we
     button.Visible = true;
     button.SetAttribute("Behavior", frame.Name + "Weapon");
     button.SetAttribute("WeaponImage", WEAPON_IMAGES[weapon])
+    button.SetAttribute("Weapon", weapon);
     const imageLabel = button?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
     if (imageLabel) imageLabel.Image = WEAPON_IMAGES[weapon];
 }
 
-export function setLoadoutFrames(guiElements: GuiElements, unlockedWeapons: (keyof WeaponFlags)[]) {
+export function setLoadoutFrames(
+    guiElements: GuiElements,
+    unlockedWeapons: (keyof WeaponFlags)[],
+    loadoutTuples: [keyof Loadouts, Loadout][] // ✅ not Loadouts
+) {
     print("Setting Loadout Frames")
     const primaryFrame = getGui(guiElements.frames, "Primary");
     const secondaryFrame = getGui(guiElements.frames, "Secondary");
     const utilityFrame = getGui(guiElements.frames, "Utility");
     const buttonPREFAB = getGui(guiElements.txtButtons, "EquipmentButton");
+
+    let loadoutSelector = getGui(guiElements.frames, "LoadoutSelector");
+    loadoutSelector = loadoutSelector?.FindFirstChild("Selector") as Frame;
 
     let primarySlots = 1;
     let secondarySlots = 1;
@@ -161,6 +201,33 @@ export function setLoadoutFrames(guiElements: GuiElements, unlockedWeapons: (key
             if (!utilityFrame || !buttonPREFAB) return;
             addWeaponOption(utilityFrame, utilitySlots, buttonPREFAB, weapon);
             utilitySlots++;
+        }
+    }
+
+    const selectorFrames = loadoutSelector.GetChildren();
+    if (!loadoutSelector) return;
+    print("Loadouts", loadoutTuples);
+    for (let i = 0; i < math.min(loadoutTuples.size(), selectorFrames.size()); i++) {
+        const [loadoutKey, currentLoadout] = loadoutTuples[i];
+        const frame = selectorFrames[i];
+
+        const loadoutFrame = frame.FindFirstChild("SelectLoadout");
+        const loadoutTxtLabel = frame.FindFirstChild("LoadoutName") as TextLabel;
+        if (!loadoutFrame || !loadoutTxtLabel) continue;
+
+        loadoutTxtLabel.Text = currentLoadout.name;
+
+        for (const slot of loadoutFrame.GetChildren()) {
+            const slotName = slot.Name;
+            if (slotName === "primary" || slotName === "secondary" || slotName === "utility") {
+                const equippedWeapon = currentLoadout.weapons[slotName as keyof typeof currentLoadout.weapons];
+                const image = slot.FindFirstChild("Image") as ImageLabel;
+
+                if (!image || !equippedWeapon || equippedWeapon === "") continue;
+
+                const weaponImage = WEAPON_IMAGES[equippedWeapon as keyof WeaponFlags];
+                image.Image = weaponImage;
+            }
         }
     }
 }

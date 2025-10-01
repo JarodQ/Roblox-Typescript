@@ -64,11 +64,11 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
     },
     loadouts: {
         loadout1: {
-            name: "Loadout 1",
+            name: "My First Loadout",
             weapons: {
-                primary: "",
-                secondary: "",
-                utility: "",
+                primary: "maizeMauler",
+                secondary: "carrotShooter",
+                utility: "blueberryBlaster",
             }
         },
         loadout2: {

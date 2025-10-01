@@ -1,11 +1,11 @@
 import { PlayerData } from "Arena/shared/PlayerData/PlayerData";
-import { getTrueFlags } from "Arena/shared/PlayerData/playerDataUtils";
+import { getLoadouts, getSortedLoadouts, getTrueFlags } from "Arena/shared/PlayerData/playerDataUtils";
 import { loadPlayerData } from "Arena/shared/PlayerData/DataStoreWrapper";
 import { WeaponFlags } from "Arena/shared/PlayerData/PlayerData";
 
-const getUnlockedWeaponsRemote = new Instance("RemoteEvent");
-getUnlockedWeaponsRemote.Name = "GetUnlockedWeaponsRemote";
-getUnlockedWeaponsRemote.Parent = game.GetService("ReplicatedStorage");
+const getLoadoutDataRemote = new Instance("RemoteEvent");
+getLoadoutDataRemote.Name = "getLoadoutDataRemote";
+getLoadoutDataRemote.Parent = game.GetService("ReplicatedStorage");
 
 function setLoadoutFrames() {
 
@@ -46,9 +46,10 @@ function setLoadoutFrames() {
 //     return unlockedWeapons;
 // };
 
-getUnlockedWeaponsRemote.OnServerEvent.Connect(async (player) => {
+getLoadoutDataRemote.OnServerEvent.Connect(async (player) => {
     const playerData = await loadPlayerData(player.UserId);
     const unlockedWeapons = playerData ? getTrueFlags(playerData.weapons) : [];
+    const loadouts = playerData ? getSortedLoadouts(playerData.loadouts) : [];
 
-    getUnlockedWeaponsRemote.FireClient(player, unlockedWeapons);
+    getLoadoutDataRemote.FireClient(player, unlockedWeapons, loadouts);
 });
