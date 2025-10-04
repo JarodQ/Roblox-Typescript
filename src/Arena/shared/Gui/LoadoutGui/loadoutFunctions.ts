@@ -1,8 +1,9 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { WeaponFlags, Loadouts, Loadout } from "Arena/shared/PlayerData/PlayerData";
+import { WeaponFlags, Loadouts, Loadout, WeaponAssignments } from "Arena/shared/PlayerData/PlayerData";
 import { WeaponSlot, WEAPON_SLOT_RULES } from "./loadoutRules";
 import { WEAPON_IMAGES } from "./loadoutImages";
 import { GuiElements } from "./guiManager";
+const loadLoadoutRemote = ReplicatedStorage.WaitForChild("loadLoadoutRemote") as RemoteEvent;
 const updatePlayerDataRemote = ReplicatedStorage.WaitForChild("updatePlayerDataRemote") as RemoteEvent;
 
 
@@ -15,9 +16,49 @@ export function getGui<T extends GuiObject>(map: Map<string, T>, name: string): 
     return undefined;
 }
 
+let myLoadouts: Loadouts;
 export const loadoutFunctions = {
+    loadLoadouts(guiElements: GuiElements) {
+        loadLoadoutRemote.OnClientEvent.Connect((playerLoadouts, loadouts: [keyof Loadouts, Loadout][]) => {
+            const selectorFrame = getGui(guiElements.frames, "Selector");
+            myLoadouts = playerLoadouts;
+            print("Loadouts: ", myLoadouts)
+            if (!selectorFrame) return;
+            for (const frame of selectorFrame?.GetChildren() ?? []) {
+                print("Frame: ", frame.IsA("Frame"))
+                if (frame.IsA("Frame")) {
+                    const entry = loadouts.find(([key]) => key === frame.Name);
+                    print("entry: ", entry)
+                    if (entry) {
+                        const [key, currentLoadout] = entry;
+                        const loadoutButton = frame?.FindFirstChild("SelectLoadout");
+                        if (!loadoutButton) continue;
+                        const validSlots: (keyof WeaponAssignments)[] = ["primary", "secondary", "utility"];
+
+                        for (const currentFrame of loadoutButton.GetChildren()) {
+                            if (!currentFrame.IsA("Frame")) continue;
+
+                            const slotName = currentFrame.Name;
+                            if (!validSlots.includes(slotName as keyof WeaponAssignments)) continue;
+
+                            const equippedWeapon = currentLoadout.weapons[slotName as keyof WeaponAssignments];
+                            const currentImage = currentFrame.FindFirstChild("Image") as ImageLabel;
+
+                            if (!currentImage || !equippedWeapon || equippedWeapon === "") continue;
+
+                            const weaponImage = WEAPON_IMAGES[equippedWeapon as keyof typeof WEAPON_IMAGES];
+                            currentImage.Image = weaponImage;
+                            currentFrame.SetAttribute("Weapon", equippedWeapon);
+                        }
+                    }
+                }
+            }
+        });
+        loadLoadoutRemote.FireServer();
+
+    },
     onLoadoutClicked(instance: Instance, guiElements: GuiElements) {
-        print("Loadout Selected!");
+        //Need to get info from playerdata
         const loadoutName = instance.FindFirstChild("LoadoutName") as TextLabel;
         const slot1 = instance.FindFirstChild("primary");
         const slot2 = instance.FindFirstChild("secondary");
@@ -36,29 +77,32 @@ export const loadoutFunctions = {
             currentLoadout.Text = loadoutName.Text;
         }
 
-        let tempVar;
-        let tempImage;
+        let selectImage;
+        let loadoutImage;
         if (slot1Item) {
-            tempVar = primarySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
-            tempImage = slot1Item.Image;
-            if (tempVar) tempVar.Visible = true;
-            if (tempImage) { tempVar.Image = tempImage }
-            else { tempVar.Image = "" };
+            selectImage = primarySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
+            loadoutImage = slot1Item.Image;
+            primarySelectFrame?.SetAttribute("Weapon", slot1?.GetAttribute("Weapon"));
+            if (selectImage) selectImage.Visible = true;
+            if (loadoutImage) { selectImage.Image = loadoutImage }
+            else { selectImage.Image = "" };
         }
 
         if (slot2Item) {
-            tempVar = secondarySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
-            tempImage = slot2Item.Image;
-            if (tempVar) tempVar.Visible = true;
-            if (tempImage) { tempVar.Image = tempImage }
-            else { tempVar.Image = "" };
+            selectImage = secondarySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
+            loadoutImage = slot2Item.Image;
+            secondarySelectFrame?.SetAttribute("Weapon", slot2?.GetAttribute("Weapon"));
+            if (selectImage) selectImage.Visible = true;
+            if (loadoutImage) { selectImage.Image = loadoutImage }
+            else { selectImage.Image = "" };
         }
         if (slot3Item) {
-            tempVar = utilitySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
-            tempImage = slot3Item.Image;
-            if (tempVar) tempVar.Visible = true;
-            if (tempImage) { tempVar.Image = tempImage }
-            else { tempVar.Image = "" };
+            selectImage = utilitySelectFrame?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
+            loadoutImage = slot3Item.Image;
+            utilitySelectFrame?.SetAttribute("Weapon", slot3?.GetAttribute("Weapon"));
+            if (selectImage) selectImage.Visible = true;
+            if (loadoutImage) { selectImage.Image = loadoutImage }
+            else { selectImage.Image = "" };
         }
 
     },
@@ -104,6 +148,7 @@ export const loadoutFunctions = {
     saveChanges(instance: Instance, guiElements: GuiElements) {
         print("Saving Changes to Player's Data!!!")
         const loadout = getGui(guiElements.txtLabels, "CurrentLoadout");
+        const loadoutSelector = getGui(guiElements.frames, 'Selector');
         const primarySelect = getGui(guiElements.frames, "PrimarySelect");
         const secondarySelect = getGui(guiElements.frames, "SecondarySelect");
         const utilitySelect = getGui(guiElements.frames, "UtilitySelect");
@@ -111,7 +156,34 @@ export const loadoutFunctions = {
         const secondaryAttribute = secondarySelect?.GetAttribute("Weapon");
         const utilityAttribute = utilitySelect?.GetAttribute("Weapon");
 
-        const loadoutName = loadout?.GetAttribute("Loadout");
+        //update loadouts and playerdata
+        const loadoutName = loadout?.GetAttribute("Loadout") as string;
+        const currentLoadoutFrame = loadoutSelector?.FindFirstChild(loadoutName);
+        const selectLoadout = currentLoadoutFrame?.FindFirstChild("SelectLoadout");
+        if (selectLoadout) {
+            const primaryFrame = selectLoadout?.FindFirstChild("primary");
+            const primaryImage = primaryFrame?.FindFirstChild("Image") as ImageLabel;
+            const secondaryFrame = selectLoadout?.FindFirstChild("secondary");
+            const secondaryImage = secondaryFrame?.FindFirstChild("Image") as ImageLabel;
+            const utiltyFrame = selectLoadout?.FindFirstChild("utility");
+            const utiltyImage = utiltyFrame?.FindFirstChild("Image") as ImageLabel;
+            if (primaryFrame && secondaryFrame && utiltyFrame && primaryImage && secondaryImage && utiltyImage) {
+                print("attributes: ", primaryAttribute, secondaryAttribute, utilityAttribute)
+                if (primaryAttribute !== "") {
+                    primaryFrame.SetAttribute("Weapon", primaryAttribute);
+                    primaryImage.Image = WEAPON_IMAGES[primaryAttribute as keyof WeaponFlags];
+
+                }
+                if (secondaryAttribute !== "") {
+                    secondaryFrame.SetAttribute("Weapon", secondaryAttribute);
+                    secondaryImage.Image = WEAPON_IMAGES[secondaryAttribute as keyof WeaponFlags];
+                }
+                if (utilityAttribute !== "") {
+                    utiltyFrame.SetAttribute("Weapon", utilityAttribute);
+                    utiltyImage.Image = WEAPON_IMAGES[utilityAttribute as keyof WeaponFlags];
+                }
+            }
+        }
         updatePlayerDataRemote.FireServer("loadouts", loadoutName, {
             name: "Close Quarters",
             weapons: {
@@ -125,6 +197,7 @@ export const loadoutFunctions = {
 
     },
     changeEquipment(instance: Instance, guiElements: GuiElements) {
+        print("Change Equipment Called");
         if (instance.Name === "PrimaryWeapon") {
             const primarySelect = getGui(guiElements.frames, "PrimarySelect");
             const imageLabel = primarySelect?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
@@ -206,7 +279,6 @@ export function setLoadoutFrames(
 
     const selectorFrames = loadoutSelector.GetChildren();
     if (!loadoutSelector) return;
-    print("Loadouts", loadoutTuples);
     for (let i = 0; i < math.min(loadoutTuples.size(), selectorFrames.size()); i++) {
         const [loadoutKey, currentLoadout] = loadoutTuples[i];
         const frame = selectorFrames[i];

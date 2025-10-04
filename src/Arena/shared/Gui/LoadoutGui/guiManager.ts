@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { loadoutFunctions, setLoadoutFrames } from "./loadoutFunctions";
+import { getGui, loadoutFunctions, setLoadoutFrames } from "./loadoutFunctions";
 const getLoadoutDataRemote = ReplicatedStorage.WaitForChild("getLoadoutDataRemote") as RemoteEvent;
 import { Loadout, Loadouts, WeaponFlags } from "Arena/shared/PlayerData/PlayerData";
 
@@ -31,6 +31,7 @@ function withDebounce<T extends (...args: unknown[]) => void>(fn: T, delay = 0.3
         }
     }) as T;
 }
+
 
 
 
@@ -116,6 +117,8 @@ export async function setupGui(gui: ScreenGui) {
 
     getLoadoutDataRemote.FireServer(); // Request data
     guiElements = addGuiElements(gui);
+
+    loadoutFunctions.loadLoadouts(guiElements);
 
 }
 

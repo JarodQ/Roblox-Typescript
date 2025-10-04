@@ -66,9 +66,9 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
         loadout1: {
             name: "My First Loadout",
             weapons: {
-                primary: "maizeMauler",
-                secondary: "carrotShooter",
-                utility: "blueberryBlaster",
+                primary: "",
+                secondary: "",
+                utility: "",
             }
         },
         loadout2: {
@@ -95,7 +95,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
                 utility: "",
             }
         },
-    },
+    } as Loadouts,
     achievements: {
 
     },
