@@ -1,4 +1,4 @@
-throw "This module is disabled temporarily";
+// throw "This module is disabled temporarily";
 import { Players, ReplicatedStorage, UserInputService, TweenService } from "@rbxts/services";
 import { StarterGui } from "@rbxts/services";
 
@@ -59,7 +59,7 @@ const tweenInTitle = () => {
     titleImage.Size = new UDim2(2.75, 0, 1.5, 0);
     titleImage.ImageTransparency = 1;
 
-    tweenTransparency(titleImage, "ImageTransparency", 0, 1, false);
+    tweenTransparency(titleImage, "ImageTransparency", 0, .2, false);
     titleSound.Play();
     tweenSize(titleImage, "Size", new UDim2(.75, 0, .5, 0), .5, true);
 }
