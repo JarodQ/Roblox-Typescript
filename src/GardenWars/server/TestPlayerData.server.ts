@@ -1,8 +1,8 @@
 throw "This module is disabled temporarily";
 
-import { loadPlayerData, savePlayerData } from "GardenWars/shared/GardenWars/DataStoreWrapper"; // Or wherever your functions live
-import { getPlayerKey } from "GardenWars/shared/GardenWars/DataStoreWrapper";
-import { PlayerData, DEFAULT_PLAYER_DATA } from "GardenWars/shared/GardenWars/types/PlayerData";
+import { loadPlayerData, savePlayerData } from "Common/shared/PlayerData/DataStoreWrapper"; // Or wherever your functions live
+import { getPlayerKey } from "Common/shared/PlayerData/DataStoreWrapper";
+import { PlayerData, DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
 
 // Resetting the mock store before test
 
@@ -18,15 +18,15 @@ async function runTest() {
 
     // Save new value
     print("Attempting to save new value!!!!!");
-    data1.carrots = 42;
+    data1.ammunition.carrots = 42;
     print(`Data 1: ${data1}`);
     await savePlayerData(testUserId, data1);
-    print("💾 Saved updated carrots:", data1.carrots);
+    print("💾 Saved updated carrots:", data1.ammunition.carrots);
 
     // Load again to confirm persistence
     const data2 = await loadPlayerData(testUserId);
     print("🔄 Reloaded data:", data2);
-    assert(data2.carrots === 42, "Expected carrots to persist after save");
+    assert(data2.ammunition.carrots === 42, "Expected carrots to persist after save");
 
     print("🎉 All assertions passed!");
 }

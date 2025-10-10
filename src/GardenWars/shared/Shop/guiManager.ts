@@ -1,4 +1,4 @@
-import { shopFunctions } from "GardenWars/shared/GardenWars/Shop/shopFunctions";
+import { shopFunctions } from "GardenWars/shared/Shop/shopFunctions";
 
 type GuiElements = {
     txtButtons: Map<string, TextButton>;

@@ -1,4 +1,4 @@
-import { WEAPON_SLOT_RULES, WeaponSlot } from "../Gui/LoadoutGui/loadoutRules";
+import { WEAPON_SLOT_RULES, WeaponSlot } from "Arena/shared/Gui/LoadoutGui/loadoutRules";
 
 export interface WeaponFlags {
     carrotShooter: boolean;

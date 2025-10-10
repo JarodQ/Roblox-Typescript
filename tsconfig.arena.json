@@ -8,8 +8,8 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./node_modules/@rbxts"],
-    "rootDir": "src/Arena",
-    "outDir": "out/Arena"
+    "rootDir": "src",
+    "outDir": "out"
   },
-  "include": ["src/Arena/**/*"]
+  "include": ["src/Arena/**/*", "src/Common/**/*"]
 }

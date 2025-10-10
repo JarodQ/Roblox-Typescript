@@ -8,8 +8,8 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./node_modules/@rbxts"],
-    "rootDir": "src/GardenWars",
-    "outDir": "out/GardenWars"
+    "rootDir": "src",
+    "outDir": "out"
   },
-  "include": ["src/GardenWars/**/*"]
+  "include": ["src/GardenWars/**/*", "src/Common/**/*"]
 }

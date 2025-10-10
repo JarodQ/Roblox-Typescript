@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { createNumberDisplay } from "GardenWars/shared/GardenWars/CreateNumber";
+import { createNumberDisplay } from "GardenWars/shared/CreateNumber";
 
 
 const numberTest: BasePart = Workspace.FindFirstChild("numberTest") as BasePart;

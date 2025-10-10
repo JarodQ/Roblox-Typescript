@@ -1,7 +1,7 @@
-import { PlayerData } from "Arena/shared/PlayerData/PlayerData";
-import { getLoadouts, getSortedLoadouts, getTrueFlags } from "Arena/shared/PlayerData/playerDataUtils";
-import { loadPlayerData } from "Arena/shared/PlayerData/DataStoreWrapper";
-import { WeaponFlags } from "Arena/shared/PlayerData/PlayerData";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
+import { getLoadouts, getSortedLoadouts, getTrueFlags } from "Common/shared/PlayerData/playerDataUtils";
+import { loadPlayerData } from "Common/shared/PlayerData/DataStoreWrapper";
+import { WeaponFlags } from "Common/shared/PlayerData/PlayerData";
 
 const getLoadoutDataRemote = new Instance("RemoteEvent");
 getLoadoutDataRemote.Name = "getLoadoutDataRemote";

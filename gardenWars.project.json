@@ -7,6 +7,9 @@
       "TS": {
         "$path": "out/GardenWars/shared"
       },
+      "Common": {
+        "$path": "out/Common/shared"
+      },
       "rbxts_include": {
         "$path": "include",
         "node_modules": {
@@ -21,6 +24,9 @@
       "$className": "ServerScriptService",
       "TS": {
         "$path": "out/GardenWars/server"
+      },
+      "Common": {
+        "$path": "out/Common/server"
       }
     },
     "StarterPlayer": {
@@ -29,6 +35,9 @@
         "$className": "StarterPlayerScripts",
         "TS": {
           "$path": "out/GardenWars/client"
+        },
+        "Common": {
+          "$path": "out/Common/client"
         }
       }
     }

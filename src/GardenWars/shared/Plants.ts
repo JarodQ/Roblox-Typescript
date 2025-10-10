@@ -1,4 +1,5 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import * as PREFABS from "./PREFABS";
 import * as InteractInterface from "./InteractInterface"
 import { Harvestable } from "./InteractInterface";
@@ -31,6 +32,7 @@ export class PlantMaster implements Harvestable {
     public seed: Seed;
     private plantPart: Part | Model | undefined;
     private seedPosition: Vector3 = new Vector3(0, 0, 0);
+    private seedOrientation: Vector3 = new Vector3(0, 0, 0);
     private seedProgress: BillboardGui;
     private growthStage: number = 0;
     private growthRate: number = 1;
@@ -49,8 +51,14 @@ export class PlantMaster implements Harvestable {
         this.grown = false;
     }
 
-    public plant(position: Vector3): void {
+    public plant(owner: Player, position: Vector3): void {
         print(this.plantPart);
+        const character = owner.Character ?? owner.CharacterAdded.Wait()[0];
+        const root = character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
+        let orientation = new Vector3(0, 0, 0);;
+        if (root) {
+            orientation = root.Orientation;
+        }
         this.plantPart = this.seed.PREFABS.find((part) => part.Name === "Stage0")?.Clone();
         if (!this.plantPart) {
             print("Plant PREFAB could not be found!");
@@ -58,9 +66,9 @@ export class PlantMaster implements Harvestable {
         }
         this.plantPart.Parent = Workspace;
         //this.plantPart.Position = position;
-        print(`Moving ${this.plantPart} to position: ${position}`);
-        InteractInterface.moveInstance(this.plantPart, position);
+        InteractInterface.moveInstance(this.plantPart, position, orientation);
         this.seedPosition = position;
+        if (orientation) this.seedOrientation = orientation
         this.growthStart = DateTime.now().UnixTimestampMillis;
         this.currentStageTime = DateTime.now().UnixTimestampMillis;
         this.seedProgress = this.seedProgress.Clone();
@@ -116,7 +124,7 @@ export class PlantMaster implements Harvestable {
                 return;
             }
             newPlantPart.Parent = Workspace;
-            InteractInterface.moveInstance(newPlantPart, this.seedPosition);
+            InteractInterface.moveInstance(newPlantPart, this.seedPosition, this.seedOrientation);
             this.seedProgress.Parent = newPlantPart;
             this.plantPart.Destroy();
             this.plantPart = newPlantPart;

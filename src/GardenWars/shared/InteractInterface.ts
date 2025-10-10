@@ -1,8 +1,8 @@
 import { Players, Workspace, ReplicatedStorage, RunService } from "@rbxts/services";
 import { TweenService } from "@rbxts/services";
-import { DEFAULT_PLAYER_DATA } from "./types/PlayerData";
-import { isValidPlayerDataKey } from "GardenWars/shared/GardenWars/DataStoreWrapper";
-import * as PlayerDataService from "GardenWars/shared/GardenWars/PlayerDataService";
+import { DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
+import { isValidPlayerDataKey } from "Common/shared/PlayerData/DataStoreWrapper";
+import * as PlayerDataService from "Common/shared/PlayerData/PlayerDataService";
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
 export const interactionMap = new Map<Instance, Interactable>();
@@ -135,7 +135,7 @@ export async function pickup(player: Player, dataName: string, pickupModel: Base
 
                     dataName = PlayerDataService.lowercaseFirst(dataName);
                     if (isValidPlayerDataKey(dataName)) {
-                        PlayerDataService.updateData(player, dataName, 5);
+                        //PlayerDataService.updateFlag(player, dataName, 5);
                     } else {
                         warn(`🚫 Invalid key: ${dataName}`);
                     }
@@ -147,16 +147,23 @@ export async function pickup(player: Player, dataName: string, pickupModel: Base
     }
 }
 
-export function moveInstance(instance: Instance, position: Vector3) {
+export function moveInstance(instance: Instance, position: Vector3, orientation: Vector3) {
     let root: BasePart | undefined;
     if (instance.IsA("Model")) {
         root = instance.PrimaryPart ?? instance.FindFirstChildWhichIsA("BasePart");
         if (root?.Anchored === true) root.Anchored = false;
-        root?.PivotTo(new CFrame(position))
+        const rotation = CFrame.Angles(
+            math.rad(orientation.X),
+            math.rad(orientation.Y),
+            math.rad(orientation.Z),
+        );
+        const targetCFrame = new CFrame(position).mul(rotation);
+        root?.PivotTo(targetCFrame);
         if (root) root.Anchored = true;
     } else if (instance.IsA("BasePart")) {
         root = instance;
         root.Position = position;
+        root.Orientation = orientation;
     }
 }
 

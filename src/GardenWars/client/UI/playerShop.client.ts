@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { setupGui } from "GardenWars/shared/GardenWars/Shop/guiManager";
+import { setupGui } from "GardenWars/shared/Shop/guiManager";
 
 const player: Player = Players.LocalPlayer;
 const playerGuis = player.WaitForChild("PlayerGui") as PlayerGui;
