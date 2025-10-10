@@ -36,6 +36,7 @@ export interface PlayerData {
     weapons: WeaponFlags,
     ammunition: AmmunitionFlags,
     loadouts: Loadouts,
+    plants: Plants[],
     achievements: AchievementFlags,
     settings: SettingsFlags,
 }
@@ -49,6 +50,13 @@ export interface Loadout {
 
 export interface Loadouts {
     [key: string]: Loadout;
+}
+
+export interface Plants {
+    plantId: string;
+    position: { x: number; y: number; z: number };
+    rotation: number[];
+    plantedAt: number;
 }
 
 export const DEFAULT_PLAYER_DATA: PlayerData = {
@@ -96,6 +104,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
             }
         },
     } as Loadouts,
+    plants: [],
     achievements: {
 
     },

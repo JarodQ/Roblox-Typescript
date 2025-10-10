@@ -1,8 +1,9 @@
 import { Players, Workspace, ReplicatedStorage, RunService } from "@rbxts/services";
 import { TweenService } from "@rbxts/services";
 import { DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
-import { isValidPlayerDataKey } from "Common/shared/PlayerData/DataStoreWrapper";
-import * as PlayerDataService from "Common/shared/PlayerData/PlayerDataService";
+import { findPlayerDataKeyPath } from "Common/shared/PlayerData/DataStoreWrapper";
+// import * as PlayerDataService from "Common/shared/PlayerData/PlayerDataService";
+import { lowercaseFirst, updateFlagByPath } from "Common/shared/PlayerData/PlayerDataService";
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
 export const interactionMap = new Map<Instance, Interactable>();
@@ -133,9 +134,10 @@ export async function pickup(player: Player, dataName: string, pickupModel: Base
                     }
                     pickupModel.Destroy();
 
-                    dataName = PlayerDataService.lowercaseFirst(dataName);
-                    if (isValidPlayerDataKey(dataName)) {
-                        //PlayerDataService.updateFlag(player, dataName, 5);
+                    dataName = lowercaseFirst(dataName);
+                    const keyInfo = findPlayerDataKeyPath(dataName);
+                    if (keyInfo.exists) {
+                        updateFlagByPath(player, keyInfo.path, 5);
                     } else {
                         warn(`🚫 Invalid key: ${dataName}`);
                     }

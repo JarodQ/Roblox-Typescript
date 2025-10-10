@@ -1,9 +1,10 @@
 import { Players } from "@rbxts/services";
-import { PlayerData, PlayerFlags } from "./PlayerData";
+import { PlayerData, PlayerFlags, Plants } from "./PlayerData";
 import { loadPlayerData, savePlayerData, getPlayerKey } from "./DataStoreWrapper";
 import { DataStoreService } from "@rbxts/services";
 
-const playerCache = new Map<number, PlayerData>();
+
+export const playerCache = new Map<number, PlayerData>();
 const lockStore = DataStoreService.GetDataStore("PlayerData_Lock");
 
 Players.PlayerAdded.Connect(async (player) => {
@@ -44,26 +45,6 @@ export function lowercaseFirst(str: string): string {
     return first + rest;
 }
 
-// export function updateData<T extends keyof PlayerData>(
-//     player: Player,
-//     key: T,
-//     value: PlayerData[T],
-// ) {
-//     const data = playerCache.get(player.UserId);
-//     const current = data?.[key];
-
-//     if (typeIs(current, 'number') && typeIs(value, 'number')) {
-//         data![key] = current + value as PlayerData[T];
-//         print(`Changed: ${value} amount to ${tostring(key)} to Player: ${player}`);
-//     }
-//     if (typeIs(current, 'boolean') && typeIs(value, 'boolean')) {
-//         if (value === true) return;
-//         data![key] = !current as PlayerData[T];
-//         print(`Changed: ${value} boolean to ${tostring(key)} for Player: ${player}`);
-//     }
-
-// }
-
 export function updateFlag<
     G extends keyof PlayerData,
     K extends keyof PlayerData[G]
@@ -83,6 +64,79 @@ export function updateFlag<
     }
 }
 
+export function updateFlagByPath(
+    player: Player,
+    path: string,
+    value: unknown
+) {
+    const data = playerCache.get(player.UserId);
+    if (!data) return;
+
+    const keys = path.split(".");
+    let target: unknown = data;
+
+    // Traverse to the second-to-last key
+    for (let i = 0; i < keys.size() - 1; i++) {
+        if (typeOf(target) !== "table") {
+            warn(`Invalid path segment: ${keys[i]}`);
+            return;
+        }
+
+        const segment = keys[i];
+        const nextSeg = (target as Record<string, unknown>)[segment];
+
+        if (nextSeg === undefined) {
+            warn(`Missing path segment: ${segment}`);
+            return;
+        }
+
+        target = nextSeg;
+    }
+    if (typeOf(target) !== "table") {
+        warn(`Invalid final target at path: ${path}`);
+        return;
+    }
+
+    const finalKey = keys[keys.size() - 1];
+    const current = (target as Record<string, unknown>)[finalKey];
+
+    const currentType = typeOf(current);
+    const valueType = typeOf(value);
+
+    if (currentType === "boolean") {
+        (target as Record<string, unknown>)[finalKey] = true;
+        print(`Set ${path} to false for Player: ${player}`);
+    } else if (currentType === "number" && valueType === "number") {
+        const newValue = (current as number) + (value as number);
+        (target as Record<string, unknown>)[finalKey] = newValue;
+        print(`Added ${value} to ${path}, new value is ${newValue} for Player: ${player}`);
+    } else {
+        warn(`Type mismatch at ${path}: expected ${currentType}, got ${valueType}`);
+    }
+}
+
+
+export function addPlantData(player: Player, plant: Plants) {
+    const data = playerCache.get(player.UserId);
+    if (!data) return;
+    data.plants.push(plant);
+}
+
+export function removePlantData(player: Player, position: Vector3) {
+    const data = playerCache.get(player.UserId);
+    if (!data) return;
+
+    const index = data.plants.findIndex(p =>
+        math.abs(p.position.x - position.X) < 0.1 &&
+        math.abs(p.position.y - position.Y) < 0.1 &&
+        math.abs(p.position.z - position.Z) < 0.1
+    );
+
+    if (index !== -1) {
+        print(`Removing plant at position:`, position);
+        data.plants.remove(index);
+    }
+}
 
 game.BindToClose(() => {
     for (const [userId, data] of playerCache) {

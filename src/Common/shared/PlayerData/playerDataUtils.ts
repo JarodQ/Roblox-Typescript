@@ -1,5 +1,19 @@
 import { Loadouts, Loadout } from "./PlayerData";
 
+export function mergeDefaults<T>(target: T, defaults: T): T {
+    for (const [key, value] of pairs(defaults as Record<string, unknown>)) {
+        const current = (target as Record<string, unknown>)[key];
+
+        if (current === undefined) {
+            (target as Record<string, unknown>)[key] = value;
+        } else if (typeOf(current) === "table" && typeOf(value) === "table") {
+            mergeDefaults(current, value);
+        }
+    }
+
+    return target;
+}
+
 export function getTrueFlags<T extends object>(flags: T): (keyof T)[] {
     const result: (keyof T)[] = [];
 
@@ -35,6 +49,3 @@ export function getSortedLoadouts(loadouts: Loadouts): [keyof Loadouts, Loadout]
     return keys.map((key) => [key, loadouts[key]]);
 }
 
-export function saveLoadoutChanges() {
-
-}

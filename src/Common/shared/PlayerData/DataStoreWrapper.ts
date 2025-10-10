@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { DataStoreService } from "@rbxts/services";
 import { PlayerData, DEFAULT_PLAYER_DATA } from "./PlayerData";
+import { mergeDefaults } from "./playerDataUtils";
 
 const RUNNING_IN_STUDIO = RunService.IsStudio();
 const store = DataStoreService.GetDataStore("PlayerData");
@@ -27,10 +28,41 @@ export function getPlayerKey(userId: number): string {
     return `Player_${userId}`;
 }
 
-export function isValidPlayerDataKey(key: string): key is keyof PlayerData {
-    return key in DEFAULT_PLAYER_DATA;
-}
+// export function isValidPlayerDataKey(key: string): key is keyof PlayerData {
+//     return key in DEFAULT_PLAYER_DATA;
+// }
+type KeyPathResult = {
+    exists: true;
+    path: string;
+    value: unknown;
+} | {
+    exists: false;
+};
 
+export function findPlayerDataKeyPath(key: string): KeyPathResult {
+    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
+        if (typeOf(obj) !== "table") return { exists: false };
+
+        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
+            const newPath = [...currentPath, k];
+
+            if (k === key) {
+                return {
+                    exists: true,
+                    path: newPath.join("."),
+                    value,
+                };
+            }
+
+            const result = search(value, newPath);
+            if (result.exists) return result;
+        }
+
+        return { exists: false };
+    }
+
+    return search(DEFAULT_PLAYER_DATA);
+}
 // Loads and returns player data or falls back to defaults
 export async function loadPlayerData(userId: number): Promise<PlayerData> {
     const key = getPlayerKey(userId);
@@ -56,6 +88,7 @@ export async function loadPlayerData(userId: number): Promise<PlayerData> {
         return Promise.resolve(data as PlayerData | undefined);
     });
 
+    const merged = mergeDefaults(result ?? {}, DEFAULT_PLAYER_DATA);
     return result ?? DEFAULT_PLAYER_DATA;
 }
 

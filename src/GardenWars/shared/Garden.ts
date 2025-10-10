@@ -40,7 +40,7 @@ export class PlayerGarden implements Interactable {
                 plantProgress: progressBar[0],
             }
             const newSeed: PlantModule.TestSeed1 = new PlantModule.TestSeed1(definedSeed);
-            newSeed.plant(this.getOwner(), hitPos);
+            newSeed.plant(this.getOwner(), hitPos, false);
             print(`${player.Name} is planting at ${interactable} with a(n) ${interactee} at the position ${hitPos}`);
         }
     }
