@@ -1,8 +1,11 @@
-import { Players } from "@rbxts/services";
+import { Players, ReplicatedStorage } from "@rbxts/services";
 import { PlayerData, PlayerFlags, Plants } from "./PlayerData";
 import { loadPlayerData, savePlayerData, getPlayerKey } from "./DataStoreWrapper";
 import { DataStoreService } from "@rbxts/services";
 
+const remoteFunction = new Instance("RemoteFunction");
+remoteFunction.Name = "RequestPlayerData";
+remoteFunction.Parent = ReplicatedStorage
 
 export const playerCache = new Map<number, PlayerData>();
 const lockStore = DataStoreService.GetDataStore("PlayerData_Lock");
@@ -21,6 +24,10 @@ Players.PlayerRemoving.Connect(async (player) => {
     }
     playerCache.delete(player.UserId);
 });
+
+remoteFunction.OnServerInvoke = (player: Player) => {
+    return playerCache.get(player.UserId);
+};
 
 task.spawn(() => {
     while (true) {

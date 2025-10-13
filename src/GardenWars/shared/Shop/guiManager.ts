@@ -1,4 +1,9 @@
 import { shopFunctions } from "GardenWars/shared/Shop/shopFunctions";
+import { playerCache } from "Common/shared/PlayerData/PlayerDataService";
+import { ReplicatedStorage } from "@rbxts/services";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
+
+const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as RemoteFunction;
 
 type GuiElements = {
     txtButtons: Map<string, TextButton>;
@@ -31,6 +36,7 @@ function withDebounce<T extends (...args: unknown[]) => void>(fn: T, delay = 0.3
 
 
 const buttonBehaviors: Record<string, (instance: Instance) => void> = {
+    Select: (instance: Instance) => shopFunctions.onSelectClicked(instance, guiElements),
     Buy: (instance: Instance) => shopFunctions.onBuyClicked(instance, guiElements),
     Sell: (instance: Instance) => shopFunctions.onSellClicked(instance, guiElements),
     CloseButton: (instance: Instance) => shopFunctions.onCloseClicked(instance, guiElements),
@@ -75,7 +81,71 @@ function setBehaviors() {
     return;
 }
 
-function findGuiElements(container: Instance) {
+export interface KeyPathResult {
+    exists: boolean;
+    path?: string;
+    value?: unknown;
+}
+
+export function resolvePlayerData(playerData: PlayerData, key: string,): KeyPathResult {
+    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
+        if (typeOf(obj) !== "table") return { exists: false };
+
+        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
+            const newPath = [...currentPath, k];
+
+            if (k === key) {
+                return {
+                    exists: true,
+                    path: newPath.join("."),
+                    value,
+                };
+            }
+
+            const result = search(value, newPath);
+            if (result.exists) return result;
+        }
+
+        return { exists: false };
+    }
+
+    return search(playerData);
+}
+
+function parseItemVariant(name: string): { base: string; variant: "L" | "U" | undefined } {
+    const [base, variant] = name.match("^(.*)_([LU])$") as LuaTuple<[string, string]>;
+
+    if (!base || !variant) return { base: name, variant: undefined };
+    return { base, variant: variant as "L" | "U" };
+}
+
+function setUnlocked(player: Player, guiElements: GuiElements) {
+    const playerData = requestPlayerData.InvokeServer() as PlayerData | undefined;
+    print("Player's data for setUnlocked: ", playerData)
+    if (!playerData) return;
+    forEachGuiElement((guiType, name, instance) => {
+        if (guiType !== "TextButton" && guiType !== "ImageButton") return;
+        const variantInfo = parseItemVariant(instance.Name);
+
+        const keyPath = instance.GetAttribute("Item") as string;
+        if (!keyPath) return;
+
+        const result = resolvePlayerData(playerData, keyPath);
+        print(`Key Path: ${keyPath}, Value: ${result.value}, for Instance: ${instance.Name}`)
+        const isUnlocked = result.value === true;
+        if (isUnlocked && variantInfo.variant === "U") {
+            instance.SetAttribute("Unlocked", isUnlocked);
+            instance.Visible = true;
+        }
+        else if (!isUnlocked && variantInfo.variant === "L") {
+            instance.SetAttribute("Unlocked", isUnlocked);
+            instance.Visible = true;
+        }
+
+    });
+}
+
+function findGuiElements(player: Player, container: Instance) {
     const txtButtons = new Map<string, TextButton>();
     const imgButtons = new Map<string, ImageButton>();
     const txtLabels = new Map<string, TextLabel>();
@@ -90,13 +160,15 @@ function findGuiElements(container: Instance) {
         if (child.IsA("Frame")) frames.set(getGuiKey(child), child);
     }
     guiElements = { txtButtons, imgButtons, txtLabels, imgLabels, frames };
+    setUnlocked(player, guiElements);
     setBehaviors();
     return;
 }
 
-export function setupGui(gui: ScreenGui) {
+
+export function setupGui(player: Player, gui: ScreenGui) {
     playerGui = gui;
-    findGuiElements(gui);
+    findGuiElements(player, gui);
     return;
 }
 

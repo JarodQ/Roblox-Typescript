@@ -39,7 +39,7 @@ type KeyPathResult = {
     exists: false;
 };
 
-export function findPlayerDataKeyPath(key: string): KeyPathResult {
+export function findPlayerDataKeyPath(key: string, playerData?: PlayerData): KeyPathResult {
     function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
         if (typeOf(obj) !== "table") return { exists: false };
 
@@ -61,7 +61,7 @@ export function findPlayerDataKeyPath(key: string): KeyPathResult {
         return { exists: false };
     }
 
-    return search(DEFAULT_PLAYER_DATA);
+    return search(playerData ?? DEFAULT_PLAYER_DATA);
 }
 // Loads and returns player data or falls back to defaults
 export async function loadPlayerData(userId: number): Promise<PlayerData> {

@@ -4,12 +4,14 @@ export interface WeaponFlags {
     carrotShooter: boolean;
     blueberryBlaster: boolean;
     maizeMauler: boolean;
+    heliosLaser: boolean;
 }
 
 export interface AmmunitionFlags {
     carrots: number;
     blueberries: number;
     corn: number;
+    sunflower: number;
 }
 
 export interface Statistics {
@@ -31,8 +33,14 @@ export interface PlayerFlags {
     settings: SettingsFlags,
 }
 
+export interface Currency {
+    credits: number;
+    valor: number;
+}
+
 export interface PlayerData {
     // flags: PlayerFlags
+    currency: Currency,
     weapons: WeaponFlags,
     ammunition: AmmunitionFlags,
     loadouts: Loadouts,
@@ -60,15 +68,21 @@ export interface Plants {
 }
 
 export const DEFAULT_PLAYER_DATA: PlayerData = {
+    currency: {
+        credits: 100000,
+        valor: 0,
+    },
     weapons: {
         carrotShooter: true,
         blueberryBlaster: true,
         maizeMauler: true,
+        heliosLaser: false,
     },
     ammunition: {
         carrots: 0,
         blueberries: 0,
         corn: 0,
+        sunflower: 0,
     },
     loadouts: {
         loadout1: {
