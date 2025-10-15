@@ -1,4 +1,18 @@
+import { ReplicatedStorage } from "@rbxts/services";
 
+const requestShopPrice = new Instance("RemoteFunction");
+requestShopPrice.Name = "RequestShopPrice";
+requestShopPrice.Parent = ReplicatedStorage
+
+requestShopPrice.OnServerInvoke = (player: Player, currentItem, transaction): number => {
+    let itemPrice;
+    print("Receiving shop info for: ", currentItem, " Transaction Type: ", transaction)
+    const item = shopList[currentItem as keyof shopInfo];
+    if (!item) return 0;
+    if (transaction === "Buy") itemPrice = item.buyPrice
+    else if (transaction === "Sell") itemPrice = item.sellPrice
+    return itemPrice ?? 0;
+};
 
 export interface itemInfo {
     buyPrice: number;
@@ -7,13 +21,9 @@ export interface itemInfo {
 
 export interface shopInfo {
     carrots: itemInfo,
-    carrotShooter: itemInfo,
     blueberries: itemInfo,
-    blueberryBlaster: itemInfo,
     corn: itemInfo,
-    maizeMauler: itemInfo,
-    sunflower: itemInfo,
-    heliosLaser: itemInfo,
+    sunflowers: itemInfo,
 }
 
 export const shopList: shopInfo = {
@@ -21,33 +31,17 @@ export const shopList: shopInfo = {
         buyPrice: 10,
         sellPrice: 5,
     },
-    carrotShooter: {
-        buyPrice: 50,
-        sellPrice: 25,
-    },
     blueberries: {
         buyPrice: 20,
         sellPrice: 10,
-    },
-    blueberryBlaster: {
-        buyPrice: 100,
-        sellPrice: 50,
     },
     corn: {
         buyPrice: 40,
         sellPrice: 20,
     },
-    maizeMauler: {
-        buyPrice: 250,
-        sellPrice: 125,
-    },
-    sunflower: {
+    sunflowers: {
         buyPrice: 60,
         sellPrice: 30,
-    },
-    heliosLaser: {
-        buyPrice: 500,
-        sellPrice: 250,
     },
 
 }

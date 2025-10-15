@@ -1,4 +1,6 @@
 //Define Effects for guielements in guiManager.ts
+import { getGui } from "./shopFunctions";
+import { GuiElements } from "./guiManager";
 
 export function applyHoverExpand(instance: GuiObject) {
     const originalSize = instance.Size;
@@ -114,3 +116,4 @@ export function applyPressEffect(instance: GuiObject) {
         });
     }
 }
+

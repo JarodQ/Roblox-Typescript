@@ -11,7 +11,7 @@ export interface AmmunitionFlags {
     carrots: number;
     blueberries: number;
     corn: number;
-    sunflower: number;
+    sunflowers: number;
 }
 
 export interface Statistics {
@@ -82,7 +82,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
         carrots: 0,
         blueberries: 0,
         corn: 0,
-        sunflower: 0,
+        sunflowers: 0,
     },
     loadouts: {
         loadout1: {

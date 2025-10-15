@@ -1,6 +1,6 @@
 // GardenWars/shared/Shop/ShopModelController.ts
 import { getPREFAB } from "GardenWars/shared/PREFABS";
-import { GuiElements } from "./shopFunctions";
+import { GuiElements } from "./guiManager";
 import { Workspace } from "@rbxts/services";
 
 const shopScene = Workspace.WaitForChild("ShopScene");

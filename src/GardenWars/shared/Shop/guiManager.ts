@@ -1,18 +1,18 @@
-import { shopFunctions } from "GardenWars/shared/Shop/shopFunctions";
-import { playerCache } from "Common/shared/PlayerData/PlayerDataService";
+import { shopFunctions, resolvePlayerData, parseItemVariant } from "GardenWars/shared/Shop/shopFunctions";
 import { ReplicatedStorage } from "@rbxts/services";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { applyHoverExpand, applyHoverShrink, applyPressEffect } from "./effects";
 
 const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as RemoteFunction;
 
-type GuiElements = {
+export type GuiElements = {
     txtButtons: Map<string, TextButton>;
     imgButtons: Map<string, ImageButton>;
     txtLabels: Map<string, TextLabel>;
     imgLabels: Map<string, ImageLabel>;
     frames: Map<string, Frame>;
     scrollingFrame: Map<string, ScrollingFrame>;
+    txtBox: Map<string, TextBox>;
 }
 
 export let guiElements: GuiElements;
@@ -39,6 +39,14 @@ function withDebounce<T extends (...args: unknown[]) => void>(fn: T, delay = 0.3
 
 const buttonBehaviors: Record<string, (instance: Instance) => void> = {
     Select: (instance: Instance) => shopFunctions.onSelectClicked(instance, guiElements),
+    PurchaseSelect: (instance: Instance) => shopFunctions.onPurchaseSelectClicked(instance, guiElements),
+    Plus1: (instance: Instance) => shopFunctions.onPlus1Clicked(instance, guiElements),
+    Plus5: (instance: Instance) => shopFunctions.onPlus5Clicked(instance, guiElements),
+    Plus10: (instance: Instance) => shopFunctions.onPlus10Clicked(instance, guiElements),
+    Plus25: (instance: Instance) => shopFunctions.onPlus20Clicked(instance, guiElements),
+    PlusMax: (instance: Instance) => shopFunctions.onPlusMaxClicked(instance, guiElements),
+    Clear: (instance: Instance) => shopFunctions.onClearClicked(instance, guiElements),
+    SeedSelect: (instance: Instance) => shopFunctions.onSeedSelectClicked(instance, guiElements),
     WeaponSelect: (instance: Instance) => shopFunctions.onWeaponSelectClicked(instance, guiElements),
     CropSelect: (instance: Instance) => shopFunctions.onCropSelectClicked(instance, guiElements),
     VIPSelect: (instance: Instance) => shopFunctions.onVIPSelectClicked(instance, guiElements),
@@ -60,6 +68,7 @@ function forEachGuiElement(
     for (const [name, instance] of guiElements.imgLabels) callBack("ImageLabel", name, instance);
     for (const [name, instance] of guiElements.frames) callBack("Frame", name, instance);
     for (const [name, instance] of guiElements.scrollingFrame) callBack("ScrollingFrame", name, instance);
+    for (const [name, instance] of guiElements.txtBox) callBack("TextBox", name, instance);
 }
 
 
@@ -138,37 +147,7 @@ export interface KeyPathResult {
     value?: unknown;
 }
 
-export function resolvePlayerData(playerData: PlayerData, key: string,): KeyPathResult {
-    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
-        if (typeOf(obj) !== "table") return { exists: false };
 
-        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
-            const newPath = [...currentPath, k];
-
-            if (k === key) {
-                return {
-                    exists: true,
-                    path: newPath.join("."),
-                    value,
-                };
-            }
-
-            const result = search(value, newPath);
-            if (result.exists) return result;
-        }
-
-        return { exists: false };
-    }
-
-    return search(playerData);
-}
-
-function parseItemVariant(name: string): { base: string; variant: "L" | "U" | undefined } {
-    const [base, variant] = name.match("^(.*)_([LU])$") as LuaTuple<[string, string]>;
-
-    if (!base || !variant) return { base: name, variant: undefined };
-    return { base, variant: variant as "L" | "U" };
-}
 
 function setUnlocked(player: Player, guiElements: GuiElements) {
     const playerData = requestPlayerData.InvokeServer() as PlayerData | undefined;
@@ -203,6 +182,7 @@ function findGuiElements(player: Player, container: Instance) {
     const imgLabels = new Map<string, ImageLabel>();
     const frames = new Map<string, Frame>();
     const scrollingFrame = new Map<string, ScrollingFrame>();
+    const txtBox = new Map<string, TextBox>();
 
     for (const child of container.GetDescendants()) {
         if (child.IsA("TextButton")) txtButtons.set(getGuiKey(child), child);
@@ -211,9 +191,10 @@ function findGuiElements(player: Player, container: Instance) {
         if (child.IsA("ImageLabel")) imgLabels.set(getGuiKey(child), child);
         if (child.IsA("Frame")) frames.set(getGuiKey(child), child);
         if (child.IsA("ScrollingFrame")) scrollingFrame.set(getGuiKey(child), child);
+        if (child.IsA("TextBox")) txtBox.set(getGuiKey(child), child);
 
     }
-    guiElements = { txtButtons, imgButtons, txtLabels, imgLabels, frames, scrollingFrame };
+    guiElements = { txtButtons, imgButtons, txtLabels, imgLabels, frames, scrollingFrame, txtBox };
     setUnlocked(player, guiElements);
     setBehaviors();
     return;

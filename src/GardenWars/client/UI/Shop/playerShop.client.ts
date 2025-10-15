@@ -1,5 +1,5 @@
 import { Players, Workspace, RunService, ContextActionService, ReplicatedStorage } from "@rbxts/services";
-import { GuiElements } from "GardenWars/shared/Shop/shopFunctions";
+import { GuiElements } from "GardenWars/shared/Shop/guiManager";
 import { getPREFAB } from "GardenWars/shared/PREFABS";
 import { setupGui } from "GardenWars/shared/Shop/guiManager";
 import { getPreviewModel } from "GardenWars/shared/Shop/shopModelController";
