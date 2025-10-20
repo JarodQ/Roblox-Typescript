@@ -27,7 +27,6 @@ const tweenTransparency = (guiObject: GuiObject, property: "ImageTransparency" |
     const tween = TweenService.Create(guiObject, tweenInfo, { [property]: target });
     tween.Play();
     if (waitCompleted) tween.Completed.Wait();
-    print(`Tween Completed for: ${guiObject}`)
 };
 
 const tweenSize = (guiObject: GuiObject, property: "Size" | "TextSize", target: UDim2, duration = 0.5, waitCompleted: boolean) => {
@@ -35,7 +34,6 @@ const tweenSize = (guiObject: GuiObject, property: "Size" | "TextSize", target: 
     const tween = TweenService.Create(guiObject, tweenInfo, { [property]: target });
     tween.Play();
     if (waitCompleted) tween.Completed.Wait();
-    print(`Tween Completed for: ${guiObject}`)
 
 };
 
@@ -91,7 +89,6 @@ fadeInProgress();
 splashProgressRemote.FireServer();
 // Listen for progress updates
 progressValue.Changed.Connect((value) => {
-    print("Progress Change entered;")
     updateProgress(value);
 
     if (value >= 100 && !hasPrompted) {

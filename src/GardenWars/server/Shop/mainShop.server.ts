@@ -1,6 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { playerCache } from "Common/shared/PlayerData/PlayerDataService";
-import { shopInfo, shopList } from "./mainShopPrices"
+import { shopInfo, shopList, itemInfo } from "./mainShopPrices";
 
 const shopRemoteEvent = new Instance("RemoteEvent");
 shopRemoteEvent.Name = "shopRemoteEvent";
@@ -23,58 +23,86 @@ function findValueReference(obj: unknown, targetKey: string): [Record<string, un
 }
 
 shopRemoteEvent.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
-    const [action, item] = args as [string, string];
-    const playerData = playerCache.get(player.UserId);
+    const [action, item, currencyType, amountRaw] = args as [string, keyof shopInfo, keyof itemInfo, number];
 
-    const currencyRef = findValueReference(playerData, "credits");
+    if (typeOf(amountRaw) !== "number" || amountRaw <= 0) {
+        print(`❌ Invalid amount: ${amountRaw}`);
+        return;
+    }
+
+    const amount = amountRaw;
+
+    const playerData = playerCache.get(player.UserId);
+    if (!playerData) return;
+
+    print("🧠 Getting player's data for transaction:", playerData);
+    print("🔍 Requested:", action, item, currencyType, "Amount:", amount);
+
+    // Resolve currency and item references
+    const currencyRef = findValueReference(playerData, currencyType);
     const itemRef = findValueReference(playerData, item);
 
-    print("Getting player's data for transaction", playerData);
-    print("Player's data of interest: ", currencyRef, itemRef, item);
+    if (!currencyRef || !itemRef) {
+        print("❌ Missing currency or item reference");
+        return;
+    }
 
-    if (currencyRef && itemRef) {
-        const [currencyParent, currencyKey] = currencyRef;
-        const [itemParent, itemKey] = itemRef;
+    const [currencyParent, currencyKey] = currencyRef;
+    const [itemParent, itemKey] = itemRef;
 
-        const buyPrice = shopList[item as keyof shopInfo].buyPrice;
-        const currentCurrency = currencyParent[currencyKey] as number;
-        const currentItemValue = itemParent[itemKey];
+    const itemData = shopList[item];
+    if (!itemData) {
+        print(`❌ Item ${item} not found in shopList`);
+        return;
+    }
 
-        print(`🛒 ${player.Name} wants to ${action} ${item}`);
-        print(`💰 Before: credits = ${currentCurrency}, ${item} = ${currentItemValue}`);
+    const priceData = itemData[currencyType];
+    if (!priceData) {
+        print(`❌ Currency ${currencyType} not found for item ${item}`);
+        return;
+    }
 
-        if (action === "Buy" && currentCurrency >= buyPrice) {
+    const buyPrice = priceData.buyPrice;
+    const sellPrice = priceData.sellPrice;
+    const currentCurrency = currencyParent[currencyKey] as number;
+    const currentItemValue = itemParent[itemKey];
 
+    print(`🛒 ${player.Name} wants to ${action} ${amount}x ${item} using ${currencyType}`);
+    print(`💰 Before: ${currencyType} = ${currentCurrency}, ${item} = ${currentItemValue}`);
+
+    if (action === "Buy") {
+        const totalCost = buyPrice * amount;
+        if (currentCurrency >= totalCost) {
             if (typeIs(currentItemValue, "boolean")) {
                 if (!currentItemValue) {
                     itemParent[itemKey] = true;
-                    currencyParent[currencyKey] = currentCurrency - buyPrice;
-                    print(`✅ Unlocked ${item} for ${buyPrice}`);
+                    currencyParent[currencyKey] = currentCurrency - totalCost;
+                    print(`✅ Unlocked ${item} for ${totalCost} ${currencyType}`);
                 } else {
                     print(`⚠️ ${item} already unlocked`);
                 }
             } else if (typeIs(currentItemValue, "number")) {
-                itemParent[itemKey] = currentItemValue + 1;
-                currencyParent[currencyKey] = currentCurrency - buyPrice;
-                print(`✅ Bought ${item} for ${buyPrice}`);
-            }
-        } else if (action === "Sell") {
-            if (typeIs(currentItemValue, "number") && currentItemValue > 0) {
-                const sellPrice = shopList[item as keyof shopInfo].sellPrice;
-                currencyParent[currencyKey] = currentCurrency + sellPrice;
-                itemParent[itemKey] = currentItemValue - 1;
-
-                print(`✅ Sold ${item} for ${sellPrice}`);
-            } else {
-                print(`❌ Cannot sell ${item}: either not owned or not sellable`);
+                itemParent[itemKey] = currentItemValue + amount;
+                currencyParent[currencyKey] = currentCurrency - totalCost;
+                print(`✅ Bought ${amount}x ${item} for ${totalCost} ${currencyType}`);
             }
         } else {
-            print(`❌ Transaction failed: Not enough currency or invalid item`);
+            print(`❌ Not enough ${currencyType} to buy ${amount}x ${item}`);
         }
-
-        const updatedCurrency = currencyParent[currencyKey];
-        const updatedItemValue = itemParent[itemKey];
-
-        print(`📊 After: credits = ${updatedCurrency}, ${item} = ${updatedItemValue}`);
+    } else if (action === "Sell") {
+        if (typeIs(currentItemValue, "number") && currentItemValue >= amount) {
+            itemParent[itemKey] = currentItemValue - amount;
+            currencyParent[currencyKey] = currentCurrency + sellPrice * amount;
+            print(`✅ Sold ${amount}x ${item} for ${sellPrice * amount} ${currencyType}`);
+        } else {
+            print(`❌ Cannot sell ${amount}x ${item}: not enough quantity`);
+        }
+    } else {
+        print(`❌ Invalid action: ${action}`);
     }
+
+    const updatedCurrency = currencyParent[currencyKey];
+    const updatedItemValue = itemParent[itemKey];
+
+    print(`📊 After: ${currencyType} = ${updatedCurrency}, ${item} = ${updatedItemValue}`);
 });

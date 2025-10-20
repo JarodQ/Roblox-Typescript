@@ -1,5 +1,11 @@
 import { Loadouts, Loadout } from "./PlayerData";
 
+export interface KeyPathResult {
+    exists: boolean;
+    path?: string;
+    value?: unknown;
+}
+
 export function mergeDefaults<T>(target: T, defaults: T): T {
     for (const [key, value] of pairs(defaults as Record<string, unknown>)) {
         const current = (target as Record<string, unknown>)[key];
@@ -49,3 +55,27 @@ export function getSortedLoadouts(loadouts: Loadouts): [keyof Loadouts, Loadout]
     return keys.map((key) => [key, loadouts[key]]);
 }
 
+export function resolvePlayerData(playerData: PlayerData, key: string,): KeyPathResult {
+    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
+        if (typeOf(obj) !== "table") return { exists: false };
+
+        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
+            const newPath = [...currentPath, k];
+
+            if (k === key) {
+                return {
+                    exists: true,
+                    path: newPath.join("."),
+                    value,
+                };
+            }
+
+            const result = search(value, newPath);
+            if (result.exists) return result;
+        }
+
+        return { exists: false };
+    }
+
+    return search(playerData);
+}

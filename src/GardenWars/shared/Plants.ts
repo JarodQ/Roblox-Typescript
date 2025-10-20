@@ -63,7 +63,6 @@ export function replantSavedPlants(player: Player, data: PlayerData) {
         replantedSeed.seedOrientation = orientation.Position; // orientation is full CFrame
         replantedSeed.growthStart = plant.plantedAt * 1000; // convert seconds to ms
         replantedSeed.currentStageTime = plant.plantedAt * 1000;
-        print("Replanting from saved data!")
         replantedSeed.plant(player, position, true);
     }
 }
@@ -128,7 +127,6 @@ export class PlantMaster implements Harvestable {
         }
 
         if (!this.plantPart) {
-            print("Plant PREFAB could not be found!");
             return;
         }
         this.plantPart.Parent = Workspace;
@@ -191,7 +189,6 @@ export class PlantMaster implements Harvestable {
         //plantPrefab.Size = new Vector3(1, 1, 1);
         this.plantPart?.Destroy();
         removePlantData(player, this.seedPosition);
-        print("Harvesting Plant");
         tweenArcPop(player, this.seed.name, plantPosition, plantPrefab);
         this.grown = false
     }
@@ -211,7 +208,6 @@ export class PlantMaster implements Harvestable {
             //const newPlantPart = this.seed.PREFABS[this.growthStage].Clone();
             const newPlantPart = this.seed.PREFABS.find((part) => part.Name === `Stage${this.growthStage}`)?.Clone();
             if (!newPlantPart) {
-                print("Plant PREFAB could not be found!");
                 return;
             }
             newPlantPart.Parent = Workspace;
@@ -226,7 +222,6 @@ export class PlantMaster implements Harvestable {
     }
 
     private trackGrowth(): void {
-        print("Tracking growth or plant!")
         const progressBar: Frame = this.seedProgress.GetDescendants().find(d => d.Name === "ProgressBar" && d.IsA("Frame")) as Frame;
         const progress = new UDim2(-1, 0, 0, 0);
         if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;

@@ -1,9 +1,13 @@
-import { shopFunctions, resolvePlayerData, parseItemVariant } from "GardenWars/shared/Shop/shopFunctions";
+import { shopFunctions, parseItemVariant, getGui } from "GardenWars/shared/Shop/shopFunctions";
 import { ReplicatedStorage } from "@rbxts/services";
-import { PlayerData } from "Common/shared/PlayerData/PlayerData";
+import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
 import { applyHoverExpand, applyHoverShrink, applyPressEffect } from "./effects";
+import { shopInfo } from "GardenWars/server/Shop/mainShopPrices";
+import { ITEM_IMAGES } from "./itemImages";
+import { getPREFAB } from "../PREFABS";
 
 const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as RemoteFunction;
+const requestShopList = ReplicatedStorage.WaitForChild("RequestShopList") as RemoteFunction;
 
 export type GuiElements = {
     txtButtons: Map<string, TextButton>;
@@ -20,6 +24,7 @@ let playerGui: ScreenGui;
 
 
 function getGuiKey(instance: Instance): string {
+    print(instance.GetFullName())
     return instance.GetFullName();
 }
 
@@ -29,7 +34,6 @@ function withDebounce<T extends (...args: unknown[]) => void>(fn: T, delay = 0.3
         const now = tick();
         if (now - lastClick >= delay) {
             lastClick = now;
-            //print("⏱ Debounced function firing with args:", args);
             fn(...args);
         }
     }) as T;
@@ -40,6 +44,7 @@ function withDebounce<T extends (...args: unknown[]) => void>(fn: T, delay = 0.3
 const buttonBehaviors: Record<string, (instance: Instance) => void> = {
     Select: (instance: Instance) => shopFunctions.onSelectClicked(instance, guiElements),
     PurchaseSelect: (instance: Instance) => shopFunctions.onPurchaseSelectClicked(instance, guiElements),
+    MyItemSelect: (instance: Instance) => shopFunctions.onMyItemSelectClicked(instance, guiElements),
     Plus1: (instance: Instance) => shopFunctions.onPlus1Clicked(instance, guiElements),
     Plus5: (instance: Instance) => shopFunctions.onPlus5Clicked(instance, guiElements),
     Plus10: (instance: Instance) => shopFunctions.onPlus10Clicked(instance, guiElements),
@@ -50,8 +55,7 @@ const buttonBehaviors: Record<string, (instance: Instance) => void> = {
     WeaponSelect: (instance: Instance) => shopFunctions.onWeaponSelectClicked(instance, guiElements),
     CropSelect: (instance: Instance) => shopFunctions.onCropSelectClicked(instance, guiElements),
     VIPSelect: (instance: Instance) => shopFunctions.onVIPSelectClicked(instance, guiElements),
-    Buy: (instance: Instance) => shopFunctions.onBuyClicked(instance, guiElements),
-    Sell: (instance: Instance) => shopFunctions.onSellClicked(instance, guiElements),
+    Transaction: (instance: Instance) => shopFunctions.onTransactionClicked(instance, guiElements),
     CloseButton: (instance: Instance) => shopFunctions.onCloseClicked(instance, guiElements),
     RobuxBuy: (instance: Instance) => shopFunctions.onRobuxBuy(instance, guiElements),
     OpenBuy: (instance: Instance) => shopFunctions.onOpenBuy(instance, guiElements),
@@ -96,43 +100,21 @@ function applyEffects(instance: GuiObject, effectsAttr: string) {
     }
 }
 
-// function setBehaviors() {
-//     forEachGuiElement((guiType, name, instance) => {
-//         const behaviorKey = instance.GetAttribute("Behavior") as string | undefined;
-//         const behavior = behaviorKey ? buttonBehaviors[behaviorKey] : undefined;
-//         //print(`Checking ${name} (${guiType}) → behavior:`, behavior);
-//         if (behavior) {
-//             if (instance.IsA("TextButton") || instance.IsA("ImageButton")) {
-//                 //print(`✅ Connecting ${name} to behavior`);
-//                 instance.MouseButton1Click.Connect(withDebounce(() => {
-//                     //print(`🔥 ${name} clicked`);
-//                     //print("Calling behavior with:", instance.GetFullName());
-//                     behavior(instance);
-//                 }));
-//             }
-//             else if (instance.IsA("TextLabel") || instance.IsA("ImageLabel")) {
-//                 //print("Is an image. Cannot interact");
-//             }
-//             if (!behaviorKey) {
-//                 //print(`⚠️ No Behavior attribute found on ${instance.GetFullName()}`);
-//             }
-//         }
-//     })
-//     return;
-// }
-
 function setBehaviors() {
     forEachGuiElement((guiType, name, instance) => {
         const behaviorKey = instance.GetAttribute("Behavior") as string | undefined;
         const effectsAttr = instance.GetAttribute("Effects") as string | undefined;
+        print("🔍 Checking:", instance.Name, "| Behavior:", behaviorKey, "| Already set:", instance.GetAttribute("BehaviorSet"));
+        // ✅ Skip if behavior already applied
+        if (instance.GetAttribute("BehaviorSet") === true) return;
 
         const behavior = behaviorKey ? buttonBehaviors[behaviorKey] : undefined;
-
         if (behavior && (instance.IsA("TextButton") || instance.IsA("ImageButton"))) {
             if (effectsAttr) applyEffects(instance, effectsAttr);
             instance.MouseButton1Click.Connect(withDebounce(() => {
                 behavior(instance);
             }));
+            instance.SetAttribute("BehaviorSet", true); // ✅ Mark as initialized
         }
 
         if (effectsAttr && instance.IsA("GuiObject")) {
@@ -141,17 +123,13 @@ function setBehaviors() {
     });
 }
 
-export interface KeyPathResult {
-    exists: boolean;
-    path?: string;
-    value?: unknown;
-}
+
 
 
 
 function setUnlocked(player: Player, guiElements: GuiElements) {
     const playerData = requestPlayerData.InvokeServer() as PlayerData | undefined;
-    print("Player's data for setUnlocked: ", playerData)
+    // print("Player's data for setUnlocked: ", playerData)
     if (!playerData) return;
     forEachGuiElement((guiType, name, instance) => {
         if (guiType !== "TextButton" && guiType !== "ImageButton") return;
@@ -161,7 +139,7 @@ function setUnlocked(player: Player, guiElements: GuiElements) {
         if (!keyPath) return;
 
         const result = resolvePlayerData(playerData, keyPath);
-        print(`Key Path: ${keyPath}, Value: ${result.value}, for Instance: ${instance.Name}`)
+        // print(`Key Path: ${keyPath}, Value: ${result.value}, for Instance: ${instance.Name}`)
         const isUnlocked = result.value === true;
         if (isUnlocked && variantInfo.variant === "U") {
             //instance.SetAttribute("Unlocked", true);
@@ -200,6 +178,91 @@ function findGuiElements(player: Player, container: Instance) {
     return;
 }
 
+function addItemFrame(playerData: PlayerData, shopList: shopInfo) {
+    const myItemsFrame = getGui(guiElements.scrollingFrame, "MyItemsFrame");
+    const guiPrefabFolder = getPREFAB("Shop", "Gui") as Folder;
+    const myFramePrefab = guiPrefabFolder.FindFirstChild("PlayerItemPrefab") as TextButton;
+
+
+
+    if (!myItemsFrame || !myFramePrefab) return;
+    for (const [itemName, itemInfo] of pairs(shopList)) {
+        //Set Item Frame
+        const itemImage = ITEM_IMAGES[itemName];
+        const newItemFrame = myFramePrefab.Clone();
+        newItemFrame.Name = itemName + "Frame";
+        newItemFrame.Parent = myItemsFrame;
+        newItemFrame.SetAttribute("Behavior", "Select");
+        const itemFrame = newItemFrame.FindFirstChild("ItemFrame");
+        if (!itemFrame) continue;
+        const itemImageLabel = itemFrame.FindFirstChild("ImageLabel");
+
+        if (itemImageLabel && itemImageLabel.IsA("ImageLabel")) {
+            itemImageLabel.Image = itemImage;
+        }
+        newItemFrame.SetAttribute("Item", itemName);
+
+        //Add playerData Info
+        const itemInfo = resolvePlayerData(playerData, itemName);
+        const itemAmountLabel = itemFrame.FindFirstChild("amount") as TextLabel;
+        if (itemInfo.exists && itemAmountLabel) {
+            const value = itemInfo.value;
+            if (typeOf(value) === "number") {
+                itemAmountLabel.Text = "X " + tostring(value);
+            } else if (typeOf(value) === "boolean") {
+                itemAmountLabel.Text = value ? "✓" : "✗";
+            } else {
+                itemAmountLabel.Text = "-";
+            }
+        }
+        if (newItemFrame) extendGuiElements(newItemFrame);
+    }
+}
+
+function extendGuiElements(container: Instance) {
+    if (!guiElements) {
+        warn("extendGuiElements called before guiElements was initialized");
+        return;
+    }
+    print("EXTENDING GUI ELEMENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  ")
+    const allInstances = [container, ...container.GetDescendants()];
+
+    for (const instance of allInstances) {
+        const key = getGuiKey(instance);
+        if (instance.IsA("TextButton")) {
+            guiElements.txtButtons.set(key, instance);
+        }
+        if (instance.IsA("ImageButton")) {
+            guiElements.imgButtons.set(key, instance);
+        }
+        if (instance.IsA("TextLabel")) {
+            guiElements.txtLabels.set(key, instance);
+        }
+        if (instance.IsA("ImageLabel")) {
+            guiElements.imgLabels.set(key, instance);
+        }
+        if (instance.IsA("Frame")) {
+            guiElements.frames.set(key, instance);
+        }
+        if (instance.IsA("ScrollingFrame")) {
+            guiElements.scrollingFrame.set(key, instance);
+        }
+        if (instance.IsA("TextBox")) {
+            guiElements.txtBox.set(key, instance);
+        }
+        if (instance.GetAttribute("Behavior")) {
+            print("🧩 Behavior candidate:", instance.Name, "| Class:", instance.ClassName);
+        }
+    }
+    setBehaviors()
+}
+
+export function setPlayersItems(player: Player, gui: ScreenGui) {
+    const playerData = requestPlayerData.InvokeServer() as PlayerData | undefined;
+    if (!playerData) return;
+    const shopList = requestShopList.InvokeServer() as shopInfo;
+    addItemFrame(playerData, shopList);
+}
 
 export function setupGui(player: Player, gui: ScreenGui) {
     playerGui = gui;

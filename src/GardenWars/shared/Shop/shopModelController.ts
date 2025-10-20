@@ -15,15 +15,15 @@ export function getPreviewModel() {
 export function switchModel(instance: Instance, guiElements: GuiElements) {
     const modelFolder = getPREFAB("Shop", "Models") as Folder;
     const itemString = instance.GetAttribute("ShopModel") as string;
-    print("ItemString: ", itemString)
-    if (!itemString) return;
+    if (!itemString) {
+        print("ShopModel Not Found")
+        return;
+    }
     const newModel = modelFolder.FindFirstChild(itemString) as Model;
-    print("New Model: ", newModel)
 
     if (!newModel) return;
 
     if (previewModel) previewModel.Destroy();
-    print("Creating new model")
     previewModel = newModel.Clone();
     previewModel.Name = "PreviewModel";
     previewModel.PivotTo(new CFrame(placeItem.Position));

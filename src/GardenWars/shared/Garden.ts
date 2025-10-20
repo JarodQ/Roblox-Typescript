@@ -32,7 +32,7 @@ export class PlayerGarden implements Interactable {
         if (interactee === undefined) return;
         const PREFABList: Part[] = PREFABS.getPREFAB("seeds", interactee.Name) as Part[];
         const progressBar: BillboardGui[] = PREFABS.getPREFAB("UI", "ProgressBar") as BillboardGui[];
-        print(PREFABList);
+        // print(PREFABList);
         if (PREFABList && progressBar) {
             const definedSeed: Seed = {
                 name: interactee.Name,
@@ -41,7 +41,7 @@ export class PlayerGarden implements Interactable {
             }
             const newSeed: PlantModule.TestSeed1 = new PlantModule.TestSeed1(definedSeed);
             newSeed.plant(this.getOwner(), hitPos, false);
-            print(`${player.Name} is planting at ${interactable} with a(n) ${interactee} at the position ${hitPos}`);
+            // print(`${player.Name} is planting at ${interactable} with a(n) ${interactee} at the position ${hitPos}`);
         }
     }
 }

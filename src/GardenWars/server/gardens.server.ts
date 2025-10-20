@@ -22,22 +22,22 @@ function assignGarden(player: Player, gardensFolder: Folder) {
     }
 
     if (assignedGardens.has(player.UserId)) {
-        print("${player.Name} has already been assigned a garden!");
+        // print("${player.Name} has already been assigned a garden!");
         return;
     }
     for (const garden of gardensFolder.GetChildren()) {
         if (!gardensArray.includes(garden as Folder)) {
             assignedGardens.set(playerId, garden as Folder);
-            print(`Garden assigned to ${player.Name} with Id: ${player.UserId}, has been assigned the garden: ${garden.Name}`);
+            // print(`Garden assigned to ${player.Name} with Id: ${player.UserId}, has been assigned the garden: ${garden.Name}`);
             assignedGardens.forEach((value, key) => { //For Testing
                 //print(`Key: ${key}, Value: ${value}`);
 
             })//For Testing
-            print(`Garden Folder: ${garden}`);
+            // print(`Garden Folder: ${garden}`);
             return garden as Folder;
         }
     }
-    print("No available gardens to assign!");
+    // print("No available gardens to assign!");
     return;
 }
 
