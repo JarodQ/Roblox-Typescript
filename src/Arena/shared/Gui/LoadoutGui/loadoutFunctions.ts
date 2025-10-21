@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { WeaponFlags, Loadouts, Loadout, WeaponAssignments } from "Arena/shared/PlayerData/PlayerData";
+import { WeaponFlags, Loadout, Loadouts, WeaponAssignments } from "Common/shared/PlayerData/PlayerData";
 import { WeaponSlot, WEAPON_SLOT_RULES } from "./loadoutRules";
 import { WEAPON_IMAGES } from "./loadoutImages";
 import { GuiElements } from "./guiManager";

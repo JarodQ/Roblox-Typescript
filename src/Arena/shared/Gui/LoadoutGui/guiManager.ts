@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { getGui, loadoutFunctions, setLoadoutFrames } from "./loadoutFunctions";
 const getLoadoutDataRemote = ReplicatedStorage.WaitForChild("getLoadoutDataRemote") as RemoteEvent;
-import { Loadout, Loadouts, WeaponFlags } from "Arena/shared/PlayerData/PlayerData";
+import { Loadout, Loadouts, WeaponFlags } from "Common/shared/PlayerData/PlayerData";
 
 
 export type GuiElements = {
@@ -110,7 +110,7 @@ export async function setupGui(gui: ScreenGui) {
     let guiElements = addGuiElements(gui);
 
     getLoadoutDataRemote.OnClientEvent.Connect((unlockedWeapons: (keyof WeaponFlags)[], loadouts: [keyof Loadouts, Loadout][]) => {
-        print("🔓 Unlocked weapons:", unlockedWeapons);
+        // print("🔓 Unlocked weapons:", unlockedWeapons);
         setLoadoutFrames(guiElements, unlockedWeapons, loadouts);
         addGuiElements(gui);
     });

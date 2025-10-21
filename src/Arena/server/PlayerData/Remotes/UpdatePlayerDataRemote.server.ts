@@ -1,5 +1,5 @@
-import { updateFlag } from "Arena/shared/PlayerData/PlayerDataService";
-import { PlayerData } from "Arena/shared/PlayerData/PlayerData";
+import { updateFlag } from "Common/shared/PlayerData/PlayerDataService";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 
 // 👇 Create a local alias to ensure consistent typing
 type PD = PlayerData;

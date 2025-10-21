@@ -1,7 +1,7 @@
 
-import { loadPlayerData, savePlayerData } from "Arena/shared/PlayerData/DataStoreWrapper";// Or wherever your functions live
-import { getPlayerKey } from "Arena/shared/PlayerData/DataStoreWrapper";
-import { PlayerData, DEFAULT_PLAYER_DATA } from "Arena/shared/PlayerData/PlayerData";
+import { loadPlayerData, savePlayerData } from "Common/shared/PlayerData/DataStoreWrapper";
+import { getPlayerKey } from "Common/shared/PlayerData/DataStoreWrapper";
+import { PlayerData, DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
 
 // Resetting the mock store before test
 

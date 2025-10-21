@@ -24,7 +24,7 @@ let playerGui: ScreenGui;
 
 
 function getGuiKey(instance: Instance): string {
-    print(instance.GetFullName())
+    // print(instance.GetFullName())
     return instance.GetFullName();
 }
 
@@ -104,7 +104,7 @@ function setBehaviors() {
     forEachGuiElement((guiType, name, instance) => {
         const behaviorKey = instance.GetAttribute("Behavior") as string | undefined;
         const effectsAttr = instance.GetAttribute("Effects") as string | undefined;
-        print("🔍 Checking:", instance.Name, "| Behavior:", behaviorKey, "| Already set:", instance.GetAttribute("BehaviorSet"));
+        // print("🔍 Checking:", instance.Name, "| Behavior:", behaviorKey, "| Already set:", instance.GetAttribute("BehaviorSet"));
         // ✅ Skip if behavior already applied
         if (instance.GetAttribute("BehaviorSet") === true) return;
 
@@ -224,7 +224,7 @@ function extendGuiElements(container: Instance) {
         warn("extendGuiElements called before guiElements was initialized");
         return;
     }
-    print("EXTENDING GUI ELEMENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  ")
+    // print("EXTENDING GUI ELEMENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  ")
     const allInstances = [container, ...container.GetDescendants()];
 
     for (const instance of allInstances) {
@@ -251,7 +251,7 @@ function extendGuiElements(container: Instance) {
             guiElements.txtBox.set(key, instance);
         }
         if (instance.GetAttribute("Behavior")) {
-            print("🧩 Behavior candidate:", instance.Name, "| Class:", instance.ClassName);
+            // print("🧩 Behavior candidate:", instance.Name, "| Class:", instance.ClassName);
         }
     }
     setBehaviors()
