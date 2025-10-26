@@ -1,6 +1,6 @@
 import { buildGuiComponent, GuiElementDescriptor } from "./buildGuiComponent";
 import { ItemData, getShopItemsForCategory } from "Common/shared/ItemData";
-import { PlayerData } from "Common/shared/PlayerData/PlayerData";
+import { PlayerData, PlayerItemData } from "Common/shared/PlayerData/PlayerData";
 import {
     createFrame,
     createUICorner,
@@ -30,17 +30,18 @@ export class ItemsFrame {
     private contentFrame: ScrollingFrame | undefined;
     private seedsSelect: TextButton | undefined;
     private cropsSelect: TextButton | undefined;
+    private playerData: PlayerData | undefined;
 
 
     constructor(
         parent: ScreenGui,
         onModeChange: (mode: "seeds" | "crops") => void,
         onItemSelect: (item: ItemData) => void,
-        private playerData: PlayerData // ✅ Add this
+        playerData: PlayerData // ✅ Add this
     ) {
         this.onItemSelect = onItemSelect;
         this.frame = buildGuiComponent(this.populateLayout(onModeChange), parent) as Frame;
-
+        this.playerData = playerData
     }
 
     private initializeFrame() {
@@ -50,10 +51,13 @@ export class ItemsFrame {
     public setDisplayMode(mode: "buy" | "sell", category: "seeds" | "crops") {
 
         if (mode === "buy") {
+            print("Setting Buy mode")
             this.populateShopLayout(category);
             if (this.seedsSelect) this.seedsSelect.Visible = true;
             if (this.cropsSelect) this.cropsSelect.Visible = true;
         } else if (mode === "sell") {
+            print("Setting Sell mode")
+
             this.populateMyItemsLayout();
             if (this.modeLabel) this.modeLabel.Text = "My Items";
             if (this.seedsSelect) this.seedsSelect.Visible = false;
@@ -61,8 +65,39 @@ export class ItemsFrame {
         }
     }
 
+    private getSellableItems(category: "seeds" | "crops"): ItemData[] {
+        const result: ItemData[] = [];
+        print("PlayerData: ", this.playerData)
+        if (!this.playerData) return result;
+
+        const shopItems = getShopItemsForCategory(category);
+
+        for (const item of shopItems) {
+            let ownedQuantity = 0;
+
+            for (const [_, entry] of pairs(this.playerData.items)) {
+
+                for (const [_, variant] of pairs(entry.variants)) {
+                    if (variant.id === item.id) {
+                        print("Searching for item: ", item, " Item has quantity: ", variant.ownedQuantity);
+
+                        ownedQuantity = variant.ownedQuantity;
+                    }
+                }
+            }
+
+            if (ownedQuantity > 0) {
+                result.push({
+                    ...item,
+                    ownedQuantity, // ✅ Inject runtime field
+                });
+            }
+        }
+
+        return result;
+    }
+
     public populateShopLayout(mode: "seeds" | "crops") {
-        print
         if (!this.contentFrame) {
             print("ContentFrame not mounted yet!");
             return;
@@ -97,11 +132,16 @@ export class ItemsFrame {
         const gridPadding = buildGuiComponent(createUIPadding()) as UIPadding;
         gridPadding.Parent = this.contentFrame;
 
-        // const myItems = this.getPlayerOwnedItems();
-        // for (const item of myItems) {
-        //     const button = buildGuiComponent(this.createInventoryItemButton(item)) as TextButton | ImageButton;
-        //     button.Parent = this.contentFrame;
-        // }
+        // const sellableItems = this.getSellableItems("seeds"); // or "crops", or both
+        const allSellableItems: ItemData[] = [
+            ...this.getSellableItems("seeds"),
+            ...this.getSellableItems("crops"),
+        ];
+
+        for (const item of allSellableItems) {
+            const button = buildGuiComponent(this.createShopItemButton(item)) as TextButton | ImageButton;
+            button.Parent = this.contentFrame;
+        }
     }
 
 
@@ -120,6 +160,32 @@ export class ItemsFrame {
     // }
 
     private createShopItemButton(item: ItemData): GuiElementDescriptor<"ImageButton"> {
+        const children = [
+            createUICorner({ radius: 8 }),
+            createUIstroke({ applyStrokeMode: Enum.ApplyStrokeMode.Border, thickness: 3 }),
+            createTextLabel({
+                text: item.name,
+                textWrapped: true,
+                textSize: 14,
+                position: UDim2.fromScale(0.5, 1),
+                anchorPoint: new Vector2(0.5, 1),
+                size: UDim2.fromScale(1, 0.3),
+            }),
+        ];
+
+        if (item.ownedQuantity !== undefined) {
+            children.push(
+                createTextLabel({
+                    text: `x${item.ownedQuantity}`,
+                    textSize: 12,
+                    position: UDim2.fromScale(1, 0),
+                    anchorPoint: new Vector2(1, 0),
+                    size: UDim2.fromScale(0.5, 0.3),
+                    textColor: Color3.fromRGB(200, 200, 200),
+                })
+            );
+        }
+
         return createImageButton({
             name: item.id,
             image: item.image,
@@ -134,23 +200,7 @@ export class ItemsFrame {
                     this.onItemSelect(item);
                 });
             },
-            children: [
-                createUICorner({ radius: 8 }),
-                createUIstroke({
-                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
-                    thickness: 3,
-                }),
-                //createUIGradient(),
-                createTextLabel({
-                    text: item.name,
-                    textWrapped: true,
-                    textSize: 14,
-                    textStrokeTransparency: 0,
-                    position: UDim2.fromScale(0.5, 1),
-                    anchorPoint: new Vector2(0.5, 1),
-                    size: UDim2.fromScale(1, 0.3),
-                }),
-            ],
+            children,
         });
     }
 

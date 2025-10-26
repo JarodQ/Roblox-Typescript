@@ -83,7 +83,7 @@ export const shopList: Record<string, ItemEntry> = {
                 stackable: true,
             },
             weaponSeed: {
-                id: "carrot_weapon_seed",
+                id: "carrotShooter_seed",
                 name: "Carrot Shooter Seed",
                 description: "Plant to grow weaponized carrots.",
                 image: "rbxassetid://111369018411705",

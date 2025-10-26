@@ -3,6 +3,7 @@ import { GuiElements, setPlayersItems } from "GardenWars/shared/Shop/guiManager"
 import { getPREFAB } from "GardenWars/shared/PREFABS";
 import { setupGui } from "GardenWars/shared/Shop/guiManager";
 import { getPreviewModel } from "GardenWars/shared/Shop/shopModelController";
+import { ShopGui } from "GardenWars/shared/GUIs/ShopV2/ShopGui";
 
 
 // const player: Player = Players.LocalPlayer;
@@ -84,7 +85,9 @@ function handleMouseInput(
     return Enum.ContextActionResult.Sink;
 }
 
-let previewModel = shopScene.WaitForChild("PreviewModel") as Model;
+// let previewModel = shopScene.WaitForChild("PreviewModel") as Model;
+let previewModel: Model | undefined;
+
 // export function switchModel(instance: Instance, guiElements: GuiElements) {
 //     const modelFolder = getPREFAB("Shop", "Models") as Folder;
 //     const itemString = instance.GetAttribute("Item") as string;
@@ -105,7 +108,7 @@ let previewModel = shopScene.WaitForChild("PreviewModel") as Model;
 RunService.RenderStepped.Connect(() => {
     if (!storeActive || angularVelocity.Magnitude < 0.001) return;
 
-    const previewModel = getPreviewModel();
+    // const previewModel = getPreviewModel();
     if (!previewModel) return;
     const primary = previewModel.PrimaryPart;
     if (!primary) return;
@@ -158,115 +161,26 @@ function activateStoreScene() {
     );
 }
 
+function switchPreviewModel(itemId: string) {
+    print(itemId)
+    const modelFolder = getPREFAB("Shop", "Models") as Folder;
+    const newModel = modelFolder.FindFirstChild(itemId) as Model;
+    if (!newModel) return;
+
+    if (previewModel) previewModel.Destroy();
+    previewModel = newModel.Clone();
+    previewModel.Name = "PreviewModel";
+    // previewModel.MoveTo(placeItem.Position);
+    previewModel.PivotTo(new CFrame(placeItem.Position));
+    previewModel.Parent = Workspace;
+}
+
 // 🎯 Triggered by proximity prompt
 proximityPrompt.Triggered.Connect(() => {
     activateStoreScene();
-    setPlayersItems(player, shopGui);
+    //setPlayersItems(player, shopGui);
+    const shopGui = new ShopGui((itemId) => {
+        switchPreviewModel(itemId);
+    });
 });
 
-
-
-
-// const player = Players.LocalPlayer;
-// const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
-// const shopGui = playerGui.WaitForChild("ShopV2") as ScreenGui;
-// const tweenFrame = shopGui.WaitForChild("TweenFrame") as Frame;
-// const viewport = tweenFrame.WaitForChild("ViewportFrame") as ViewportFrame;
-// const shopScene = Workspace.WaitForChild("ShopScene");
-// const shopCamera = shopScene.WaitForChild("ShopPrompt") as BasePart;
-// const proximityPrompt = shopCamera.WaitForChild("ProximityPrompt") as ProximityPrompt;
-
-
-// const viewportCamera = new Instance("Camera");
-// viewportCamera.Name = "ShopCamera";
-// viewportCamera.CFrame = shopCamera.CFrame; // Position camera 10 studs away
-// viewport.CurrentCamera = viewportCamera;
-// viewportCamera.Parent = viewport;
-
-
-// // Clone model into viewport
-// const originalModel = getPREFAB("Shop", "Models") as Folder;
-// const previewModel = originalModel.FindFirstChild("maizeMauler")!.Clone() as Model;
-// previewModel.Parent = viewport;
-// previewModel.PivotTo(CFrame.identity);
-
-// let dragging = false;
-// let lastPosition = new Vector2();
-// let storeActive = false;
-// let currentPitch = 0;
-// const minPitch = math.rad(-45);
-// const maxPitch = math.rad(45);
-// let angularVelocity = new Vector2(0, 0);
-// const maxSpeed = 0.2;
-// const damping = 0.95;
-
-// function handleMouseInput(
-//     actionName: string,
-//     inputState: Enum.UserInputState,
-//     input: InputObject,
-// ) {
-//     if (!storeActive) return Enum.ContextActionResult.Pass;
-
-//     if (input.UserInputType === Enum.UserInputType.MouseButton1) {
-//         if (inputState === Enum.UserInputState.Begin) {
-//             dragging = true;
-//             lastPosition = new Vector2(input.Position.X, input.Position.Y);
-//         } else if (inputState === Enum.UserInputState.End) {
-//             dragging = false;
-//         }
-//     }
-
-//     if (input.UserInputType === Enum.UserInputType.MouseMovement && dragging) {
-//         const currentPosition = new Vector2(input.Position.X, input.Position.Y);
-//         const delta = currentPosition.sub(lastPosition);
-//         lastPosition = currentPosition;
-
-//         angularVelocity = new Vector2(
-//             math.clamp(delta.X * 0.01, -maxSpeed, maxSpeed),
-//             math.clamp(delta.Y * 0.01, -maxSpeed, maxSpeed),
-//         );
-//     }
-
-//     return Enum.ContextActionResult.Sink;
-// }
-
-// RunService.RenderStepped.Connect(() => {
-//     if (!storeActive || angularVelocity.Magnitude < 0.001) return;
-
-//     const primary = previewModel.PrimaryPart;
-//     if (!primary) return;
-
-//     const center = primary.Position;
-//     const currentPivot = previewModel.GetPivot();
-
-//     let newPitch = currentPitch + angularVelocity.Y;
-//     newPitch = math.clamp(newPitch, minPitch, maxPitch);
-//     const pitchDelta = newPitch - currentPitch;
-//     currentPitch = newPitch;
-
-//     const yaw = CFrame.Angles(0, angularVelocity.X, 0);
-//     const pitch = CFrame.Angles(pitchDelta, 0, 0);
-//     const rotation = yaw.mul(pitch);
-
-//     const newPivot = new CFrame(center).mul(rotation).mul(currentPivot.sub(center));
-//     previewModel.PivotTo(newPivot);
-
-//     angularVelocity = angularVelocity.mul(damping);
-// });
-
-// function activateStoreScene() {
-//     storeActive = true;
-
-//     ContextActionService.BindAction(
-//         "RotatePreviewModel",
-//         handleMouseInput,
-//         false,
-//         Enum.UserInputType.MouseButton1,
-//         Enum.UserInputType.MouseMovement,
-//     );
-// }
-
-// // 🎯 Triggered by proximity prompt
-// proximityPrompt.Triggered.Connect(() => {
-//     activateStoreScene();
-// });

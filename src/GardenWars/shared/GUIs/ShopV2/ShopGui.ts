@@ -20,15 +20,15 @@ export class ShopGui extends MainGui {
     private itemsMode: "seeds" | "crops" = "seeds";
     private playerData: PlayerData;
 
-    constructor() {
+    constructor(onItemSelected: (itemId: string) => void) {
         super();
         this.playerData = requestPlayerData.InvokeServer() as PlayerData;
-
+        print(this.playerData);
         this.selectionFrame = new SelectionFrame(this.screenGui, mode => this.setMode(mode));
         this.itemsFrame = new ItemsFrame(
             this.screenGui,
             itemsMode => this.setItemsMode(itemsMode),
-            item => this.setSelectedItem(item), // ✅ Callback from ItemsFrame
+            item => this.setSelectedItem(item, onItemSelected), // ✅ Callback from ItemsFrame
             this.playerData,
         );
         this.itemInfoFrame = new ItemInfoFrame(this.screenGui, () => this.selectedItem, this.playerData);
@@ -51,8 +51,9 @@ export class ShopGui extends MainGui {
         //this.itemInfoFrame.updateItem(itemsMode);
     }
 
-    private setSelectedItem(item: ItemData) {
+    private setSelectedItem(item: ItemData, onItemSelected: (itemId: string) => void) {
         this.selectedItem = item;
         this.itemInfoFrame.updateItem(item, this.mode); // ✅ Update info panel
+        onItemSelected(item.id);
     }
 }
