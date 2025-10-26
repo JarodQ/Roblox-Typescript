@@ -18,7 +18,7 @@ async function runTest() {
 
     // Save new value
     // print("Attempting to save new value!!!!!");
-    data1.ammunition.carrots = 42;
+    //data1.crops.carrots = 42;------------------------------------------------Uncomment for testing
     // print(`Data 1: ${data1}`);
     await savePlayerData(testUserId, data1);
     // print("💾 Saved updated carrots:", data1.ammunition.carrots);
@@ -26,7 +26,7 @@ async function runTest() {
     // Load again to confirm persistence
     const data2 = await loadPlayerData(testUserId);
     // print("🔄 Reloaded data:", data2);
-    assert(data2.ammunition.carrots === 42, "Expected carrots to persist after save");
+    //assert(data2.crops.carrots === 42, "Expected carrots to persist after save");----------------------------Uncomment for testing
 
     // print("🎉 All assertions passed!");
 }

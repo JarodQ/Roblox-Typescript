@@ -2,6 +2,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import { switchModel } from "./shopModelController";
 import { GuiElements } from "./guiManager";
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { ITEM_IMAGES } from "./itemImages";
 import { shopInfo } from "GardenWars/server/Shop/mainShopPrices";
 

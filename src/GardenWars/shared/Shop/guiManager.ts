@@ -1,6 +1,7 @@
 import { shopFunctions, parseItemVariant, getGui } from "GardenWars/shared/Shop/shopFunctions";
 import { ReplicatedStorage } from "@rbxts/services";
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { applyHoverExpand, applyHoverShrink, applyPressEffect } from "./effects";
 import { shopInfo } from "GardenWars/server/Shop/mainShopPrices";
 import { ITEM_IMAGES } from "./itemImages";

@@ -3,7 +3,7 @@ export interface ItemData {
     name: string; // Display name (e.g. "Carrot Seed")
     description: string;
     image: string; // Image asset ID or path
-    category: "seed" | "crop" | "weapon";
+    category: "seeds" | "crops";
 
     prices: {
         buy: {
@@ -38,6 +38,33 @@ export interface shopInfo {
 
 }
 
+
+export function getShopItemsForCategory(category: "seeds" | "crops"): ItemData[] {
+    const items: ItemData[] = [];
+
+    function collect(obj: unknown) {
+        if (typeIs(obj, "table")) {
+            // Check if this is an ItemData-like object
+            const maybeItem = obj as Partial<ItemData>;
+            if (typeOf(maybeItem.id) === "string" && maybeItem.category === category) {
+                items.push(maybeItem as ItemData);
+                return;
+            }
+
+            // Recurse into nested objects
+            for (const [_, value] of pairs(obj as Record<string, unknown>)) {
+                collect(value);
+            }
+        }
+    }
+
+    for (const [_, entry] of pairs(shopList)) {
+        collect(entry.variants);
+    }
+
+    return items;
+}
+
 export const shopList: Record<string, ItemEntry> = {
     carrots: {
         name: "Carrots",
@@ -48,7 +75,7 @@ export const shopList: Record<string, ItemEntry> = {
                 name: "Carrot Seed",
                 description: "Plant to grow carrots.",
                 image: "rbxassetid://108601628629100",
-                category: "seed",
+                category: "seeds",
                 prices: {
                     buy: { coins: 10, valor: 1 },
                     sell: { coins: 5 },
@@ -59,8 +86,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "carrot_weapon_seed",
                 name: "Carrot Shooter Seed",
                 description: "Plant to grow weaponized carrots.",
-                image: "rbxassetid://108601628629100",
-                category: "seed",
+                image: "rbxassetid://111369018411705",
+                category: "seeds",
                 prices: {
                     buy: { coins: 15, valor: 2 },
                     sell: { coins: 7 },
@@ -72,7 +99,7 @@ export const shopList: Record<string, ItemEntry> = {
                 name: "Carrots",
                 description: "Harvested carrots used for ammo or trade.",
                 image: "rbxassetid://108601628629100",
-                category: "crop",
+                category: "crops",
                 prices: {
                     buy: { coins: 20 },
                     sell: { coins: 12 },
@@ -90,8 +117,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "blueberry_seed",
                 name: "Blueberry Seed",
                 description: "Plant to grow blueberry bushes.",
-                image: "rbxassetid://108601628629101",
-                category: "seed",
+                image: "rbxassetid://139245603700947",
+                category: "seeds",
                 prices: {
                     buy: { coins: 12, valor: 2 },
                     sell: { coins: 6 },
@@ -102,8 +129,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "blueberryBlaster_seed",
                 name: "Blueberry Blaster Seed",
                 description: "Plant to grow weaponized blueberries.",
-                image: "rbxassetid://108601628629100",
-                category: "seed",
+                image: "rbxassetid://129472140650048",
+                category: "seeds",
                 prices: {
                     buy: { coins: 15, valor: 2 },
                     sell: { coins: 7 },
@@ -114,8 +141,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "blueberry_crop",
                 name: "Blueberries",
                 description: "Freshly harvested blueberries, great for selling or crafting potions.",
-                image: "rbxassetid://108601628629102",
-                category: "crop",
+                image: "rbxassetid://139245603700947",
+                category: "crops",
                 prices: {
                     buy: { coins: 24 },
                     sell: { coins: 14, valor: 3 },
@@ -132,8 +159,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "corn_seed",
                 name: "Corn Seed",
                 description: "Plant to grow tall corn stalks.",
-                image: "rbxassetid://108601628629103",
-                category: "seed",
+                image: "rbxassetid://76605413606941",
+                category: "seeds",
                 prices: {
                     buy: { coins: 14, valor: 1 },
                     sell: { coins: 6 },
@@ -145,8 +172,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "maizeMauler_seed",
                 name: "Maize Mauler Seed",
                 description: "Plant to grow weaponized corn.",
-                image: "rbxassetid://108601628629100",
-                category: "seed",
+                image: "rbxassetid://140686676686152",
+                category: "seeds",
                 prices: {
                     buy: { coins: 15, valor: 2 },
                     sell: { coins: 7 },
@@ -157,8 +184,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "corn_crop",
                 name: "Corn",
                 description: "Harvested corn, great for selling or crafting food items.",
-                image: "rbxassetid://108601628629104",
-                category: "crop",
+                image: "rbxassetid://76605413606941",
+                category: "crops",
                 prices: {
                     buy: { coins: 28 },
                     sell: { coins: 16, valor: 2 },
@@ -176,8 +203,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "sunflower_seed",
                 name: "Sunflower Seed",
                 description: "Plant to grow tall, radiant sunflowers.",
-                image: "rbxassetid://108601628629105",
-                category: "seed",
+                image: "rbxassetid://105812995170847",
+                category: "seeds",
                 prices: {
                     buy: { coins: 18, valor: 2 },
                     sell: { coins: 9 },
@@ -189,8 +216,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "heliosLaser_seed",
                 name: "Helios Laser Seed",
                 description: "Plant to grow weaponized sunflower.",
-                image: "rbxassetid://108601628629100",
-                category: "seed",
+                image: "rbxassetid://109999962651743",
+                category: "seeds",
                 prices: {
                     buy: { coins: 15, valor: 2 },
                     sell: { coins: 7 },
@@ -201,8 +228,8 @@ export const shopList: Record<string, ItemEntry> = {
                 id: "sunflower_crop",
                 name: "Sunflower",
                 description: "Harvested sunflower, prized for its vibrant petals and trade value.",
-                image: "rbxassetid://108601628629106",
-                category: "crop",
+                image: "rbxassetid://105812995170847",
+                category: "crops",
                 prices: {
                     buy: { coins: 36 },
                     sell: { coins: 20, valor: 3 },

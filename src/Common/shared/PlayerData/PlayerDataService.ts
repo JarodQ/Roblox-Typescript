@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { PlayerData, PlayerFlags, Plants } from "./PlayerData";
+import { PlayerData, Plants } from "./PlayerData";
 import { loadPlayerData, savePlayerData, getPlayerKey } from "./DataStoreWrapper";
 import { DataStoreService } from "@rbxts/services";
 

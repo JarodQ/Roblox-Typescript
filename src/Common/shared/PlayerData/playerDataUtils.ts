@@ -1,4 +1,4 @@
-import { Loadouts, Loadout } from "./PlayerData";
+import { PlayerData, Loadouts, Loadout } from "./PlayerData";
 
 export interface KeyPathResult {
     exists: boolean;

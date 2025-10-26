@@ -1,4 +1,7 @@
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
+import { PlayerData } from "Common/shared/PlayerData/PlayerData";
+
+
 
 export class CurrencyFrame {
     private frame: Frame;
