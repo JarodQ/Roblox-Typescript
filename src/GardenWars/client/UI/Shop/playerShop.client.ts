@@ -177,6 +177,7 @@ function switchPreviewModel(itemId: string) {
 
 // 🎯 Triggered by proximity prompt
 proximityPrompt.Triggered.Connect(() => {
+    game.GetService("StarterGui").SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
     activateStoreScene();
     //setPlayersItems(player, shopGui);
     const shopGui = new ShopGui((itemId) => {

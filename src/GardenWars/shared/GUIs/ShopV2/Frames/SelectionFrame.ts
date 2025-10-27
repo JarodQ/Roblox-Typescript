@@ -94,7 +94,12 @@ export class SelectionFrame {
                     children: [
                         createUICorner({ radius: 8000 }),
                         createUIGradient(),
-                        createImageLabel({ imageId: "rbxassetid://120182446283422", anchorPoint: new Vector2(0.5, 0), position: UDim2.fromScale(0.5, -0.343) }),
+                        createImageLabel({
+                            imageId: "rbxassetid://87686940256852",
+                            anchorPoint: new Vector2(0.5, 0),
+                            position: UDim2.fromScale(0.491, -0.247),
+                            size: UDim2.fromScale(1.176, 1.176),
+                        }),
                         createTextLabel({ text: "Close", anchorPoint: new Vector2(0, 1), position: UDim2.fromScale(0, 1) }),
 
                     ],

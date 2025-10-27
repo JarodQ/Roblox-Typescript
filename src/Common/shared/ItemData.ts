@@ -1,3 +1,8 @@
+import { ReplicatedStorage } from "@rbxts/services";
+// import { getData } from "./PlayerData/PlayerDataService";
+// import { savePlayerData } from "./PlayerData/DataStoreWrapper";
+
+
 export interface ItemData {
     id: string; // Unique identifier (e.g. "carrot_seed")
     name: string; // Display name (e.g. "Carrot Seed")
@@ -7,11 +12,11 @@ export interface ItemData {
 
     prices: {
         buy: {
-            coins: number;
+            credits: number;
             valor?: number;
         };
         sell: {
-            coins: number;
+            credits: number;
             valor?: number;
         };
     };
@@ -65,6 +70,19 @@ export function getShopItemsForCategory(category: "seeds" | "crops"): ItemData[]
     return items;
 }
 
+export function findItemById(itemId: string): ItemData | undefined {
+    for (const [_, entry] of pairs(shopList)) {
+        for (const [_, variant] of pairs(entry.variants)) {
+            if (variant.id === itemId) {
+                return variant;
+            }
+        }
+    }
+    return undefined;
+}
+
+
+
 export const shopList: Record<string, ItemEntry> = {
     carrots: {
         name: "Carrots",
@@ -77,8 +95,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://108601628629100",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 10, valor: 1 },
-                    sell: { coins: 5 },
+                    buy: { credits: 10, valor: 1 },
+                    sell: { credits: 5 },
                 },
                 stackable: true,
             },
@@ -89,8 +107,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://111369018411705",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 15, valor: 2 },
-                    sell: { coins: 7 },
+                    buy: { credits: 15, valor: 2 },
+                    sell: { credits: 7 },
                 },
                 stackable: true,
             },
@@ -101,8 +119,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://108601628629100",
                 category: "crops",
                 prices: {
-                    buy: { coins: 20 },
-                    sell: { coins: 12 },
+                    buy: { credits: 20 },
+                    sell: { credits: 12 },
                 },
                 stackable: true,
             },
@@ -120,8 +138,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://139245603700947",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 12, valor: 2 },
-                    sell: { coins: 6 },
+                    buy: { credits: 12, valor: 2 },
+                    sell: { credits: 6 },
                 },
                 stackable: true,
             },
@@ -132,8 +150,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://129472140650048",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 15, valor: 2 },
-                    sell: { coins: 7 },
+                    buy: { credits: 15, valor: 2 },
+                    sell: { credits: 7 },
                 },
                 stackable: true,
             },
@@ -144,8 +162,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://139245603700947",
                 category: "crops",
                 prices: {
-                    buy: { coins: 24 },
-                    sell: { coins: 14, valor: 3 },
+                    buy: { credits: 24 },
+                    sell: { credits: 14, valor: 3 },
                 },
                 stackable: true,
             },
@@ -162,8 +180,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://76605413606941",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 14, valor: 1 },
-                    sell: { coins: 6 },
+                    buy: { credits: 14, valor: 1 },
+                    sell: { credits: 6 },
                 },
                 stackable: true,
                 maxStackSize: 99,
@@ -175,8 +193,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://140686676686152",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 15, valor: 2 },
-                    sell: { coins: 7 },
+                    buy: { credits: 15, valor: 2 },
+                    sell: { credits: 7 },
                 },
                 stackable: true,
             },
@@ -187,8 +205,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://76605413606941",
                 category: "crops",
                 prices: {
-                    buy: { coins: 28 },
-                    sell: { coins: 16, valor: 2 },
+                    buy: { credits: 28 },
+                    sell: { credits: 16, valor: 2 },
                 },
                 stackable: true,
                 maxStackSize: 99,
@@ -206,8 +224,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://105812995170847",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 18, valor: 2 },
-                    sell: { coins: 9 },
+                    buy: { credits: 18, valor: 2 },
+                    sell: { credits: 9 },
                 },
                 stackable: true,
                 maxStackSize: 99,
@@ -219,8 +237,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://109999962651743",
                 category: "seeds",
                 prices: {
-                    buy: { coins: 15, valor: 2 },
-                    sell: { coins: 7 },
+                    buy: { credits: 15, valor: 2 },
+                    sell: { credits: 7 },
                 },
                 stackable: true,
             },
@@ -231,8 +249,8 @@ export const shopList: Record<string, ItemEntry> = {
                 image: "rbxassetid://105812995170847",
                 category: "crops",
                 prices: {
-                    buy: { coins: 36 },
-                    sell: { coins: 20, valor: 3 },
+                    buy: { credits: 36 },
+                    sell: { credits: 20, valor: 3 },
                 },
                 stackable: true,
                 maxStackSize: 99,

@@ -1,4 +1,5 @@
 import { PlayerData, Loadouts, Loadout } from "./PlayerData";
+import { DEFAULT_PLAYER_DATA } from "./PlayerData";
 
 export interface KeyPathResult {
     exists: boolean;
@@ -20,6 +21,16 @@ export function mergeDefaults<T>(target: T, defaults: T): T {
     return target;
 }
 
+export function lowercaseFirst(str: string): string {
+    if (str.size() === 0) return str;
+
+    const first = str.sub(1, 1).lower();
+
+    const rest = str.sub(2);
+    print(first, rest);
+    return first + rest;
+}
+
 export function getTrueFlags<T extends object>(flags: T): (keyof T)[] {
     const result: (keyof T)[] = [];
 
@@ -32,6 +43,30 @@ export function getTrueFlags<T extends object>(flags: T): (keyof T)[] {
     return result;
 }
 
+export function findPlayerDataKeyPath(key: string, playerData?: PlayerData): KeyPathResult {
+    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
+        if (typeOf(obj) !== "table") return { exists: false };
+
+        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
+            const newPath = [...currentPath, k];
+
+            if (k === key) {
+                return {
+                    exists: true,
+                    path: newPath.join("."),
+                    value,
+                };
+            }
+
+            const result = search(value, newPath);
+            if (result.exists) return result;
+        }
+
+        return { exists: false };
+    }
+
+    return search(playerData ?? DEFAULT_PLAYER_DATA);
+}
 
 //Loadout Functions
 export function getLoadouts<T extends object>(loadouts: T): [keyof T, T[keyof T]][] {

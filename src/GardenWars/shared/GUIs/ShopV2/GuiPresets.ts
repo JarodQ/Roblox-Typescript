@@ -169,6 +169,7 @@ export function createTextLabel(options?: {
     zIndex?: number;
     textStrokeColor?: Color3;
     textStrokeTransparency?: number;
+    textXAlignment?: Enum.TextXAlignment,
     backgroundTransparency?: number;
     name?: string;
     onMount?: (label: TextLabel) => void;
@@ -187,6 +188,7 @@ export function createTextLabel(options?: {
         zIndex = 2,
         textStrokeColor = Color3.fromRGB(0, 0, 0),
         textStrokeTransparency = 1,
+        textXAlignment = Enum.TextXAlignment.Center,
         backgroundTransparency = 1,
         name = "TextLabel",
         onMount,
@@ -211,6 +213,7 @@ export function createTextLabel(options?: {
             TextSize: textSize,
             TextStrokeColor3: textStrokeColor,
             TextStrokeTransparency: textStrokeTransparency,
+            TextXAlignment: textXAlignment,
         },
         onMount: (instance) => {
             if (instance.IsA("TextLabel") && onMount) {

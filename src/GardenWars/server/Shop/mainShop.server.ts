@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { playerCache } from "Common/shared/PlayerData/PlayerDataService";
+import { playerCache } from "Common/server/PlayerDataService";
 import { shopInfo, shopList, itemInfo } from "./mainShopPrices";
 
 const shopRemoteEvent = new Instance("RemoteEvent");

@@ -23,7 +23,6 @@ export class ShopGui extends MainGui {
     constructor(onItemSelected: (itemId: string) => void) {
         super();
         this.playerData = requestPlayerData.InvokeServer() as PlayerData;
-        print(this.playerData);
         this.selectionFrame = new SelectionFrame(this.screenGui, mode => this.setMode(mode));
         this.itemsFrame = new ItemsFrame(
             this.screenGui,
@@ -31,7 +30,7 @@ export class ShopGui extends MainGui {
             item => this.setSelectedItem(item, onItemSelected), // ✅ Callback from ItemsFrame
             this.playerData,
         );
-        this.itemInfoFrame = new ItemInfoFrame(this.screenGui, () => this.selectedItem, this.playerData);
+        this.itemInfoFrame = new ItemInfoFrame(this.screenGui, () => this.selectedItem, this.playerData, this);
         this.currencyFrame = new CurrencyFrame(this.screenGui, this.playerData);
     }
 
@@ -42,8 +41,16 @@ export class ShopGui extends MainGui {
         this.itemsFrame.setDisplayMode(this.mode, this.itemsMode);
         //this.itemsFrame.setMode(mode);
     }
+
+    public getMode(): "buy" | "sell" {
+        return this.mode;
+    }
+
+    public getPlayerData(): PlayerData {
+        return this.playerData;
+    }
+
     private setItemsMode(itemsMode: "seeds" | "crops") {
-        print("Setting Mode");
         this.itemsMode = itemsMode;
         this.itemsFrame.populateShopLayout(this.itemsMode);
         this.itemInfoFrame.updateItem(undefined, this.mode);
@@ -55,5 +62,25 @@ export class ShopGui extends MainGui {
         this.selectedItem = item;
         this.itemInfoFrame.updateItem(item, this.mode); // ✅ Update info panel
         onItemSelected(item.id);
+    }
+
+    public handlePurchase(quantity: number, currency: "credits" | "valor") {
+        if (quantity <= 0 || !this.selectedItem) return;
+
+        const purchaseFunction = ReplicatedStorage.WaitForChild("PurchaseItem") as RemoteFunction;
+
+        const updatedData = purchaseFunction.InvokeServer(
+            this.selectedItem.id,
+            quantity,
+            currency,
+            this.mode // "buy" or "sell"
+        ) as PlayerData;
+
+        if (updatedData) {
+            this.playerData = updatedData;
+            this.currencyFrame.update(this.playerData);
+            this.itemsFrame.updatePlayerData(this.playerData);
+            this.itemsFrame.populateMyItemsLayout(this.mode);
+        }
     }
 }

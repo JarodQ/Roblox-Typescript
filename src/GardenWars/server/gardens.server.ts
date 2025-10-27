@@ -1,5 +1,5 @@
 import { Players, Workspace, ReplicatedStorage } from "@rbxts/services";
-import { PlayerGarden, Garden } from "../shared/Garden";
+import { PlayerGarden } from "../shared/Garden";
 
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 

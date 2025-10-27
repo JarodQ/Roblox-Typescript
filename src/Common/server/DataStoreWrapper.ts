@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { DataStoreService } from "@rbxts/services";
-import { PlayerData, DEFAULT_PLAYER_DATA } from "./PlayerData";
-import { mergeDefaults } from "./playerDataUtils";
+import { PlayerData, DEFAULT_PLAYER_DATA } from "../shared/PlayerData/PlayerData";
+import { mergeDefaults } from "../shared/PlayerData/playerDataUtils";
 
 const RUNNING_IN_STUDIO = RunService.IsStudio();
 const store = DataStoreService.GetDataStore("PlayerData");
@@ -39,30 +39,7 @@ type KeyPathResult = {
     exists: false;
 };
 
-export function findPlayerDataKeyPath(key: string, playerData?: PlayerData): KeyPathResult {
-    function search(obj: unknown, currentPath: string[] = []): KeyPathResult {
-        if (typeOf(obj) !== "table") return { exists: false };
 
-        for (const [k, value] of pairs(obj as Record<string, unknown>)) {
-            const newPath = [...currentPath, k];
-
-            if (k === key) {
-                return {
-                    exists: true,
-                    path: newPath.join("."),
-                    value,
-                };
-            }
-
-            const result = search(value, newPath);
-            if (result.exists) return result;
-        }
-
-        return { exists: false };
-    }
-
-    return search(playerData ?? DEFAULT_PLAYER_DATA);
-}
 // Loads and returns player data or falls back to defaults
 export async function loadPlayerData(userId: number): Promise<PlayerData> {
     const key = getPlayerKey(userId);

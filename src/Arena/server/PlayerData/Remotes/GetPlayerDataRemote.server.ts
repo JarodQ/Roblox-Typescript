@@ -1,6 +1,6 @@
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { getLoadouts, getSortedLoadouts, getTrueFlags } from "Common/shared/PlayerData/playerDataUtils";
-import { loadPlayerData } from "Common/shared/PlayerData/DataStoreWrapper";
+import { loadPlayerData } from "Common/server/DataStoreWrapper";
 import { WeaponFlags } from "Common/shared/PlayerData/PlayerData";
 
 const getLoadoutDataRemote = new Instance("RemoteEvent");

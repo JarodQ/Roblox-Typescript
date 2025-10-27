@@ -48,6 +48,10 @@ export class ItemsFrame {
         this.populateShopLayout("seeds"); // Optional: rebuild layout
     }
 
+    public updatePlayerData(playerData: PlayerData) {
+        this.playerData = playerData;
+    }
+
     public setDisplayMode(mode: "buy" | "sell", category: "seeds" | "crops") {
 
         if (mode === "buy") {
@@ -58,7 +62,7 @@ export class ItemsFrame {
         } else if (mode === "sell") {
             print("Setting Sell mode")
 
-            this.populateMyItemsLayout();
+            this.populateMyItemsLayout(mode);
             if (this.modeLabel) this.modeLabel.Text = "My Items";
             if (this.seedsSelect) this.seedsSelect.Visible = false;
             if (this.cropsSelect) this.cropsSelect.Visible = false;
@@ -67,7 +71,6 @@ export class ItemsFrame {
 
     private getSellableItems(category: "seeds" | "crops"): ItemData[] {
         const result: ItemData[] = [];
-        print("PlayerData: ", this.playerData)
         if (!this.playerData) return result;
 
         const shopItems = getShopItemsForCategory(category);
@@ -76,10 +79,9 @@ export class ItemsFrame {
             let ownedQuantity = 0;
 
             for (const [_, entry] of pairs(this.playerData.items)) {
-
                 for (const [_, variant] of pairs(entry.variants)) {
+
                     if (variant.id === item.id) {
-                        print("Searching for item: ", item, " Item has quantity: ", variant.ownedQuantity);
 
                         ownedQuantity = variant.ownedQuantity;
                     }
@@ -120,8 +122,8 @@ export class ItemsFrame {
         }
     }
 
-    public populateMyItemsLayout() {
-        if (!this.contentFrame) {
+    public populateMyItemsLayout(mode: "buy" | "sell") {
+        if (!this.contentFrame || mode !== "sell") {
             print("ContentFrame not mounted yet!");
             return;
         }
@@ -138,26 +140,14 @@ export class ItemsFrame {
             ...this.getSellableItems("crops"),
         ];
 
+        // ✅ Sort alphabetically by item name
+        allSellableItems.sort((a, b) => a.name.lower() < b.name.lower());
+
         for (const item of allSellableItems) {
             const button = buildGuiComponent(this.createShopItemButton(item)) as TextButton | ImageButton;
             button.Parent = this.contentFrame;
         }
     }
-
-
-    // private getPlayerOwnedItems(): PlayerItemData[] {
-    //     const result: PlayerItemData[] = [];
-
-    //     for (const [_, entry] of pairs(this.playerData.items)) {
-    //         for (const [_, variant] of pairs(entry.variants)) {
-    //             if (variant && variant.ownedQuantity > 0) {
-    //                 result.push(variant); // ✅ variant is already PlayerItemData
-    //             }
-    //         }
-    //     }
-
-    //     return result;
-    // }
 
     private createShopItemButton(item: ItemData): GuiElementDescriptor<"ImageButton"> {
         const children = [
@@ -170,6 +160,7 @@ export class ItemsFrame {
                 position: UDim2.fromScale(0.5, 1),
                 anchorPoint: new Vector2(0.5, 1),
                 size: UDim2.fromScale(1, 0.3),
+                textStrokeTransparency: 0,
             }),
         ];
 
@@ -182,6 +173,7 @@ export class ItemsFrame {
                     anchorPoint: new Vector2(1, 0),
                     size: UDim2.fromScale(0.5, 0.3),
                     textColor: Color3.fromRGB(200, 200, 200),
+                    textStrokeTransparency: 0,
                 })
             );
         }
@@ -203,49 +195,6 @@ export class ItemsFrame {
             children,
         });
     }
-
-    // private createInventoryItemButton(item: PlayerItemData): GuiElementDescriptor<"ImageButton"> {
-    //     return createImageButton({
-    //         name: item.id,
-    //         image: item.image,
-    //         backgroundTransparency: 0.75,
-    //         size: UDim2.fromOffset(100, 100),
-    //         onClick: () => this.onItemSelect(item), // ✅ You may need to adapt this
-    //         onMount: (btn) => {
-    //             btn.MouseEnter.Connect(() => hoverGridEffect(btn));
-    //             btn.MouseLeave.Connect(() => unhoverGridEffect(btn));
-    //             btn.Activated.Connect(() => {
-    //                 clickGridEffect(btn, [btn]);
-    //                 this.onItemSelect(item);
-    //             });
-    //         },
-    //         children: [
-    //             createUICorner({ radius: 8 }),
-    //             createUIstroke({
-    //                 applyStrokeMode: Enum.ApplyStrokeMode.Border,
-    //                 thickness: 3,
-    //             }),
-    //             createTextLabel({
-    //                 text: item.name,
-    //                 textWrapped: true,
-    //                 textSize: 14,
-    //                 position: UDim2.fromScale(0.5, 1),
-    //                 anchorPoint: new Vector2(0.5, 1),
-    //                 size: UDim2.fromScale(1, 0.3),
-    //             }),
-    //             createTextLabel({
-    //                 text: `x${item.ownedQuantity}`,
-    //                 textSize: 12,
-    //                 position: UDim2.fromScale(1, 0),
-    //                 anchorPoint: new Vector2(1, 0),
-    //                 size: UDim2.fromScale(0.5, 0.3),
-    //                 textColor: Color3.fromRGB(200, 200, 200),
-    //                 // textXAlignment: Enum.TextXAlignment.Right,
-    //             }),
-    //         ],
-    //     });
-    // }
-
 
     private populateLayout(onModeChange: (mode: "seeds" | "crops") => void): GuiElementDescriptor<"Frame"> {
         const buttonInstances: TextButton[] = [];
@@ -325,7 +274,7 @@ export class ItemsFrame {
                             onClick: () => onModeChange("seeds"),
                             // onMount: (btn) => attachEffects(btn, "seeds"),
                             onMount: (label) => {
-                                attachEffects;
+                                attachEffects(label);
                                 this.seedsSelect = label;
                             },
                             //onMount: attachEffects,
@@ -363,7 +312,7 @@ export class ItemsFrame {
                             size: UDim2.fromScale(1, 0.982),
                             onClick: () => onModeChange("crops"),
                             onMount: (label) => {
-                                attachEffects;
+                                attachEffects(label);
                                 this.cropsSelect = label;
                             },
                             // onMount: (btn) => attachEffects(btn, "crops"),

@@ -3,11 +3,14 @@ import { Players } from "@rbxts/services";
 import * as PREFABS from "./PREFABS";
 // import * as InteractInterface from "./InteractInterface"
 import { Harvestable, moveInstance, tweenArcPop, InteractionRegistry } from "./InteractInterface";
-import { addPlantData, removePlantData, playerCache } from "Common/shared/PlayerData/PlayerDataService";
-import { loadPlayerData } from "Common/shared/PlayerData/DataStoreWrapper";
+// import { addPlantData, removePlantData, playerCache } from "Common/shared/PlayerData/PlayerDataService";
+import { loadPlayerData } from "Common/server/DataStoreWrapper";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
 
+const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
+const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
+const getPlayerData = ReplicatedStorage.WaitForChild("GetPlayerData") as RemoteFunction;
 
 
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;
@@ -24,7 +27,8 @@ Players.PlayerAdded.Connect(async (player) => {
 
     // Wait up to 2 seconds (20 attempts at 0.1s)
     while (!data && attempts < 20) {
-        data = playerCache.get(player.UserId);
+        // data = playerCache.get(player.UserId);
+        data = getPlayerData.InvokeServer(player)
         if (!data) {
             await Promise.delay(0.1);
             attempts++;
@@ -138,7 +142,7 @@ export class PlantMaster implements Harvestable {
 
         // Add plant to player data (serialized)
         if (!replanting) {
-            addPlantData(owner, {
+            addPlantEvent.FireServer({
                 plantId: this.seed.name,
                 position: serializeVector3(this.seedPosition),
                 rotation: serializeCFrame(new CFrame(this.seedOrientation)),
@@ -188,7 +192,8 @@ export class PlantMaster implements Harvestable {
         plantPrefab.Parent = Workspace;
         //plantPrefab.Size = new Vector3(1, 1, 1);
         this.plantPart?.Destroy();
-        removePlantData(player, this.seedPosition);
+        // removePlantData(player, this.seedPosition);
+        removePlantEvent.FireServer(this.seedPosition);
         tweenArcPop(player, this.seed.name, plantPosition, plantPrefab);
         this.grown = false
     }

@@ -1,7 +1,7 @@
 throw "This module is disabled temporarily";
 
-import { loadPlayerData, savePlayerData } from "Common/shared/PlayerData/DataStoreWrapper"; // Or wherever your functions live
-import { getPlayerKey } from "Common/shared/PlayerData/DataStoreWrapper";
+import { loadPlayerData, savePlayerData } from "Common/server/DataStoreWrapper"; // Or wherever your functions live
+import { getPlayerKey } from "Common/server/DataStoreWrapper";
 import { PlayerData, DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
 
 // Resetting the mock store before test

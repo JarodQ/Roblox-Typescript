@@ -1,9 +1,10 @@
 import { Players, Workspace, ReplicatedStorage, RunService } from "@rbxts/services";
 import { TweenService } from "@rbxts/services";
 import { DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
-import { findPlayerDataKeyPath } from "Common/shared/PlayerData/DataStoreWrapper";
-// import * as PlayerDataService from "Common/shared/PlayerData/PlayerDataService";
-import { lowercaseFirst, updateFlagByPath } from "Common/shared/PlayerData/PlayerDataService";
+import { findPlayerDataKeyPath } from "Common/shared/PlayerData/playerDataUtils";
+import { lowercaseFirst } from "Common/shared/PlayerData/playerDataUtils";
+
+const updateFlagByPathEvent = ReplicatedStorage.WaitForChild("UpdateFlagByPath") as RemoteEvent;
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
 export const interactionMap = new Map<Instance, Interactable>();
@@ -115,6 +116,7 @@ function rotateIndefinitely(instance: BasePart | Model, duration = 5): () => voi
 export async function pickup(player: Player, dataName: string, pickupModel: BasePart, range?: number, onPickupReached?: () => void) {
     if (!range) range = 10;
     const speed = 1;
+
     while (true) {
         const character = player.Character;
         if (character) {
@@ -126,18 +128,20 @@ export async function pickup(player: Player, dataName: string, pickupModel: Base
                         onPickupReached();
                         return;
                     }
+
                     while (pickupModel.Position.sub(humanoidRoot.Position).Magnitude > 3) {
                         const target = new CFrame(pickupModel.Position, humanoidRoot.Position)
                             .add((humanoidRoot.Position.sub(pickupModel.Position)).Unit.mul(0.5));
                         pickupModel.CFrame = pickupModel.CFrame.Lerp(target, speed);
                         await Promise.delay(0.01);
                     }
+
                     pickupModel.Destroy();
 
                     dataName = lowercaseFirst(dataName);
                     const keyInfo = findPlayerDataKeyPath(dataName);
                     if (keyInfo.exists) {
-                        updateFlagByPath(player, keyInfo.path, 5);
+                        updateFlagByPathEvent.FireServer(keyInfo.path, 5);
                     } else {
                         warn(`🚫 Invalid key: ${dataName}`);
                     }

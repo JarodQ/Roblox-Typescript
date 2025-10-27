@@ -96,7 +96,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 stackable: true,
             },
             weaponSeed: {
-                id: "carrot_weapon_seed",
+                id: "carrotShooter_seed",
                 name: "Carrot Shooter Seed",
                 description: "Plant to grow weaponized carrots.",
                 image: "rbxassetid://108601628629100",
