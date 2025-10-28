@@ -52,10 +52,21 @@ export class ShopGui extends MainGui {
 
     private setItemsMode(itemsMode: "seeds" | "crops") {
         this.itemsMode = itemsMode;
+        // if (itemsMode === "seeds") {
+        //     this.itemsFrame.seedsSelect!.ZIndex = 1;
+        //     this.itemsFrame.seedsSelect!.BackgroundColor3 = Color3.fromRGB(255, 200, 150)
+        //     this.itemsFrame.cropsSelect!.ZIndex = 1;
+        //     this.itemsFrame.cropsSelect!.BackgroundColor3 = Color3.fromRGB(150, 100, 85)
+        // }
+        // else if (itemsMode === "crops") {
+        //     this.itemsFrame.cropsSelect!.ZIndex = 1;
+        //     this.itemsFrame.cropsSelect!.BackgroundColor3 = Color3.fromRGB(255, 200, 150)
+        //     this.itemsFrame.seedsSelect!.ZIndex = 1;
+        //     this.itemsFrame.seedsSelect!.BackgroundColor3 = Color3.fromRGB(150, 100, 85)
+        // }
         this.itemsFrame.populateShopLayout(this.itemsMode);
         this.itemInfoFrame.updateItem(undefined, this.mode);
-        //this.selectedItem = itemsMode;
-        //this.itemInfoFrame.updateItem(itemsMode);
+
     }
 
     private setSelectedItem(item: ItemData, onItemSelected: (itemId: string) => void) {

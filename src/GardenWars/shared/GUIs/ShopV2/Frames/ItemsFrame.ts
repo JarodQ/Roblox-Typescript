@@ -28,8 +28,8 @@ export class ItemsFrame {
     private onItemSelect: (item: ItemData) => void;
     private modeLabel: TextLabel | undefined;
     private contentFrame: ScrollingFrame | undefined;
-    private seedsSelect: TextButton | undefined;
-    private cropsSelect: TextButton | undefined;
+    public seedsSelect: TextButton | undefined;
+    public cropsSelect: TextButton | undefined;
     private playerData: PlayerData | undefined;
 
 
@@ -152,7 +152,11 @@ export class ItemsFrame {
     private createShopItemButton(item: ItemData): GuiElementDescriptor<"ImageButton"> {
         const children = [
             createUICorner({ radius: 8 }),
-            createUIstroke({ applyStrokeMode: Enum.ApplyStrokeMode.Border, thickness: 3 }),
+            createUIstroke({
+                applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                thickness: 3,
+                color: Color3.fromRGB(130, 80, 0)
+            }),
             createTextLabel({
                 text: item.name,
                 textWrapped: true,
@@ -172,7 +176,7 @@ export class ItemsFrame {
                     position: UDim2.fromScale(1, 0),
                     anchorPoint: new Vector2(1, 0),
                     size: UDim2.fromScale(0.5, 0.3),
-                    textColor: Color3.fromRGB(200, 200, 200),
+                    textColor: Color3.fromRGB(255, 255, 255),
                     textStrokeTransparency: 0,
                 })
             );
@@ -181,12 +185,11 @@ export class ItemsFrame {
         return createImageButton({
             name: item.id,
             image: item.image,
-            backgroundTransparency: .75,
+            backgroundColor: Color3.fromRGB(255, 180, 60),
+            backgroundTransparency: 0,
             size: UDim2.fromOffset(100, 100),
             onClick: () => this.onItemSelect(item),
             onMount: (btn) => {
-                btn.MouseEnter.Connect(() => hoverGridEffect(btn));
-                btn.MouseLeave.Connect(() => unhoverGridEffect(btn));
                 btn.Activated.Connect(() => {
                     clickGridEffect(btn, [btn]);
                     this.onItemSelect(item);
@@ -214,14 +217,18 @@ export class ItemsFrame {
             type: "Frame",
             name: "ItemsFrame",
             properties: {
-                BackgroundColor3: new Color3(0, 0, 0),
-                BackgroundTransparency: 0.55,
+                BackgroundColor3: Color3.fromRGB(255, 200, 150),
+                BackgroundTransparency: 0,
                 Position: UDim2.fromScale(0.039, 0.194),
                 Size: UDim2.fromScale(0.254, 0.752),
             },
             onMount: () => this.initializeFrame(), // ✅ Wait until mounted
             children: [
                 createUICorner({ radius: 8 }),
+                createUIstroke({
+                    color: Color3.fromRGB(130, 80, 0),
+                    thickness: 3,
+                }),
                 createTextLabel({
                     name: "SelectedFrame",
                     anchorPoint: new Vector2(0.5, 0),
@@ -237,6 +244,7 @@ export class ItemsFrame {
                 createImageLabel({
                     name: "Separator",
                     imageId: "",
+                    backgroundColor: Color3.fromRGB(130, 80, 0),
                     backgroundTransparency: .5,
                     position: UDim2.fromScale(.018, 0.17),
                     size: UDim2.fromScale(0.954, 0.025),
@@ -260,17 +268,19 @@ export class ItemsFrame {
                 }),
                 createFrame({
                     name: "SeedsSelectFrame",
-                    position: UDim2.fromScale(0.024, -0.103),
-                    size: UDim2.fromScale(0.476, 0.103),
+                    position: UDim2.fromScale(0.028, -0.10),
+                    size: UDim2.fromScale(0.472, 0.10),
                     clipDescendants: true,
                     backgroundTransparency: 1,
                     children: [
                         createTextButton({
                             name: "SeedSelect",
                             anchorPoint: new Vector2(0.5, 0),
-                            position: UDim2.fromScale(0.5, 0.2),
-                            size: UDim2.fromScale(1, 0.982),
-                            backgroundTransparency: 0.2,
+                            position: UDim2.fromScale(0.504, 0.2),
+                            size: UDim2.fromScale(0.897, 0.982),
+                            backgroundColor: Color3.fromRGB(255, 200, 150),
+                            backgroundTransparency: 0,
+                            zIndex: 1,
                             onClick: () => onModeChange("seeds"),
                             // onMount: (btn) => attachEffects(btn, "seeds"),
                             onMount: (label) => {
@@ -280,6 +290,11 @@ export class ItemsFrame {
                             //onMount: attachEffects,
                             children: [
                                 createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                                 createImageLabel({
                                     name: "ImageLabel",
                                     position: UDim2.fromScale(0.0, -0.178),
@@ -300,8 +315,8 @@ export class ItemsFrame {
                 }),
                 createFrame({
                     name: "CropsSelectFrame",
-                    position: UDim2.fromScale(0.501, -0.103),
-                    size: UDim2.fromScale(0.476, 0.103),
+                    position: UDim2.fromScale(0.501, -0.1),
+                    size: UDim2.fromScale(0.472, 0.1),
                     clipDescendants: true,
                     backgroundTransparency: 1,
                     children: [
@@ -309,7 +324,10 @@ export class ItemsFrame {
                             name: "CropSelect",
                             anchorPoint: new Vector2(0.5, 0),
                             position: UDim2.fromScale(0.5, 0.2),
-                            size: UDim2.fromScale(1, 0.982),
+                            size: UDim2.fromScale(0.897, 0.982),
+                            backgroundColor: Color3.fromRGB(150, 100, 85),
+                            backgroundTransparency: 0,
+                            zIndex: 0,
                             onClick: () => onModeChange("crops"),
                             onMount: (label) => {
                                 attachEffects(label);
@@ -319,6 +337,11 @@ export class ItemsFrame {
                             //onMount: attachEffects,
                             children: [
                                 createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                                 createImageLabel({
                                     name: "ImageLabel",
                                     position: UDim2.fromScale(0.0, -0.178),

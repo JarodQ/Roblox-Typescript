@@ -175,13 +175,18 @@ export class ItemInfoFrame {
             type: "Frame",
             name: "ItemInfoFrame",
             properties: {
-                BackgroundColor3: new Color3(0, 0, 0),
-                BackgroundTransparency: 0.4,
+                BackgroundColor3: Color3.fromRGB(255, 200, 150),
+                BackgroundTransparency: 0,
                 Position: UDim2.fromScale(0.693, 0.194),
                 Size: UDim2.fromScale(0.254, 0.752),
             },
             children: [
                 createUICorner({ radius: 8 }),
+                createUIstroke({
+                    color: Color3.fromRGB(130, 80, 0),
+                    thickness: 3,
+                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                }),
                 createFrame({
                     name: "Info",
                     position: UDim2.fromScale(0, 0),
@@ -193,10 +198,15 @@ export class ItemInfoFrame {
                             anchorPoint: new Vector2(0.5, 0.5),
                             position: UDim2.fromScale(0.612, 0.356),
                             size: UDim2.fromScale(0.438, 0.157),
-                            backgroundTransparency: 0.3,
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             children: [
                                 createUICorner({ radius: 8 }),
-                                createUIstroke({ thickness: 1.8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                                 createTextLabel({
                                     name: "SelectedCredits",
                                     backgroundTransparency: 1,
@@ -218,10 +228,15 @@ export class ItemInfoFrame {
                             anchorPoint: new Vector2(0.5, 0.5),
                             position: UDim2.fromScale(0.612, 0.554),
                             size: UDim2.fromScale(0.438, 0.157),
-                            backgroundTransparency: 0.3,
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             children: [
                                 createUICorner({ radius: 8 }),
-                                createUIstroke({ thickness: 1.8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                                 createTextLabel({
                                     name: "SelectedValor",
                                     backgroundTransparency: 1,
@@ -241,17 +256,22 @@ export class ItemInfoFrame {
                         createFrame({
                             name: "Item",
                             anchorPoint: new Vector2(0.5, 0.5),
-                            backgroundColor: Color3.fromRGB(255, 255, 255),
-                            backgroundTransparency: 0.7,
+                            backgroundColor: Color3.fromRGB(255, 200, 150),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.192, 0.455),
                             size: UDim2.fromScale(0.28, 0.32),
                             children: [
                                 createUICorner({ radius: 8 }),
-                                createUIstroke({ applyStrokeMode: Enum.ApplyStrokeMode.Border, thickness: 6 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 6,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                                 createFrame({
                                     name: "ImageFrame",
                                     anchorPoint: new Vector2(0.5, 0.5),
-                                    backgroundTransparency: 0.3,
+                                    backgroundColor: Color3.fromRGB(255, 180, 60),
+                                    backgroundTransparency: 0,
                                     position: UDim2.fromScale(0.5, 0.5),
                                     size: UDim2.fromScale(0.889, 0.889),
                                     children: [
@@ -278,6 +298,7 @@ export class ItemInfoFrame {
                         createImageLabel({
                             name: "Separator",
                             imageId: "",
+                            backgroundColor: Color3.fromRGB(130, 80, 0),
                             backgroundTransparency: .5,
                             position: UDim2.fromScale(.018, 0.187),
                             size: UDim2.fromScale(0.954, 0.036),
@@ -288,6 +309,7 @@ export class ItemInfoFrame {
                         createImageLabel({
                             name: "Separator",
                             imageId: "",
+                            backgroundColor: Color3.fromRGB(130, 80, 0),
                             backgroundTransparency: .5,
                             position: UDim2.fromScale(.018, 0.907),
                             size: UDim2.fromScale(0.954, 0.036),
@@ -302,6 +324,8 @@ export class ItemInfoFrame {
                             size: UDim2.fromScale(0.925, 0.178),
                             font: Enum.Font.FredokaOne,
                             text: "Item Name",
+                            textColor: Color3.fromRGB(255, 255, 255),
+                            textStrokeTransparency: 0,
                             textSize: 40,
                             textScaled: true,
                             onMount: (label) => {
@@ -316,6 +340,8 @@ export class ItemInfoFrame {
                             size: UDim2.fromScale(0.9, 0.165),
                             font: Enum.Font.FredokaOne,
                             text: "Placeholder description",
+                            textColor: Color3.fromRGB(255, 255, 255),
+                            textStrokeTransparency: 0,
                             textSize: 21,
                             textScaled: true,
                             onMount: (label) => {
@@ -332,7 +358,8 @@ export class ItemInfoFrame {
                     children: [
                         createTextBox({
                             name: "QuantityBox",
-                            backgroundTransparency: 0.5,
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.037, 0.066),
                             size: UDim2.fromScale(0.683, 0.212),
                             font: Enum.Font.FredokaOne,
@@ -354,12 +381,19 @@ export class ItemInfoFrame {
                                 });
                             },
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "Clear",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.755, 0.064),
                             size: UDim2.fromScale(0.201, 0.212),
                             text: "CLEAR",
@@ -367,12 +401,19 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => clearQuantity(),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "Plus1",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.035, 0.324),
                             size: UDim2.fromScale(0.129, 0.169),
                             text: "+1",
@@ -380,12 +421,19 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => onAdjust(1),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "Plus5",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.197, 0.324),
                             size: UDim2.fromScale(0.129, 0.169),
                             text: "+5",
@@ -393,12 +441,19 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => onAdjust(5),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "Plus10",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.346, 0.324),
                             size: UDim2.fromScale(0.129, 0.169),
                             text: "+10",
@@ -406,12 +461,19 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => onAdjust(10),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "Plus20",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.507, 0.324),
                             size: UDim2.fromScale(0.129, 0.169),
                             text: "+20",
@@ -419,12 +481,19 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => onAdjust(20),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
                             name: "PlusMax",
                             anchorPoint: new Vector2(0, 0),
+                            backgroundColor: Color3.fromRGB(255, 180, 60),
+                            backgroundTransparency: 0,
                             position: UDim2.fromScale(0.672, 0.324),
                             size: UDim2.fromScale(0.155, 0.169),
                             text: "Max",
@@ -432,7 +501,12 @@ export class ItemInfoFrame {
                             textSize: 20,
                             onClick: () => onMax(),
                             children: [
-                                createUICorner({ radius: 8 })
+                                createUICorner({ radius: 8 }),
+                                createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
+                                    applyStrokeMode: Enum.ApplyStrokeMode.Border,
+                                }),
                             ]
                         }),
                         createTextButton({
@@ -447,8 +521,9 @@ export class ItemInfoFrame {
                             children: [
                                 createUICorner({ radius: 8 }),
                                 createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
                                     applyStrokeMode: Enum.ApplyStrokeMode.Border,
-                                    thickness: 1.5,
                                 }),
                                 createTextLabel({
                                     name: "Price",
@@ -478,8 +553,9 @@ export class ItemInfoFrame {
                             children: [
                                 createUICorner({ radius: 8 }),
                                 createUIstroke({
+                                    color: Color3.fromRGB(130, 80, 0),
+                                    thickness: 3,
                                     applyStrokeMode: Enum.ApplyStrokeMode.Border,
-                                    thickness: 1.5,
                                 }),
                                 createTextLabel({
                                     name: "Price",

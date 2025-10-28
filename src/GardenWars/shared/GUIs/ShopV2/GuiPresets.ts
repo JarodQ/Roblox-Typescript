@@ -78,6 +78,7 @@ export function createUIstroke(options?: {
         properties: {
             ApplyStrokeMode: applyStrokeMode,
             Thickness: thickness,
+            Color: color,
         },
         children,
     };
@@ -85,18 +86,20 @@ export function createUIstroke(options?: {
 
 export function createUIGradient(options?: {
     rotation?: number;
-    color1?: Color3;
-    color2?: Color3;
-    transparency1?: number;
-    transparency2?: number;
+    colorSequence?: [number, Color3][];
+    transparencySequence?: [number, number][];
     children?: GuiChildren;
 }): GuiElementDescriptor<"UIGradient"> {
     const {
         rotation = 90,
-        color1 = Color3.fromRGB(0, 0, 0),
-        color2 = Color3.fromRGB(0, 0, 0),
-        transparency1 = 0.5,
-        transparency2 = 1,
+        colorSequence = [
+            [0, Color3.fromRGB(0, 0, 0)],
+            [1, Color3.fromRGB(0, 0, 0)],
+        ],
+        transparencySequence = [
+            [0, 0],
+            [1, 0],
+        ],
         children,
     } = options ?? {};
 
@@ -105,8 +108,8 @@ export function createUIGradient(options?: {
         name: "UIGradient",
         properties: {
             Rotation: rotation,
-            Color: new ColorSequence(color1, color2),
-            Transparency: new NumberSequence(transparency1, transparency2),
+            Color: new ColorSequence(colorSequence.map(([t, c]) => new ColorSequenceKeypoint(t, c))),
+            Transparency: new NumberSequence(transparencySequence.map(([t, v]) => new NumberSequenceKeypoint(t, v))),
         },
         children,
     };
@@ -237,6 +240,7 @@ export function createTextButton(options?: {
     textSize?: number;
     textStrokeColor?: Color3;
     textStrokeTransparency?: number;
+    zIndex?: number;
     onClick?: () => void;
     onHover?: (button: TextButton) => void;
     onUnhover?: (button: TextButton) => void;
@@ -258,6 +262,7 @@ export function createTextButton(options?: {
         textSize = 20,
         textStrokeColor = Color3.fromRGB(0, 0, 0),
         textStrokeTransparency = 0,
+        zIndex = 1,
         onClick,
         onHover,
         onUnhover,
@@ -281,6 +286,7 @@ export function createTextButton(options?: {
             TextColor3: textColor,
             TextSize: textSize,
             TextStrokeTransparency: textStrokeTransparency,
+            ZIndex: zIndex,
         },
         onClick,
         onMount: (instance: Instance) => {

@@ -1,7 +1,7 @@
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { buildGuiComponent, GuiElementDescriptor } from "./buildGuiComponent";
-import { createFrame, createUICorner, createTextLabel } from "../GuiPresets";
+import { createFrame, createUICorner, createTextLabel, createUIstroke, createImageLabel, createUIGradient } from "../GuiPresets";
 
 
 
@@ -23,10 +23,10 @@ export class CurrencyFrame {
         const valor = resolvePlayerData(playerData, "valor");
 
         if (this.playerCreditAmount) {
-            this.playerCreditAmount.Text = `Credits: ${credits.exists ? credits.value : "N/A"}`;
+            this.playerCreditAmount.Text = `${credits.exists ? credits.value : "-"}`;
         }
         if (this.playerValorAmount) {
-            this.playerValorAmount.Text = `Valor: ${valor.exists ? valor.value : "N/A"}`;
+            this.playerValorAmount.Text = `${valor.exists ? valor.value : "-"}`;
         }
     }
 
@@ -41,19 +41,39 @@ export class CurrencyFrame {
             },
             children: [
                 createFrame({
-                    name: "CropCreditsFrame",
-                    position: UDim2.fromScale(0, 0),
-                    size: UDim2.fromScale(0.455, 0.873),
+                    name: "CreditsFrame",
+                    backgroundColor: Color3.fromRGB(255, 255, 255),
+                    backgroundTransparency: 0,
+                    position: UDim2.fromScale(0.073, 0.158),
+                    size: UDim2.fromScale(0.403, 0.462),
                     children: [
-                        createUICorner({ radius: 8 }),
+                        createUICorner({ radius: 8000 }),
+                        createUIstroke({
+                            color: Color3.fromRGB(200, 150, 0),
+                            thickness: 2.4,
+                        }),
+                        createUIGradient({
+                            colorSequence: [
+                                [0, Color3.fromRGB(255, 255, 0)],
+                                [.5, Color3.fromRGB(255, 200, 0)],
+                                [1, Color3.fromRGB(120, 94, 0)]
+                            ]
+                        }),
+                        createImageLabel({
+                            name: "CreditsEmblem",
+                            backgroundTransparency: 1,
+                            position: UDim2.fromScale(-0.176, -0.363),
+                            size: UDim2.fromScale(0.4, 1.724),
+                            imageId: "rbxassetid://134465210991338",
+                        }),
                         createTextLabel({
                             name: "PlayerCreditsLabel",
                             backgroundTransparency: 1,
                             position: UDim2.fromScale(0, 0),
-                            size: UDim2.fromScale(1, 1),
+                            size: UDim2.fromScale(0.922, 1),
                             text: "-",
-                            textColor: Color3.fromRGB(0, 200, 0),
-                            textSize: 20,
+                            textColor: Color3.fromRGB(255, 255, 255),
+                            textSize: 22,
                             textStrokeTransparency: 0,
                             textXAlignment: Enum.TextXAlignment.Right,
                             onMount: (label) => {
@@ -64,18 +84,38 @@ export class CurrencyFrame {
                 }),
                 createFrame({
                     name: "ValorVinesFrame",
-                    position: UDim2.fromScale(0.547, 0),
-                    size: UDim2.fromScale(0.455, 0.873),
+                    backgroundColor: Color3.fromRGB(255, 255, 255),
+                    backgroundTransparency: 0,
+                    position: UDim2.fromScale(0.549, 0.191),
+                    size: UDim2.fromScale(0.403, 0.462),
                     children: [
-                        createUICorner({ radius: 8 }),
+                        createUICorner({ radius: 8000 }),
+                        createUIstroke({
+                            color: Color3.fromRGB(150, 0, 200),
+                            thickness: 2.4,
+                        }),
+                        createUIGradient({
+                            colorSequence: [
+                                [0, Color3.fromRGB(255, 0, 255)],
+                                [.5, Color3.fromRGB(200, 0, 255)],
+                                [1, Color3.fromRGB(67, 0, 85)]
+                            ]
+                        }),
+                        createImageLabel({
+                            name: "CreditsEmblem",
+                            backgroundTransparency: 1,
+                            position: UDim2.fromScale(-0.166, -0.45),
+                            size: UDim2.fromScale(0.4, 1.724),
+                            imageId: "rbxassetid://84652718802743",
+                        }),
                         createTextLabel({
                             name: "PlayerValorLabel",
                             backgroundTransparency: 1,
                             position: UDim2.fromScale(0, 0),
-                            size: UDim2.fromScale(1, 1),
+                            size: UDim2.fromScale(0.922, 1),
                             text: "-",
-                            textColor: Color3.fromRGB(255, 200, 0),
-                            textSize: 20,
+                            textColor: Color3.fromRGB(255, 255, 255),
+                            textSize: 22,
                             textStrokeTransparency: 0,
                             textXAlignment: Enum.TextXAlignment.Right,
                             onMount: (label) => {

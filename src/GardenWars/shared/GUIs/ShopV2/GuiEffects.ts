@@ -36,7 +36,7 @@ export function hoverGridEffect(button: TextButton | ImageButton) {
     if (button === selectedGridButton) return;
 
     const tween = TweenService.Create(button, new TweenInfo(0.2), {
-        BackgroundTransparency: 0.5,
+        BackgroundColor3: Color3.fromRGB(180, 110, 0)
     });
     tween.Play();
 }
@@ -45,7 +45,7 @@ export function unhoverGridEffect(button: TextButton | ImageButton) {
     if (button === selectedGridButton) return;
 
     const tween = TweenService.Create(button, new TweenInfo(0.2), {
-        BackgroundTransparency: 0.7,
+        BackgroundColor3: Color3.fromRGB(255, 180, 60)
     });
     tween.Play();
 }
@@ -57,7 +57,7 @@ export function clickGridEffect(
     // Reset previously selected button if it exists and isn't the same
     if (selectedGridButton && selectedGridButton !== button) {
         const reset = TweenService.Create(selectedGridButton, new TweenInfo(0.2), {
-            BackgroundTransparency: 0.7,
+            BackgroundColor3: Color3.fromRGB(255, 180, 60)
         });
         reset.Play();
     }
@@ -67,33 +67,48 @@ export function clickGridEffect(
 
     // Highlight the clicked button
     const highlight = TweenService.Create(button, new TweenInfo(0.2), {
-        BackgroundTransparency: 0.2,
+        BackgroundColor3: Color3.fromRGB(180, 110, 0)
     });
     highlight.Play();
 
     // Dim all other buttons (optional, if you want to emphasize the selected one)
-    for (const other of allButtons) {
-        if (other !== button) {
-            const dim = TweenService.Create(other, new TweenInfo(0.2), {
-                BackgroundTransparency: 0.8,
-            });
-            dim.Play();
-        }
-    }
+    // for (const other of allButtons) {
+    //     if (other !== button) {
+    //         const dim = TweenService.Create(other, new TweenInfo(0.2), {
+    //             BackgroundTransparency: 0.8,
+    //         });
+    //         dim.Play();
+    //     }
+    // }
 }
 
-export function clickEffect(button: TextButton | ImageButton, allButtons: (TextButton | ImageButton)[]) {
-    const fade = TweenService.Create(button, new TweenInfo(0.2), {
-        BackgroundTransparency: 0.2,
-    });
-    fade.Play();
+// export function clickEffect(button: TextButton | ImageButton, allButtons: (TextButton | ImageButton)[]) {
+//     const fade = TweenService.Create(button, new TweenInfo(0.2), {
+//         BackgroundTransparency: 0.2,
+//     });
+//     fade.Play();
 
+//     for (const other of allButtons) {
+//         if (other !== button) {
+//             const dim = TweenService.Create(other, new TweenInfo(0.2), {
+//                 BackgroundTransparency: 0.8,
+//             });
+//             dim.Play();
+//         }
+//     }
+// }
+
+export function clickEffect(
+    button: TextButton | ImageButton,
+    allButtons: (TextButton | ImageButton)[],
+) {
+    button.ZIndex = 1;
     for (const other of allButtons) {
-        if (other !== button) {
-            const dim = TweenService.Create(other, new TweenInfo(0.2), {
-                BackgroundTransparency: 0.8,
-            });
-            dim.Play();
+        if (other === button) {
+            other.BackgroundColor3 = Color3.fromRGB(255, 200, 150); // Highlighted
+        } else {
+            other.ZIndex = 0;
+            other.BackgroundColor3 = Color3.fromRGB(150, 100, 85); // Dimmed
         }
     }
 }
