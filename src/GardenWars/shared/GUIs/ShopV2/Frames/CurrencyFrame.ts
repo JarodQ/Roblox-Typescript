@@ -1,7 +1,7 @@
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { buildGuiComponent, GuiElementDescriptor } from "./buildGuiComponent";
-import { createFrame, createUICorner, createTextLabel, createUIstroke, createImageLabel, createUIGradient } from "../GuiPresets";
+import { createFrame, createUICorner, createTextLabel, createUIstroke, createImageLabel, createUIGradient } from "../../../../../Common/shared/Guis/Util/GuiPresets";
 
 
 

@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { MainGui } from "../MainGui";
+import { MainGui } from "../../../../Common/shared/Guis/MainGui";
 import { ItemData } from "Common/shared/ItemData";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { SelectionFrame } from "./Frames/SelectionFrame";
@@ -22,6 +22,7 @@ export class ShopGui extends MainGui {
 
     constructor(onItemSelected: (itemId: string) => void) {
         super();
+        this.screenGui.Name = "ShopGuiVersionX";
         this.playerData = requestPlayerData.InvokeServer() as PlayerData;
         this.selectionFrame = new SelectionFrame(this.screenGui, mode => this.setMode(mode));
         this.itemsFrame = new ItemsFrame(

@@ -8,8 +8,8 @@ import {
     createTextButton,
     createTextBox,
     createImageLabel,
-} from "../GuiPresets";
-import { hoverEffect, unhoverEffect, clickEffect } from "../GuiEffects";
+} from "../../../../../Common/shared/Guis/Util/GuiPresets";
+import { hoverEffect, unhoverEffect, clickEffect } from "../../../../../Common/shared/Guis/Util/GuiEffects";
 import { ShopGui } from "../ShopGui";
 import { ItemData } from "Common/shared/ItemData";
 import { resolvePlayerData } from "Common/shared/PlayerData/playerDataUtils";

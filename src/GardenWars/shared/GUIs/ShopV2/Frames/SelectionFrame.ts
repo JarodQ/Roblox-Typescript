@@ -6,8 +6,8 @@ import {
     createImageLabel,
     createTextLabel,
     createTextButton
-} from "../GuiPresets";
-import { hoverEffect, unhoverEffect, clickEffect } from "../GuiEffects";
+} from "../../../../../Common/shared/Guis/Util/GuiPresets";
+import { hoverEffect, unhoverEffect, clickEffect } from "../../../../../Common/shared/Guis/Util/GuiEffects";
 
 export class SelectionFrame {
     private frame: Frame;

@@ -1,5 +1,5 @@
 // GuiPresets.ts
-import { GuiElementDescriptor } from "./Frames/buildGuiComponent";
+import { GuiElementDescriptor } from "../../../../GardenWars/shared/GUIs/ShopV2/Frames/buildGuiComponent";
 import { hoverEffect, unhoverEffect, clickEffect, registerOriginalState } from "./GuiEffects";
 type GuiChildren = GuiElementDescriptor<keyof CreatableInstances>[];
 
@@ -15,6 +15,7 @@ export function createFrame(options?: {
     clipDescendants?: boolean;
     zIndex?: number;
     children?: GuiChildren;
+    onMount?: (label: Frame) => void;
 }): GuiElementDescriptor<"Frame"> {
     const {
         name = "Frame",
@@ -27,6 +28,7 @@ export function createFrame(options?: {
         clipDescendants = false,
         zIndex = 1,
         children,
+        onMount,
     } = options ?? {};
 
     return {
@@ -41,6 +43,11 @@ export function createFrame(options?: {
             BorderSizePixel: borderSizePixel,
             ClipsDescendants: clipDescendants,
             ZIndex: zIndex,
+        },
+        onMount: (instance) => {
+            if (instance.IsA("Frame") && onMount) {
+                onMount(instance);
+            }
         },
         children,
     };
@@ -320,6 +327,7 @@ export function createTextBox(options?: {
     placeholderText?: string;
     textStrokeColor?: Color3;
     textStrokeTransparency?: number;
+    textXAlignment?: Enum.TextXAlignment;
     clearTextOnFocus?: boolean;
     onFocusLost?: (textbox: TextBox, enterPressed: boolean) => void;
     onMount?: (textbox: TextBox) => void;
@@ -340,6 +348,7 @@ export function createTextBox(options?: {
         placeholderText = "",
         textStrokeColor = Color3.fromRGB(0, 0, 0),
         textStrokeTransparency = 0,
+        textXAlignment = Enum.TextXAlignment.Center,
         clearTextOnFocus = false,
         onFocusLost,
         onMount,
@@ -363,6 +372,7 @@ export function createTextBox(options?: {
             PlaceholderText: placeholderText,
             TextStrokeColor3: textStrokeColor,
             TextStrokeTransparency: textStrokeTransparency,
+            TextXAlignment: textXAlignment,
             ClearTextOnFocus: clearTextOnFocus,
         },
         onMount: (instance: Instance) => {
@@ -460,6 +470,7 @@ export function createScrollingFrame(options?: {
     borderSizePixel?: number;
     canvasSize?: UDim2;
     automaticCanvasSize?: Enum.AutomaticSize;
+    scrollBarImageColor?: Color3,
     scrollingDirection?: Enum.ScrollingDirection;
     scrollBarThickness?: number;
     zIndex?: number;
@@ -478,6 +489,7 @@ export function createScrollingFrame(options?: {
         automaticCanvasSize = Enum.AutomaticSize.Y,
         scrollingDirection = Enum.ScrollingDirection.Y,
         scrollBarThickness = 6,
+        scrollBarImageColor = Color3.fromRGB(0, 0, 0),
         zIndex = 1,
         onMount,
         children,
@@ -497,6 +509,7 @@ export function createScrollingFrame(options?: {
             AutomaticCanvasSize: automaticCanvasSize,
             ScrollingDirection: scrollingDirection,
             ScrollBarThickness: scrollBarThickness,
+            ScrollBarImageColor3: scrollBarImageColor,
             ZIndex: zIndex,
         },
         onMount: (instance: Instance) => {

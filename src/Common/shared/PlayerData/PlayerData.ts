@@ -7,7 +7,7 @@ export interface WeaponFlags {
     heliosLaser: boolean;
 }
 
-interface ItemEntry {
+export interface ItemEntry {
     name: string;
     description: string;
     variants: {
@@ -99,7 +99,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "carrotShooter_seed",
                 name: "Carrot Shooter Seed",
                 description: "Plant to grow weaponized carrots.",
-                image: "rbxassetid://108601628629100",
+                image: "rbxassetid://111369018411705",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -124,7 +124,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "blueberry_seed",
                 name: "Blueberry Seed",
                 description: "Plant to grow blueberry bushes.",
-                image: "rbxassetid://108601628629101",
+                image: "rbxassetid://139245603700947",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -133,7 +133,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "blueberryBlaster_seed",
                 name: "Blueberry Blaster Seed",
                 description: "Plant to grow weaponized blueberries.",
-                image: "rbxassetid://108601628629100",
+                image: "rbxassetid://129472140650048",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -142,7 +142,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "blueberry_crop",
                 name: "Blueberries",
                 description: "Freshly harvested blueberries, great for selling or crafting potions.",
-                image: "rbxassetid://108601628629102",
+                image: "rbxassetid://139245603700947",
                 category: "crops",
                 ownedQuantity: 0,
                 stackable: true,
@@ -157,7 +157,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "corn_seed",
                 name: "Corn Seed",
                 description: "Plant to grow tall corn stalks.",
-                image: "rbxassetid://108601628629103",
+                image: "rbxassetid://76605413606941",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -167,7 +167,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "maizeMauler_seed",
                 name: "Maize Mauler Seed",
                 description: "Plant to grow weaponized corn.",
-                image: "rbxassetid://108601628629100",
+                image: "rbxassetid://140686676686152",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -176,7 +176,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "corn_crop",
                 name: "Corn",
                 description: "Harvested corn, great for selling or crafting food items.",
-                image: "rbxassetid://108601628629104",
+                image: "rbxassetid://76605413606941",
                 category: "crops",
                 ownedQuantity: 0,
                 stackable: true,
@@ -192,7 +192,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "sunflower_seed",
                 name: "Sunflower Seed",
                 description: "Plant to grow tall, radiant sunflowers.",
-                image: "rbxassetid://108601628629105",
+                image: "rbxassetid://105812995170847",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -202,7 +202,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "heliosLaser_seed",
                 name: "Helios Laser Seed",
                 description: "Plant to grow weaponized sunflower.",
-                image: "rbxassetid://108601628629100",
+                image: "rbxassetid://133937211445933",
                 category: "seeds",
                 ownedQuantity: 0,
                 stackable: true,
@@ -211,7 +211,7 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 id: "sunflower_crop",
                 name: "Sunflower",
                 description: "Harvested sunflower, prized for its vibrant petals and trade value.",
-                image: "rbxassetid://108601628629106",
+                image: "rbxassetid://105812995170847",
                 category: "crops",
                 ownedQuantity: 0,
                 stackable: true,

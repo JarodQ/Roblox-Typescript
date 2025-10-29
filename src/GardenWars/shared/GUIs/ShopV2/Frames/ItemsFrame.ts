@@ -13,7 +13,7 @@ import {
     createUIPadding,
     createUIstroke,
     createImageLabel
-} from "../GuiPresets";
+} from "../../../../../Common/shared/Guis/Util/GuiPresets";
 import {
     hoverEffect,
     unhoverEffect,
@@ -21,7 +21,7 @@ import {
     unhoverGridEffect,
     clickEffect,
     clickGridEffect,
-} from "../GuiEffects";
+} from "../../../../../Common/shared/Guis/Util/GuiEffects";
 
 export class ItemsFrame {
     private frame: Frame;
