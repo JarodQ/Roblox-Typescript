@@ -26,9 +26,13 @@ export class InventoryDisplay {
     private playerData: PlayerData;
     private itemGrid?: ScrollingFrame;
     private itemFilter: "all" | "seeds" | "crops" | "weapons" = "all";
+    private searchBoxRef?: TextBox;
+    private searchImageRef?: ImageButton;
+    private isSearchActive: boolean;
     private hotbar?: Frame;
     private hotbarFrames: TextButton[] = [];
     private hotbarItems: (PlayerItemData | undefined)[] = [];
+    private draggedHotbarIndex: number | undefined = undefined;
     private isDragging: boolean = false;
     private draggedItem?: PlayerItemData;
     private dragIcon?: ImageLabel | Frame;
@@ -44,14 +48,9 @@ export class InventoryDisplay {
     ) {
         this.playerData = playerData;
         this.getPlayerData = getPlayerData;
-        const layout = this.populateLayout();
+        const layout = this.populateLayout(() => parent.Destroy());
         this.frame = buildGuiComponent(layout, parent) as Frame;
-        // game.GetService("UserInputService").InputBegan.Connect((input, gameProcessed) => {
-        //     if (gameProcessed || input.UserInputType !== Enum.UserInputType.MouseButton1) return;
-
-        //     const mousePos = game.GetService("UserInputService").GetMouseLocation();
-        //     this.tryPlaceDraggedItem(mousePos);
-        // });
+        this.isSearchActive = false;
         game.GetService("UserInputService").InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed || input.UserInputType !== Enum.UserInputType.MouseButton1) return;
 
@@ -60,9 +59,9 @@ export class InventoryDisplay {
         });
     }
 
-    public setDragging(item: PlayerItemData) {
+    public setDragging(item: PlayerItemData, hotbarSwap: boolean = false) {
         // ✅ Return previously dragged item if it wasn't placed
-        if (this.draggedItem) {
+        if (this.draggedItem && !hotbarSwap) {
             this.addItemToInventory(this.draggedItem);
         }
 
@@ -78,7 +77,9 @@ export class InventoryDisplay {
         this.dragMoveConnection = undefined;
     }
 
-    private populateLayout(): GuiElementDescriptor<"Frame"> {
+    private populateLayout(
+        onClose: () => void,
+    ): GuiElementDescriptor<"Frame"> {
         const buttonInstances: TextButton[] = [];
 
         function invClickEffect(
@@ -121,8 +122,8 @@ export class InventoryDisplay {
                     name: "SearchFrame",
                     backgroundColor: Color3.fromRGB(255, 200, 150),
                     backgroundTransparency: 0,
-                    position: UDim2.fromScale(0.702, 0.065),
-                    size: UDim2.fromScale(0.235, 0.057),
+                    position: UDim2.fromScale(0.66, 0.065),
+                    size: UDim2.fromScale(0.28, 0.057),//0.235
                     children: [
                         createUICorner({ radius: 8 }),
                         createUIstroke({
@@ -135,22 +136,53 @@ export class InventoryDisplay {
                             position: UDim2.fromScale(0.239, 0),
                             size: UDim2.fromScale(0.755, 1),
                             placeholderText: "Search",
-                            textSize: 14,
+                            textSize: 25,
                             textStrokeTransparency: 0,
                             textXAlignment: Enum.TextXAlignment.Right,
                             onMount: (textBox) => {
+                                this.searchBoxRef = textBox;
+
                                 textBox.GetPropertyChangedSignal("Text").Connect(() => {
-                                    const searchText = textBox.Text;
-                                    const filteredItems = this.getFilteredPlayerItems("all", searchText);
+                                    const searchText: string = textBox.Text;
+                                    this.updateItems(this.getFilteredPlayerItems(this.itemFilter, searchText));
+                                    if (this.searchBoxRef && this.searchImageRef) {
+                                        if (searchText !== "" && !this.isSearchActive) {
+                                            this.isSearchActive = true;
+                                            this.searchImageRef.Image = "rbxassetid://87686940256852"; // 'X' icon
+                                        } else if (searchText === "" && this.isSearchActive) {
+                                            this.isSearchActive = false;
+                                            this.searchImageRef.Image = "rbxassetid://99546542595933"; // Magnifying glass
+                                        }
+                                    }
                                 });
                             },
                         }),
-                        createImageLabel({
+                        createImageButton({
                             name: "SearchImage",
+                            anchorPoint: new Vector2(0, 0),
                             position: UDim2.fromScale(0.038, -0.043),
                             size: UDim2.fromScale(0.157, 1.087),
-                            imageId: "rbxassetid://87686940256852",
+                            image: "rbxassetid://99546542595933",
+                            onMount: (imageButton) => {
+                                this.searchImageRef = imageButton;
+                                imageButton.MouseButton1Click.Connect(() => {
+                                    if (this.searchBoxRef && this.searchImageRef) {
+
+                                        if (this.isSearchActive) {
+                                            // Clear search
+                                            this.searchBoxRef.Text = "";
+                                            this.isSearchActive = false;
+                                            this.searchImageRef.Image = "rbxassetid://99546542595933";
+                                            this.updateItems(this.getFilteredPlayerItems(this.itemFilter, ""));
+                                        } else {
+                                            // Focus search box
+                                            this.searchBoxRef.CaptureFocus();
+                                        }
+                                    }
+                                });
+                            },
                         }),
+
                     ],
                 }),
                 createTextButton({
@@ -281,6 +313,38 @@ export class InventoryDisplay {
                         ...this.createHotbarLayout(),
                     ],
                 }),
+                createTextButton({
+                    name: "Close",
+                    position: UDim2.fromScale(0.937, -0.099),
+                    size: UDim2.fromScale(0.102, 0.152),
+                    anchorPoint: new Vector2(0, 0),
+                    backgroundColor: Color3.fromRGB(255, 200, 150),
+                    backgroundTransparency: 0,
+                    text: "",
+                    onClick: () => onClose(),
+                    onMount: attachEffects,
+                    children: [
+                        createUICorner({ radius: 8000 }),
+                        createUIstroke({
+                            color: Color3.fromRGB(130, 80, 0),
+                            thickness: 3,
+                            applyStrokeMode: Enum.ApplyStrokeMode.Border
+                        }),
+                        createImageLabel({
+                            imageId: "rbxassetid://87686940256852",
+                            anchorPoint: new Vector2(0.5, 0),
+                            position: UDim2.fromScale(0.491, -0.247),
+                            size: UDim2.fromScale(1.176, 1.176),
+                        }),
+                        createTextLabel({
+                            text: "Close",
+                            textStrokeTransparency: 0,
+                            anchorPoint: new Vector2(0, 1),
+                            position: UDim2.fromScale(0, 1)
+                        }),
+
+                    ],
+                }),
             ],
         };
     }
@@ -302,23 +366,47 @@ export class InventoryDisplay {
 
                         // Track item in slot
                         this.hotbarItems[i] = undefined;
-
                         slot.MouseButton1Click.Connect(() => {
+                            const slotItem = this.hotbarItems[i];
+
                             if (this.draggedItem) {
                                 const previousItem = this.hotbarItems[i];
                                 this.hotbarItems[i] = this.draggedItem;
                                 this.renderItemInHotbarSlot(slot, this.draggedItem);
 
-                                if (
-                                    previousItem &&
-                                    previousItem.id !== this.draggedItem.id
-                                ) {
-                                    this.addItemToInventory(previousItem);
+                                if (previousItem && previousItem.id !== this.draggedItem.id) {
+                                    if (this.draggedHotbarIndex !== undefined) {
+                                        // ✅ Swapping between hotbar slots
+                                        this.hotbarItems[this.draggedHotbarIndex] = previousItem;
+                                        this.renderItemInHotbarSlot(this.hotbarFrames[this.draggedHotbarIndex], previousItem);
+                                        this.cancelDragAndReturnItem();
+                                    } else {
+                                        // ✅ Dragged from inventory — start dragging displaced item
+                                        this.setDragging(previousItem, true);
+                                    }
+                                } else {
+                                    // ✅ No displaced item or same item — just finish drag
+                                    this.cancelDragAndReturnItem();
                                 }
 
-                                this.cancelDragAndReturnItem();
+                                this.draggedHotbarIndex = undefined;
+                            } else if (slotItem) {
+                                // ✅ Start dragging from this hotbar slot
+                                this.hotbarItems[i] = undefined;
+                                this.draggedHotbarIndex = i;
+
+                                // Clear visuals
+                                slot.GetChildren().forEach(child => {
+                                    slot.BackgroundColor3 = Color3.fromRGB(255, 200, 150);
+                                    if (child.IsA("ImageLabel") || child.IsA("TextLabel")) {
+                                        child.Destroy();
+                                    }
+                                });
+
+                                this.setDragging(slotItem, true);
                             }
                         });
+
                     },
                     children: [
                         createUICorner({ radius: 8 }),
@@ -524,7 +612,7 @@ export class InventoryDisplay {
 
         const stroke = new Instance("UIStroke");
         stroke.Color = Color3.fromRGB(130, 80, 0); // Warm brown tone
-        stroke.Thickness = 2;
+        stroke.Thickness = 3;
         stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
         stroke.Parent = this.dragIcon;
 
@@ -671,9 +759,10 @@ export class InventoryDisplay {
     //     this.dragMoveConnection = undefined;
     // }
 
-    private renderItemInHotbarSlot(slot: TextButton, item: PlayerItemData) {
+    private renderItemInHotbarSlot(slot: TextButton, item: PlayerItemData | undefined) {
         // slot.ClearAllChildren();
         // Clear visuals from slot
+        if (!item) return;
         for (const child of slot.GetChildren()) {
             if (child.IsA("ImageLabel") || child.IsA("TextLabel")) {
                 child.Destroy();
