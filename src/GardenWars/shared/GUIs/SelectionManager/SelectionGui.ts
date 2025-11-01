@@ -12,8 +12,10 @@ import {
     createUIstroke,
     createImageLabel,
     createTextLabel,
-    createTextButton
+    createTextButton,
+    createImageButton
 } from "../../../../Common/shared/Guis/Util/GuiPresets";
+import { hoverEffect, unhoverEffect, clickEffect, playSound } from "Common/shared/Guis/Util/GuiEffects";
 
 export class SelectionManager extends MainGui {
     private selectionFrame: Frame;
@@ -32,21 +34,75 @@ export class SelectionManager extends MainGui {
     }
 
     private populateLayout(): GuiElementDescriptor<"Frame"> {
+        const buttonInstances: (TextButton | ImageButton)[] = [];
+
+        const attachEffects = (button: TextButton | ImageButton) => {
+            buttonInstances.push(button);
+            button.MouseEnter.Connect(() => hoverEffect(button));
+            button.MouseLeave.Connect(() => unhoverEffect(button));
+            button.Activated.Connect(() => clickEffect(button, buttonInstances));
+        };
+
+
         return {
             type: "Frame",
             name: "SelectionFrame",
             properties: {
                 AnchorPoint: new Vector2(0, 0.5),
                 BackgroundColor3: Color3.fromRGB(255, 200, 150),
-                BackgroundTransparency: 0,
-                Position: UDim2.fromScale(0.006, 0.5),
-                Size: UDim2.fromScale(0.053, 0.38),
+                BackgroundTransparency: 1,
+                Position: UDim2.fromScale(0.006, 0.481),
+                Size: UDim2.fromScale(0.057, 0.305),
             },
             children: [
-                createUICorner({ radius: 8 }),
-                createUIstroke({
-                    color: Color3.fromRGB(130, 80, 0),
-                    thickness: 3,
+                // createUICorner({ radius: 8 }),
+                // createUIstroke({
+                //     color: Color3.fromRGB(130, 80, 0),
+                //     thickness: 3,
+                // }),
+                createImageButton({
+                    name: "Shop",
+                    position: UDim2.fromScale(0.5, 0.165),
+                    size: UDim2.fromScale(1, 0.333),
+                    image: "rbxassetid://102667665656517",
+                    onMount: (button) => {
+                        button.MouseEnter.Connect(() => hoverEffect(button));
+                        button.MouseLeave.Connect(() => unhoverEffect(button));
+                        button.Activated.Connect(() => {
+                            playSound("rbxassetid://96721760461704");
+                            clickEffect(button, buttonInstances);
+                        });
+                    }
+                }),
+                createImageButton({
+                    name: "Garden",
+                    position: UDim2.fromScale(0.5, .5),
+                    size: UDim2.fromScale(1, 0.333),
+                    image: "rbxassetid://116628885994374",
+                    onMount: (button) => {
+                        button.MouseEnter.Connect(() => hoverEffect(button));
+                        button.MouseLeave.Connect(() => unhoverEffect(button));
+                        button.Activated.Connect(() => {
+                            playSound("rbxassetid://98888775996495");
+                            clickEffect(button, buttonInstances);
+                        });
+                    }
+                }),
+                createImageButton({
+                    name: "Inventory",
+                    position: UDim2.fromScale(0.5, 0.832),
+                    size: UDim2.fromScale(1, 0.333),
+                    image: "rbxassetid://98405619153543",
+                    onMount: (button) => {
+                        button.MouseEnter.Connect(() => hoverEffect(button));
+                        button.MouseLeave.Connect(() => unhoverEffect(button));
+                        button.Activated.Connect(() => {
+                            playSound("rbxassetid://81659213909958");
+                            clickEffect(button, buttonInstances);
+                            const inventoryScreen = this.inventoryGui.getScreenGui();
+                            inventoryScreen.Enabled = true;
+                        });
+                    }
                 }),
             ],
         }

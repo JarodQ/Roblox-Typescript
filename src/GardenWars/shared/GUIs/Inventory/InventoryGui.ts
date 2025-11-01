@@ -13,8 +13,9 @@ export class InventoryGui extends MainGui {
     constructor() {
         super();
         this.screenGui.Name = "InventoryGuiClass";
+        this.screenGui.Enabled = false;
         this.playerData = this.getPlayerData();
-        this.inventoryDisplay = new InventoryDisplay(this.screenGui, this.playerData, this.getPlayerData);
+        this.inventoryDisplay = new InventoryDisplay(this.screenGui, this.playerData, this.getPlayerData, this.closeInventory);
     }
 
     public updatePlayerData(updated: PlayerData) {
@@ -25,4 +26,9 @@ export class InventoryGui extends MainGui {
     private getPlayerData = (): PlayerData => {
         return requestPlayerData.InvokeServer() as PlayerData;
     };
+
+    private closeInventory = (): void => {
+        this.screenGui.Enabled = false;
+        return;
+    }
 }

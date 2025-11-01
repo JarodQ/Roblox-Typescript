@@ -10,4 +10,8 @@ export class MainGui {
         this.screenGui.IgnoreGuiInset = true;
         this.screenGui.Parent = Players.LocalPlayer!.WaitForChild("PlayerGui");
     }
+
+    public getScreenGui() {
+        return this.screenGui;
+    }
 }

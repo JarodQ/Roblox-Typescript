@@ -1,19 +1,27 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Players } from "@rbxts/services";
-import * as PREFABS from "./PREFABS";
+import * as PREFABS from "../../shared/PREFABS";
 // import * as InteractInterface from "./InteractInterface"
-import { Harvestable, moveInstance, tweenArcPop, InteractionRegistry } from "./InteractInterface";
-// import { addPlantData, removePlantData, playerCache } from "Common/shared/PlayerData/PlayerDataService";
+import { moveInstance, tweenArcPop } from "../../shared/Gardens/VisualUtils";
+import { Interactable, InteractionRegistry } from "GardenWars/shared/InteractInterface";
+import { addPlant, removePlant } from "./PlantService";
 import { loadPlayerData } from "Common/server/DataStoreWrapper";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
+import { playerCache } from "Common/server/PlayerDataService";
 
-const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
-const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
+// const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
+// const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
+
 const getPlayerData = ReplicatedStorage.WaitForChild("GetPlayerData") as RemoteFunction;
 
 
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;
+
+export interface Harvestable extends Interactable {
+    isReadyToHarvest(): boolean;
+    harvest(player: Player): void;
+}
 
 // function getGrowthStage(plantedAt: number, totalGrowthTime: number, stageGrowthTime: number): number {
 //     const now = DateTime.now().UnixTimestampMillis;
@@ -28,7 +36,9 @@ Players.PlayerAdded.Connect(async (player) => {
     // Wait up to 2 seconds (20 attempts at 0.1s)
     while (!data && attempts < 20) {
         // data = playerCache.get(player.UserId);
-        data = getPlayerData.InvokeServer(player)
+        // data = getPlayerData.InvokeServer(player);
+        data = playerCache.get(player.UserId);
+
         if (!data) {
             await Promise.delay(0.1);
             attempts++;
@@ -91,6 +101,28 @@ export type SeedMods = {
     fireAspect: Boolean;
 }
 
+export function handlePlantSeedEvent(player: Player, ...args: unknown[]) {
+    print("Handling Planting")
+    const [seedName, position] = args as [string, Vector3];
+
+    const prefabList = PREFABS.getPREFAB("seeds", seedName) as Part[];
+    const progressBars = PREFABS.getPREFAB("UI", "ProgressBar") as BillboardGui[];
+
+    if (!prefabList || !progressBars || prefabList.size() === 0 || progressBars.size() === 0) {
+        warn(`Invalid seed or UI prefab for ${seedName}`);
+        return;
+    }
+
+    const seed: Seed = {
+        name: seedName,
+        PREFABS: prefabList,
+        plantProgress: progressBars[0],
+    };
+
+    const plant = new TestSeed1(seed);
+    plant.plant(player, position, false);
+}
+
 export class PlantMaster implements Harvestable {
     public seed: Seed;
     public seedPosition: Vector3 = new Vector3(0, 0, 0);
@@ -114,7 +146,10 @@ export class PlantMaster implements Harvestable {
         this.grown = false;
     }
 
+
+
     public plant(owner: Player, position: Vector3, replanting: boolean): void {
+        print(owner, position, replanting)
         const character = owner.Character ?? owner.CharacterAdded.Wait()[0];
         const root = character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
         let orientation = new Vector3(0, 0, 0);;
@@ -134,15 +169,13 @@ export class PlantMaster implements Harvestable {
             return;
         }
         this.plantPart.Parent = Workspace;
-        //this.plantPart.Position = position;
-        //Add Plant to player Data
-        // Store position and orientation
         this.seedPosition = position;
         if (orientation) this.seedOrientation = orientation;
 
         // Add plant to player data (serialized)
         if (!replanting) {
-            addPlantEvent.FireServer({
+            print("Adding Plant: Plants.ts")
+            addPlant(owner, {
                 plantId: this.seed.name,
                 position: serializeVector3(this.seedPosition),
                 rotation: serializeCFrame(new CFrame(this.seedOrientation)),
@@ -177,26 +210,37 @@ export class PlantMaster implements Harvestable {
         return this.grown;
     }
 
+
     public harvest(player: Player) {
-        //const plantPrefab = DropsPrefabsFolder.FindFirstChild("HarvestTest")!.Clone() as BasePart;
-        let plantPrefab: Model | Part = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part
-        plantPrefab = plantPrefab.Clone();
+        print("Seed Name: ", this.seed.name)
+        const prefab = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part;
+        const plantPrefab = prefab.Clone();
+        print("Prefab: ", plantPrefab)
         let plantPosition: Vector3;
         if (this.plantPart?.IsA("Model")) {
-            plantPosition = this.plantPart?.GetPivot().Position
+            plantPosition = this.plantPart.GetPivot().Position;
         } else if (this.plantPart?.IsA("BasePart")) {
-            plantPosition = this.plantPart?.Position;
+            plantPosition = this.plantPart.Position;
         } else {
             return;
         }
-        plantPrefab.Parent = Workspace;
-        //plantPrefab.Size = new Vector3(1, 1, 1);
+
+        // Destroy the server-side plant
         this.plantPart?.Destroy();
-        // removePlantData(player, this.seedPosition);
-        removePlantEvent.FireServer(this.seedPosition);
-        tweenArcPop(player, this.seed.name, plantPosition, plantPrefab);
-        this.grown = false
+        removePlant(player, this.seedPosition);
+        this.grown = false;
+
+        print("Prefab: ", plantPrefab)
+        // Fire client-side visual event
+        const harvestVisualEvent = ReplicatedStorage.WaitForChild("HarvestVisualEvent") as RemoteEvent;
+        harvestVisualEvent.FireClient(player, this.seed.name, plantPosition);
     }
+
+    // private handlePlayerData(player: Player, seedName: string) {
+    //     print("Sending pickupItem event")
+    //     pickupItem.FireServer(player, seedName, 5);
+    //     return;
+    // }
 
     private computeGrowthStage(): number {
         if (!this.growthStart) return 0;

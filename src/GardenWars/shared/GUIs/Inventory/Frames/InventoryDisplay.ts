@@ -37,6 +37,7 @@ export class InventoryDisplay {
     private draggedItem?: PlayerItemData;
     private dragIcon?: ImageLabel | Frame;
     private getPlayerData: () => PlayerData;
+    private closeInventory: () => void;
     private dragMoveConnection?: RBXScriptConnection;
 
 
@@ -45,9 +46,11 @@ export class InventoryDisplay {
         parent: ScreenGui,
         playerData: PlayerData,
         getPlayerData: () => PlayerData,
+        closeInventory: () => void,
     ) {
         this.playerData = playerData;
         this.getPlayerData = getPlayerData;
+        this.closeInventory = closeInventory
         const layout = this.populateLayout(() => parent.Destroy());
         this.frame = buildGuiComponent(layout, parent) as Frame;
         this.isSearchActive = false;
@@ -57,6 +60,7 @@ export class InventoryDisplay {
             const mousePos = game.GetService("UserInputService").GetMouseLocation();
             this.tryPlaceDraggedItem(mousePos);
         });
+        this.updateItems(this.getFilteredPlayerItems(this.itemFilter, ""));
     }
 
     public setDragging(item: PlayerItemData, hotbarSwap: boolean = false) {
@@ -321,7 +325,7 @@ export class InventoryDisplay {
                     backgroundColor: Color3.fromRGB(255, 200, 150),
                     backgroundTransparency: 0,
                     text: "",
-                    onClick: () => onClose(),
+                    onClick: () => this.closeInventory(),
                     onMount: attachEffects,
                     children: [
                         createUICorner({ radius: 8000 }),

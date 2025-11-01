@@ -37,11 +37,10 @@ export class SelectionFrame {
             type: "Frame",
             name: "SelectionFrame",
             properties: {
-                AnchorPoint: new Vector2(0, 0.5),
                 BackgroundColor3: Color3.fromRGB(255, 200, 150),
                 BackgroundTransparency: 0,
-                Position: UDim2.fromScale(0, 0.5),
-                Size: UDim2.fromScale(0.053, 0.38),
+                Position: UDim2.fromScale(0.322, 0.85),
+                Size: UDim2.fromScale(0.355, 0.086),
             },
             children: [
                 createUICorner({ radius: 8 }),

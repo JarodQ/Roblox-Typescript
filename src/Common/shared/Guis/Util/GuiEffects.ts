@@ -1,6 +1,7 @@
-import { TweenService } from "@rbxts/services";
+import { TweenService, ReplicatedStorage, SoundService } from "@rbxts/services";
 
 const originalStates = new Map<TextButton | ImageButton, { size: UDim2; position: UDim2 }>();
+
 
 export function registerOriginalState(button: TextButton | ImageButton) {
     originalStates.set(button, {
@@ -9,13 +10,29 @@ export function registerOriginalState(button: TextButton | ImageButton) {
     });
 }
 
-export function hoverEffect(button: TextButton | ImageButton) {
+export function playSound(soundId: string) {
+    print("Attempting to play sound");
+    if (!soundId) return;
+
+    const sound = new Instance("Sound");
+    sound.SoundId = soundId;
+    sound.Volume = 1;
+    sound.PlaybackSpeed = 1;
+    sound.Parent = SoundService;
+
+    sound.Play();
+    sound.Ended.Connect(() => sound.Destroy());
+}
+
+export function hoverEffect(button: TextButton | ImageButton, soundId?: string) {
     const original = originalStates.get(button);
     if (!original) return;
 
+    playSound("rbxassetid://86901006903445");
+
     const tween = TweenService.Create(button, new TweenInfo(0.2), {
-        Size: original.size.add(UDim2.fromOffset(10, 10)),
-        Position: original.position.sub(UDim2.fromScale(0, 0.1)),
+        Size: original.size.add(UDim2.fromOffset(5, 5)),
+        //Position: original.position.sub(UDim2.fromScale(0, 0.1)),
     });
     tween.Play();
 }
@@ -26,7 +43,7 @@ export function unhoverEffect(button: TextButton | ImageButton) {
 
     const tween = TweenService.Create(button, new TweenInfo(0.2), {
         Size: original.size,
-        Position: original.position,
+        //Position: original.position,
     });
     tween.Play();
 }

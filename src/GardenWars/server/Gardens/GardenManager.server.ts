@@ -1,7 +1,17 @@
 import { Players, Workspace, ReplicatedStorage } from "@rbxts/services";
-import { PlayerGarden } from "../shared/Garden";
+import { PlayerGarden } from "GardenWars/server/Gardens/PlayerGarden";
 
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
+
+print("Creating PlantSeed RemoteEvent");
+
+// const plantSeedEvent = new Instance("RemoteEvent");
+// plantSeedEvent.Name = "PlantSeed";
+// plantSeedEvent.Parent = ReplicatedStorage;
+
+const harvestVisualEvent = new Instance("RemoteEvent");
+harvestVisualEvent.Name = "HarvestVisualEvent";
+harvestVisualEvent.Parent = ReplicatedStorage;
 
 const gardensFolder = Workspace.FindFirstChild("Gardens") as Folder | undefined
 const PlayerGardens: Map<number, PlayerGarden> = new Map();
@@ -13,9 +23,10 @@ assignedGardens.set(testKey, gardensFolder?.FindFirstChildOfClass("Folder") as F
 
 
 
+
 function assignGarden(player: Player, gardensFolder: Folder) {
     const playerId = player.UserId;
-
+    print("AssigningGarden!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     let gardensArray: Folder[] = [];
     for (const [, garden] of assignedGardens) {
         gardensArray.push(garden);
@@ -85,6 +96,7 @@ Players.PlayerRemoving.Connect(function (player: Player) {
 })
 
 interactEvent.OnServerEvent.Connect((player: Player, target: unknown, clickPosition: unknown, interactable?: unknown) => {
+    print("receiving interact event")
     const instance = target as Instance;
     const hitPos = clickPosition as Vector3;
     const playerGarden = PlayerGardens.get(player.UserId);

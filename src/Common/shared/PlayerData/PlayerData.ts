@@ -14,6 +14,7 @@ export interface ItemEntry {
         seed?: PlayerItemData;
         weaponSeed?: PlayerItemData;
         crop?: PlayerItemData;
+        weapon?: PlayerItemData;
     };
 }
 
@@ -22,7 +23,7 @@ export interface PlayerItemData {
     name: string; // Display name (e.g. "Carrot Seed")
     description: string;
     image: string; // Image asset ID or path
-    category: "seeds" | "crops";
+    category: "seeds" | "crops" | "weapons";
     ownedQuantity: number;
     stackable: boolean;
     maxStackSize?: number;
@@ -113,6 +114,15 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 ownedQuantity: 0,
                 stackable: true,
             },
+            weapon: {
+                id: "carrot_weapon",
+                name: "Carrot Shooter",
+                description: "Carrot weapon used to shoot carrots.",
+                image: "rbxassetid://111369018411705",
+                category: "weapons",
+                ownedQuantity: 0,
+                stackable: true,
+            }
         },
 
     },
@@ -147,6 +157,15 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 ownedQuantity: 0,
                 stackable: true,
             },
+            weapon: {
+                id: "blueberry_weapon",
+                name: "Blueberry Blaster",
+                description: "Blueberry Shotgun used to shoot blueberries",
+                image: "rbxassetid://129472140650048",
+                category: "weapons",
+                ownedQuantity: 0,
+                stackable: true,
+            }
         },
     },
     corn: {
@@ -182,6 +201,15 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 stackable: true,
                 maxStackSize: 99,
             },
+            weapon: {
+                id: "maizeMauler_weapon",
+                name: "Maize Mauler",
+                description: "Rotary cannon used to shoot corn",
+                image: "rbxassetid://140686676686152",
+                category: "weapons",
+                ownedQuantity: 0,
+                stackable: true,
+            }
         },
     },
     sunflowers: {
@@ -217,6 +245,15 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
                 stackable: true,
                 maxStackSize: 99,
             },
+            weapon: {
+                id: "heliosLaser_weapon",
+                name: "Helios Laser",
+                description: "Sunflower which shoots a powerfull beam of energy",
+                image: "rbxassetid://133937211445933",
+                category: "weapons",
+                ownedQuantity: 0,
+                stackable: true,
+            }
         },
     },
 }
