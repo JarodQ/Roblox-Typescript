@@ -3,6 +3,7 @@ import { MainGui } from "../../../../Common/shared/Guis/MainGui";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { ItemData } from "Common/shared/ItemData";
 import { InventoryGui } from "../Inventory/InventoryGui";
+import { HotbarGui } from "../HotBar/HotbarGui";
 import { ShopGui } from "../ShopV2/ShopGui";
 import { GuiElementDescriptor } from "../ShopV2/Frames/buildGuiComponent";
 import { buildGuiComponent } from "../ShopV2/Frames/buildGuiComponent";
@@ -22,15 +23,21 @@ export class SelectionManager extends MainGui {
     // private inventorySelector: ImageButton;
     // private shopSelector: ImageButton;
     private inventoryGui: InventoryGui;
+    private hotBarGui: HotbarGui;
     // private shopGui: ShopGui;
 
     constructor() {
         super();
         this.screenGui.Name = "SelectionManagerGui";
-        this.inventoryGui = new InventoryGui();
+        this.inventoryGui = new InventoryGui(() => this.updateHotbar());
+        this.hotBarGui = new HotbarGui(this.inventoryGui.inventoryDisplay.hotbarItems);
         // this.shopGui = new ShopGui();
         const layout = this.populateLayout();
         this.selectionFrame = buildGuiComponent(layout, this.screenGui) as Frame;
+    }
+
+    public updateHotbar() {
+        this.hotBarGui.updateHotbarItems(this.inventoryGui.inventoryDisplay.hotbarItems);
     }
 
     private populateLayout(): GuiElementDescriptor<"Frame"> {

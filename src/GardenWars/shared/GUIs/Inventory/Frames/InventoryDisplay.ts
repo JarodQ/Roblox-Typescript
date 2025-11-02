@@ -31,13 +31,14 @@ export class InventoryDisplay {
     private isSearchActive: boolean;
     private hotbar?: Frame;
     private hotbarFrames: TextButton[] = [];
-    private hotbarItems: (PlayerItemData | undefined)[] = [];
+    public hotbarItems: (PlayerItemData | undefined)[] = [];
     private draggedHotbarIndex: number | undefined = undefined;
     private isDragging: boolean = false;
     private draggedItem?: PlayerItemData;
     private dragIcon?: ImageLabel | Frame;
     private getPlayerData: () => PlayerData;
     private closeInventory: () => void;
+    private updateHotbarItems: () => void;
     private dragMoveConnection?: RBXScriptConnection;
 
 
@@ -47,10 +48,12 @@ export class InventoryDisplay {
         playerData: PlayerData,
         getPlayerData: () => PlayerData,
         closeInventory: () => void,
+        updateHotbar: () => void,
     ) {
         this.playerData = playerData;
         this.getPlayerData = getPlayerData;
-        this.closeInventory = closeInventory
+        this.closeInventory = closeInventory;
+        this.updateHotbarItems = updateHotbar;
         const layout = this.populateLayout(() => parent.Destroy());
         this.frame = buildGuiComponent(layout, parent) as Frame;
         this.isSearchActive = false;
@@ -409,6 +412,7 @@ export class InventoryDisplay {
 
                                 this.setDragging(slotItem, true);
                             }
+                            this.updateHotbarItems();
                         });
 
                     },

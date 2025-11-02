@@ -8,14 +8,19 @@ const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as
 
 export class InventoryGui extends MainGui {
     private playerData: PlayerData;
-    private inventoryDisplay: InventoryDisplay;
+    public inventoryDisplay: InventoryDisplay;
 
-    constructor() {
+    constructor(updateHotbar: () => void) {
         super();
         this.screenGui.Name = "InventoryGuiClass";
         this.screenGui.Enabled = false;
         this.playerData = this.getPlayerData();
-        this.inventoryDisplay = new InventoryDisplay(this.screenGui, this.playerData, this.getPlayerData, this.closeInventory);
+        this.inventoryDisplay = new InventoryDisplay(
+            this.screenGui,
+            this.playerData,
+            this.getPlayerData,
+            this.closeInventory,
+            () => updateHotbar());
     }
 
     public updatePlayerData(updated: PlayerData) {
