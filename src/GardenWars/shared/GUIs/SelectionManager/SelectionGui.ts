@@ -38,6 +38,8 @@ export class SelectionManager extends MainGui {
 
     public updateHotbar() {
         this.hotBarGui.updateHotbarItems(this.inventoryGui.inventoryDisplay.hotbarItems);
+        const hotbarScreen = this.hotBarGui.getScreenGui();
+        hotbarScreen.Enabled = true;
     }
 
     private populateLayout(): GuiElementDescriptor<"Frame"> {
@@ -108,6 +110,8 @@ export class SelectionManager extends MainGui {
                             clickEffect(button, buttonInstances);
                             const inventoryScreen = this.inventoryGui.getScreenGui();
                             inventoryScreen.Enabled = true;
+                            const hotbarScreen = this.hotBarGui.getScreenGui();
+                            hotbarScreen.Enabled = false;
                         });
                     }
                 }),

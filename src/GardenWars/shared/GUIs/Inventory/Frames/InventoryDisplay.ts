@@ -1,3 +1,4 @@
+import { ReplicatedStorage } from "@rbxts/services";
 import { buildGuiComponent, GuiElementDescriptor } from "../../ShopV2/Frames/buildGuiComponent";
 import {
     createFrame,
@@ -15,6 +16,8 @@ import {
 import { hoverEffect, unhoverEffect } from "../../../../../Common/shared/Guis/Util/GuiEffects";
 import { PlayerData, ItemEntry, PlayerItemData } from "Common/shared/PlayerData/PlayerData";
 import { ItemData } from "Common/shared/ItemData";
+
+const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as RemoteFunction;
 
 interface HotbarSlot {
     frame: Frame;
@@ -64,6 +67,7 @@ export class InventoryDisplay {
             this.tryPlaceDraggedItem(mousePos);
         });
         this.updateItems(this.getFilteredPlayerItems(this.itemFilter, ""));
+        this.initializeHotbar();
     }
 
     public setDragging(item: PlayerItemData, hotbarSwap: boolean = false) {
@@ -73,6 +77,35 @@ export class InventoryDisplay {
         }
 
         this.startDragging(item);
+    }
+
+    private initializeHotbar() {
+        const playerData = requestPlayerData.InvokeServer() as PlayerData;
+        if (!playerData) return;
+
+        const hotbarItems = playerData.hotbarItems;
+
+        for (let i = 0; i < this.hotbarFrames.size(); i++) {
+            const itemId = hotbarItems[i + 1];
+            let matchedItem: PlayerItemData | undefined;
+
+            // Search through player's items to find the matching variant by ID
+            for (const [, entry] of pairs(playerData.items)) {
+                for (const [, variant] of pairs(entry.variants)) {
+                    if (variant.id === itemId) {
+                        matchedItem = variant;
+                        break;
+                    }
+                }
+                if (matchedItem) {
+                    hotbarItems[i] = matchedItem.id;
+                    break;
+                }
+            }
+
+            const slot = this.hotbarFrames[i];
+            this.renderItemInHotbarSlot(slot, matchedItem);
+        }
     }
 
     private cancelDragAndReturnItem() {
@@ -412,7 +445,7 @@ export class InventoryDisplay {
 
                                 this.setDragging(slotItem, true);
                             }
-                            this.updateHotbarItems();
+                            // this.updateHotbarItems();
                         });
 
                     },

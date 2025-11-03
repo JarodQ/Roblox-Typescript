@@ -36,6 +36,10 @@ const pickupItem = new Instance("RemoteEvent");
 pickupItem.Name = "PickupItem";
 pickupItem.Parent = ReplicatedStorage;
 
+const updateHotbarData = new Instance("RemoteEvent");
+updateHotbarData.Name = "UpdateHotbarData";
+updateHotbarData.Parent = ReplicatedStorage;
+
 export const playerCache = new Map<number, PlayerData>();
 const lockStore = DataStoreService.GetDataStore("PlayerData_Lock");
 
@@ -60,7 +64,7 @@ requestPlayerData.OnServerInvoke = (player: Player) => {
 
 task.spawn(() => {
     while (true) {
-        task.wait(60);
+        task.wait(10);
         playerCache.forEach((data, userId) => {
             savePlayerData(userId, data)
         });
@@ -223,6 +227,13 @@ export function helper(player: Player, seedName: string, amount: number) {
 
 }
 
+updateHotbarData.OnServerEvent.Connect((player, ...args) => {
+    const [hotbarData] = args as [Record<number, string>]
+    const playerData = playerCache.get(player.UserId);
+    if (playerData && playerData.hotbarItems) {
+        playerData.hotbarItems = hotbarData;
+    }
+});
 
 purchaseFunction.OnServerInvoke = (player, ...args) => {
     const [itemId, quantity, currency, mode] = args as [string, number, "credits" | "valor", "buy" | "sell"];

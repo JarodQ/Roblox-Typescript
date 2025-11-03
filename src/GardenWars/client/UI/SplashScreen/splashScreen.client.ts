@@ -4,7 +4,7 @@ import { StarterGui } from "@rbxts/services";
 
 // Disable toolbelt and reset button
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
-pcall(() => StarterGui.SetCore("ResetButtonCallback", false));
+// pcall(() => StarterGui.SetCore("ResetButtonCallback", false));
 
 const splashProgressRemote = ReplicatedStorage.WaitForChild("SplashProgressRemote") as RemoteEvent;
 
@@ -108,6 +108,6 @@ UserInputService.InputBegan.Connect(() => {
     }
 
     // Re-enable toolbelt and reset button
-    StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true);
+    // StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true);
     pcall(() => StarterGui.SetCore("ResetButtonCallback", true));
 });

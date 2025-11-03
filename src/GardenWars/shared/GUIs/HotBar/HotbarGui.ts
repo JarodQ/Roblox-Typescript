@@ -19,28 +19,77 @@ import {
     createFrame
 } from "../../../../Common/shared/Guis/Util/GuiPresets";
 import { hoverEffect, unhoverEffect, clickEffect, playSound } from "Common/shared/Guis/Util/GuiEffects";
+import { getPREFAB } from "GardenWars/shared/PREFABS";
+
+const hotbarUpdateEvent = ReplicatedStorage.WaitForChild("UpdateHotbarData") as RemoteEvent;
+const requestToolEquip = ReplicatedStorage.WaitForChild("RequestToolEquip") as RemoteEvent;
+const requestPlayerData = ReplicatedStorage.WaitForChild("RequestPlayerData") as RemoteFunction;
+
 
 export class HotbarGui extends MainGui {
     private hotbarFrame: Frame;
     private hotbarSlots: TextButton[] = [];
+    private hotbarItems: string[] = [];
+    private previousSlotSelect: TextButton | undefined;
+
 
     constructor(hotbarItems: (PlayerItemData | undefined)[] = []) {
         super();
         this.screenGui.Name = "HotBarGui";
         const layout = this.populateLayout();
         this.hotbarFrame = buildGuiComponent(layout, this.screenGui) as Frame;
+        this.initializeHotbar();
 
+        //Automatically equip the first item in the hotbar
+        // this.previousSlotSelect = this.hotbarSlots[0];
 
     }
 
+    private initializeHotbar() {
+        const playerData = requestPlayerData.InvokeServer() as PlayerData;
+        if (!playerData) return;
+
+        const hotbarItems = playerData.hotbarItems;
+
+        for (let i = 0; i < this.hotbarSlots.size(); i++) {
+            const itemId = hotbarItems[i + 1];
+            let matchedItem: PlayerItemData | undefined;
+
+            // Search through player's items to find the matching variant by ID
+            for (const [, entry] of pairs(playerData.items)) {
+                for (const [, variant] of pairs(entry.variants)) {
+                    if (variant.id === itemId) {
+                        matchedItem = variant;
+                        break;
+                    }
+                }
+                if (matchedItem) {
+                    this.hotbarItems[i] = matchedItem.id;
+                    break;
+                }
+            }
+
+            const slot = this.hotbarSlots[i];
+            this.renderItemInHotbarSlot(slot, matchedItem);
+        }
+    }
+
+
     public updateHotbarItems(hotbarItems: (PlayerItemData | undefined)[]) {
         hotbarItems = hotbarItems;
-
+        const hotbarDataUpdate: Record<number, string> = []
         for (let i = 0; i < this.hotbarSlots.size(); i++) {
             const slot = this.hotbarSlots[i];
             const item = hotbarItems[i];
             this.renderItemInHotbarSlot(slot, item);
+            if (item && item.id) {
+                hotbarDataUpdate[i + 1] = item?.id;
+                this.hotbarItems[i] = item?.id
+            }
+            else { hotbarDataUpdate[i + 1] = "" }
         }
+        hotbarUpdateEvent.FireServer(hotbarDataUpdate);
+
     }
 
     private populateLayout(): GuiElementDescriptor<"Frame"> {
@@ -108,6 +157,30 @@ export class HotbarGui extends MainGui {
                         // Track item in slot
                         slot.MouseButton1Click.Connect(() => {
                             // Add click logic here
+                            if (this.previousSlotSelect) {
+                                const previousUIStroke = this.previousSlotSelect.FindFirstChild("UIStroke") as UIStroke;
+                                if (previousUIStroke) {
+                                    previousUIStroke.Color = Color3.fromRGB(130, 80, 0);
+                                    previousUIStroke.Thickness = 3;
+                                }
+                            }
+
+                            const currentUIStroke = slot.FindFirstChild("UIStroke") as UIStroke;
+                            if (currentUIStroke) {
+                                if (slot === this.previousSlotSelect) {
+                                    currentUIStroke.Color = Color3.fromRGB(130, 80, 0);
+                                    currentUIStroke.Thickness = 3;
+                                    this.previousSlotSelect = undefined;
+                                }
+                                else {
+                                    currentUIStroke.Color = Color3.fromRGB(255, 153, 0);
+                                    currentUIStroke.Thickness = 4;
+                                    this.previousSlotSelect = slot;
+                                }
+                            }
+
+                            print(this.hotbarItems)
+                            requestToolEquip.FireServer(this.hotbarItems[i]);
                         });
                     },
                     children: [

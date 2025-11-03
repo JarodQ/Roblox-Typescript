@@ -58,6 +58,7 @@ export interface PlayerData {
     currency: Currency,
     weapons: WeaponFlags,
     items: Record<string, ItemEntry>,
+    hotbarItems: Record<number, string>,
     loadouts: Loadouts,
     plants: Plants[],
     achievements: AchievementFlags,
@@ -258,6 +259,18 @@ const DEFAULT_ITEM_LIST: Record<string, ItemEntry> = {
     },
 }
 
+const DEFAULT_HOTBAR_ITEMS: Record<number, string> = {
+
+    1: "",
+    2: "",
+    3: "",
+    4: "",
+    5: "",
+    6: "",
+    7: "",
+    8: "",
+}
+
 export const DEFAULT_PLAYER_DATA: PlayerData = {
     currency: {
         credits: 100000,
@@ -270,6 +283,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
         heliosLaser: false,
     },
     items: DEFAULT_ITEM_LIST,
+    hotbarItems: DEFAULT_HOTBAR_ITEMS,
     loadouts: {
         loadout1: {
             name: "My First Loadout",
