@@ -13,6 +13,10 @@ const harvestVisualEvent = new Instance("RemoteEvent");
 harvestVisualEvent.Name = "HarvestVisualEvent";
 harvestVisualEvent.Parent = ReplicatedStorage;
 
+const teleportToGarden = new Instance("RemoteEvent");
+teleportToGarden.Name = "TeleportToGarden";
+teleportToGarden.Parent = ReplicatedStorage;
+
 const gardensFolder = Workspace.FindFirstChild("Gardens") as Folder | undefined
 const PlayerGardens: Map<number, PlayerGarden> = new Map();
 const assignedGardens: Map<number, Folder> = new Map();
@@ -58,6 +62,27 @@ function unassignGarden(player: Player) {
     //print(`${playerId} has been removed from their garden.`);
 
 }
+
+teleportToGarden.OnServerEvent.Connect((player: Player) => {
+    const playerGarden = assignedGardens.get(player.UserId);
+    if (!playerGarden) return;
+
+    const teleportFolder = playerGarden.FindFirstChild("Teleport") as Folder;
+    if (!teleportFolder) return;
+
+    const teleportPart = teleportFolder.FindFirstChild("TeleportPart") as BasePart;
+    if (!teleportPart) return;
+
+    const character = player.Character ?? player.CharacterAdded.Wait()[0];
+    if (!character) return;
+
+    const root = character.FindFirstChild("HumanoidRootPart") as BasePart;
+    if (!root) return;
+
+    // Teleport the character slightly above the part to avoid clipping
+    root.CFrame = teleportPart.CFrame.add(new Vector3(0, 3, 0));
+});
+
 
 Players.PlayerAdded.Connect(function (player: Player) {
 

@@ -19,6 +19,7 @@ export class PlayerGarden implements Interactable {
 
     constructor(garden: Garden) {
         this.garden = garden;
+
     }
 
     public getOwner(): Player {

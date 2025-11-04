@@ -36,6 +36,7 @@ export class InventoryGui extends MainGui {
     private closeInventory = (): void => {
         this.screenGui.Enabled = false;
         this.updateHotbarItems();
+
         return;
     }
 }

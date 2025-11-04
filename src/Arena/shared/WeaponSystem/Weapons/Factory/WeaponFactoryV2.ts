@@ -8,6 +8,9 @@ import { SemiAutoFiring } from "../FiringModes/SemiAutoFiring";
 import { AutoFiring } from "../FiringModes/AutoFiring";
 import { AmmoType } from "../../Ammo/AmmoType";
 import { CarrotShooter } from "../Types/WeaponType/CarrotShooter";
+import { BlueberryBlaster } from "../Types/WeaponType/BlueberryBlaster";
+import { MaizeMauler } from "../Types/WeaponType/MaizeMauler";
+import { HeliosLaser } from "../Types/WeaponType/HeliosLaser";
 import { TraceStrategy } from "../TraceStrategy/TraceStrategy";
 
 
@@ -17,7 +20,10 @@ type WeaponConstructor = new (
 ) => Weapon;
 
 const weaponRegistry: Record<string, WeaponConstructor> = {
-    CarrotShooter_w: CarrotShooter
+    CarrotShooter_w: CarrotShooter,
+    BlueberryBlaster_w: BlueberryBlaster,
+    MaizeMauler_w: BlueberryBlaster,
+    HeliosLaser_w: BlueberryBlaster,
 }
 
 export function createWeapon(

@@ -84,73 +84,73 @@ let firingThread: thread | undefined;
 //         firingThread = undefined;
 //     });
 // }
-function startFiringOld(): void {
-    if (isFiring || firingThread) return;
+// function startFiringOld(): void {
+//     if (isFiring || firingThread) return;
 
-    isFiring = true;
+//     isFiring = true;
 
-    const player = Players.LocalPlayer;
-    const character = player.Character;
-    const weaponTool = character?.FindFirstChildOfClass("Tool");
-    const head = character?.FindFirstChild("Head") as BasePart;
-    const mouse = player.GetMouse();
+//     const player = Players.LocalPlayer;
+//     const character = player.Character;
+//     const weaponTool = character?.FindFirstChildOfClass("Tool");
+//     const head = character?.FindFirstChild("Head") as BasePart;
+//     const mouse = player.GetMouse();
 
-    if (!character || !head || !mouse) return;
+//     if (!character || !head || !mouse) return;
 
-    const direction = mouse.Hit.Position.sub(head.Position).Unit;
+//     const direction = mouse.Hit.Position.sub(head.Position).Unit;
 
-    // 🔫 Fire immediately
-    FireWeapon.FireServer(head.Position, direction);
-    if (weaponTool) {
-        localTracer(head.Position, weaponTool);
-        localSound("Fire", weaponTool);
-    }
+//     // 🔫 Fire immediately
+//     FireWeapon.FireServer(head.Position, direction);
+//     if (weaponTool) {
+//         localTracer(head.Position, weaponTool);
+//         localSound("Fire", weaponTool);
+//     }
 
-    const angle = math.random(-maxTilt, maxTilt);
-    const randomTilt = math.rad(angle);
-    AdaptiveRecoil.apply(math.rad(.5));
-    ReticleScaler.boost();
-    armRecoil.triggerRecoil();
+//     const angle = math.random(-maxTilt, maxTilt);
+//     const randomTilt = math.rad(angle);
+//     AdaptiveRecoil.apply(math.rad(.5));
+//     ReticleScaler.boost();
+//     armRecoil.triggerRecoil();
 
-    // let lastShotTime = Workspace.GetServerTimeNow();
+//     // let lastShotTime = Workspace.GetServerTimeNow();
 
-    // 🔁 Continue firing loop
-    firingThread = task.spawn(() => {
-        while (isFiring) {
-            // const now = Workspace.GetServerTimeNow();
-            // const timeSinceLastShot = now - lastShotTime;
+//     // 🔁 Continue firing loop
+//     firingThread = task.spawn(() => {
+//         while (isFiring) {
+//             // const now = Workspace.GetServerTimeNow();
+//             // const timeSinceLastShot = now - lastShotTime;
 
-            // if (timeSinceLastShot >= FIRE_RATE - 0.05) {
-            // lastShotTime = now;
+//             // if (timeSinceLastShot >= FIRE_RATE - 0.05) {
+//             // lastShotTime = now;
 
-            const character = player.Character;
-            const weaponTool = character?.FindFirstChildOfClass("Tool");
-            const head = character?.FindFirstChild("Head") as BasePart;
-            const mouse = player.GetMouse();
+//             const character = player.Character;
+//             const weaponTool = character?.FindFirstChildOfClass("Tool");
+//             const head = character?.FindFirstChild("Head") as BasePart;
+//             const mouse = player.GetMouse();
 
-            if (!character || !head || !mouse) break;
+//             if (!character || !head || !mouse) break;
 
-            const direction = mouse.Hit.Position.sub(head.Position).Unit;
+//             const direction = mouse.Hit.Position.sub(head.Position).Unit;
 
-            FireWeapon.FireServer(head.Position, direction, currentAmmo, {});
-            if (weaponTool) {
-                localTracer(head.Position, weaponTool);
-                localSound("Fire", weaponTool);
-            }
+//             FireWeapon.FireServer(head.Position, direction, currentAmmo, {});
+//             if (weaponTool) {
+//                 localTracer(head.Position, weaponTool);
+//                 localSound("Fire", weaponTool);
+//             }
 
-            const angle = math.random(-maxTilt, maxTilt);
-            const randomTilt = math.rad(angle);
-            AdaptiveRecoil.apply(math.rad(.5));
-            ReticleScaler.boost();
-            armRecoil.triggerRecoil();
-            // }
+//             const angle = math.random(-maxTilt, maxTilt);
+//             const randomTilt = math.rad(angle);
+//             AdaptiveRecoil.apply(math.rad(.5));
+//             ReticleScaler.boost();
+//             armRecoil.triggerRecoil();
+//             // }
 
-            RunService.Heartbeat.Wait();
-        }
+//             RunService.Heartbeat.Wait();
+//         }
 
-        firingThread = undefined;
-    });
-}
+//         firingThread = undefined;
+//     });
+// }
 
 function startFiring(): void {
     if (isFiring) return;

@@ -1,4 +1,4 @@
-import { updateFlag } from "Common/shared/PlayerData/PlayerDataService";
+import { updateFlag } from "Common/server/PlayerDataService";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 
 // 👇 Create a local alias to ensure consistent typing

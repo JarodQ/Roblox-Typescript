@@ -18,6 +18,9 @@ import {
 } from "../../../../Common/shared/Guis/Util/GuiPresets";
 import { hoverEffect, unhoverEffect, clickEffect, playSound } from "Common/shared/Guis/Util/GuiEffects";
 
+const teleportToGarden = ReplicatedStorage.WaitForChild("TeleportToGarden") as RemoteEvent;
+const teleportToShop = ReplicatedStorage.WaitForChild("TeleportToShop") as RemoteEvent;
+
 export class SelectionManager extends MainGui {
     private selectionFrame: Frame;
     // private inventorySelector: ImageButton;
@@ -80,6 +83,7 @@ export class SelectionManager extends MainGui {
                         button.Activated.Connect(() => {
                             playSound("rbxassetid://96721760461704");
                             clickEffect(button, buttonInstances);
+                            teleportToShop.FireServer();
                         });
                     }
                 }),
@@ -94,6 +98,7 @@ export class SelectionManager extends MainGui {
                         button.Activated.Connect(() => {
                             playSound("rbxassetid://98888775996495");
                             clickEffect(button, buttonInstances);
+                            teleportToGarden.FireServer();
                         });
                     }
                 }),

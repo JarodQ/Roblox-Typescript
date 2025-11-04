@@ -66,8 +66,8 @@ export class InventoryDisplay {
             const mousePos = game.GetService("UserInputService").GetMouseLocation();
             this.tryPlaceDraggedItem(mousePos);
         });
-        this.updateItems(this.getFilteredPlayerItems(this.itemFilter, ""));
         this.initializeHotbar();
+        this.updateItems(this.getFilteredPlayerItems(this.itemFilter, ""));
     }
 
     public setDragging(item: PlayerItemData, hotbarSwap: boolean = false) {
@@ -79,14 +79,43 @@ export class InventoryDisplay {
         this.startDragging(item);
     }
 
+    // private initializeHotbar() {
+    //     const playerData = requestPlayerData.InvokeServer() as PlayerData;
+    //     if (!playerData) return;
+
+    //     const hotbarItems = playerData.hotbarItems;
+
+
+    //     for (let i = 0; i < this.hotbarFrames.size(); i++) {
+    //         const itemId = hotbarItems[i + 1];
+    //         let matchedItem: PlayerItemData | undefined;
+
+    //         // Search through player's items to find the matching variant by ID
+    //         for (const [, entry] of pairs(playerData.items)) {
+    //             for (const [, variant] of pairs(entry.variants)) {
+    //                 if (variant.id === itemId) {
+    //                     matchedItem = variant;
+    //                     break;
+    //                 }
+    //             }
+    //             if (matchedItem) {
+    //                 hotbarItems[i] = matchedItem.id;
+    //                 break;
+    //             }
+    //         }
+
+    //         const slot = this.hotbarFrames[i];
+    //         this.renderItemInHotbarSlot(slot, matchedItem);
+    //     }
+    // }
     private initializeHotbar() {
         const playerData = requestPlayerData.InvokeServer() as PlayerData;
         if (!playerData) return;
 
-        const hotbarItems = playerData.hotbarItems;
+        const hotbarIds = playerData.hotbarItems;
 
         for (let i = 0; i < this.hotbarFrames.size(); i++) {
-            const itemId = hotbarItems[i + 1];
+            const itemId = hotbarIds[i + 1]; // hotbar uses 1-based indexing
             let matchedItem: PlayerItemData | undefined;
 
             // Search through player's items to find the matching variant by ID
@@ -97,12 +126,10 @@ export class InventoryDisplay {
                         break;
                     }
                 }
-                if (matchedItem) {
-                    hotbarItems[i] = matchedItem.id;
-                    break;
-                }
+                if (matchedItem) break;
             }
 
+            this.hotbarItems[i] = matchedItem; // ✅ Store in this.hotbarItems
             const slot = this.hotbarFrames[i];
             this.renderItemInHotbarSlot(slot, matchedItem);
         }
@@ -481,10 +508,26 @@ export class InventoryDisplay {
         const matchedItems: PlayerItemData[] = [];
         const playerData = this.getPlayerData();
 
-        for (const [_, entry] of pairs(playerData.items)) {
-            for (const [_, variant] of pairs(entry.variants)) {
+        // Build a set of hotbar item IDs for fast lookup
+        const hotbarItems = this.hotbarItems as (PlayerItemData | undefined)[];
+        print("hotbar items: ", hotbarItems)
+        const filteredHotbarItems: PlayerItemData[] = [];
+
+        for (const item of hotbarItems) {
+            if (item !== undefined) {
+                filteredHotbarItems.push(item);
+            }
+        }
+
+        const hotbarIds = new Set(filteredHotbarItems.map((item) => item.id));
+        print("filtered hotbar items: ", hotbarIds)
+
+
+        for (const [, entry] of pairs(playerData.items)) {
+            for (const [, variant] of pairs(entry.variants)) {
                 if (!variant) continue;
                 if (!variant.ownedQuantity || variant.ownedQuantity <= 0) continue;
+                if (hotbarIds.has(variant.id)) continue; // 🔥 Skip if already in hotbar
 
                 const nameMatch =
                     searchText === undefined ||
@@ -493,7 +536,6 @@ export class InventoryDisplay {
                 const typeMatch = filter === "all" || variant.category === filter;
 
                 if (nameMatch && typeMatch) {
-                    print(nameMatch, typeMatch)
                     matchedItems.push(variant);
                 }
             }

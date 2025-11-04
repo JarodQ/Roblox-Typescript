@@ -20,7 +20,7 @@ export class SemiAutoFiring implements FiringMode {
     }
 
     startFiring(origin: Vector3, direction: Vector3): void {
-
+        print("Firing in semiAuto")
         const now = Workspace.GetServerTimeNow();
         if (now - this.lastFireTime < this.fireRate) {
             // warn(`Semi-auto fire rate violation`);

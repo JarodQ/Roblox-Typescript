@@ -1,10 +1,14 @@
-import { ReplicatedStorage } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { playerCache } from "Common/server/PlayerDataService";
 import { shopInfo, shopList, itemInfo } from "./mainShopPrices";
 
 const shopRemoteEvent = new Instance("RemoteEvent");
 shopRemoteEvent.Name = "shopRemoteEvent";
 shopRemoteEvent.Parent = ReplicatedStorage;
+
+const teleportToShop = new Instance("RemoteEvent");
+teleportToShop.Name = "TeleportToShop";
+teleportToShop.Parent = ReplicatedStorage;
 
 function findValueReference(obj: unknown, targetKey: string): [Record<string, unknown>, string] | undefined {
     if (typeIs(obj, "table")) {
@@ -105,4 +109,26 @@ shopRemoteEvent.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     const updatedItemValue = itemParent[itemKey];
 
     print(`📊 After: ${currencyType} = ${updatedCurrency}, ${item} = ${updatedItemValue}`);
+});
+
+teleportToShop.OnServerEvent.Connect((player: Player) => {
+    const TeleportsFolder = Workspace.FindFirstChild("Teleports") as Folder;
+    if (!TeleportsFolder) return;
+
+    const shopTeleportsFolder = TeleportsFolder.FindFirstChild("Shop") as Folder;
+    if (!shopTeleportsFolder) return;
+
+    const teleportPoints = shopTeleportsFolder.GetChildren();
+    if (teleportPoints.size() === 0) return;
+
+    const randomIndex = math.random(1, teleportPoints.size());
+    const teleportPart = teleportPoints[randomIndex - 1] as BasePart;
+
+    const character = player.Character ?? player.CharacterAdded.Wait()[0];
+    if (!character) return;
+
+    const root = character.FindFirstChild("HumanoidRootPart") as BasePart;
+    if (!root) return;
+
+    root.CFrame = teleportPart.CFrame.add(new Vector3(0, 3, 0)); // Offset to avoid clipping
 });

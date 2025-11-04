@@ -32,5 +32,6 @@ export class AutoFiring implements FiringMode {
 
     stopFiring(): void {
         // Stop auto-fire loop
+        this.isFiring = false;
     }
 }
