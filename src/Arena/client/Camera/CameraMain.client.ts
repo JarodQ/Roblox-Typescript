@@ -1,4 +1,4 @@
-// throw "This module is disabled temporarily";
+throw "This module is disabled temporarily";
 import { Players, UserInputService, RunService, Workspace } from "@rbxts/services";
 import { Constants } from "Arena/shared/Constants";
 import { CameraTilt } from "Arena/client/Camera/CameraTilt";

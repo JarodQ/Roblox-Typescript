@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import FireWeapon = require("Arena/shared/WeaponSystem/Remotes/FireWeapon");
+import StopFiring = require("Arena/shared/WeaponSystem/Remotes/StopFiring");
 import ReloadWeapon = require("Arena/shared/WeaponSystem/Remotes/ReloadWeapon");
 import { Weapon } from "Arena/shared/WeaponSystem/Weapons/Base/Weapon";
 import { createWeapon } from "Arena/shared/WeaponSystem/Weapons/Factory/WeaponFactoryV2";
@@ -14,38 +15,27 @@ function isWeaponType(value: string): value is "hitscan" | "projectile" {
 
 FireWeapon.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     const [origin, direction] = args as [Vector3, Vector3];
+    let weapon = playerWeapons.get(player);
 
-    // const now = Workspace.GetServerTimeNow();
-    // const lastFire = lastFireTimestamps.get(player) ?? 0;
-    // if (now - lastFire < FIRE_RATE - .05) {
-    // warn(`Server Side Fire rate violation by ${player.Name}`);
-    // return;
-    // };
+    const character = player.Character
+    const weaponTool = character?.FindFirstChildOfClass("Tool");
+    if (!weapon && character && weaponTool) {
+        weapon = createWeapon(weaponTool.Name, character, weaponTool);
+        playerWeapons.set(player, weapon);
+    }
+    if (weapon && weaponTool) {
+        const damageContext = weapon.startFiring(origin, direction);
+    }
+});
 
-    // lastFireTimestamps.set(player, now);
+StopFiring.OnServerEvent.Connect((player: Player) => {
     let weapon = playerWeapons.get(player);
     const character = player.Character
     const weaponTool = character?.FindFirstChildOfClass("Tool");
-    //print(character, weaponTool);
-    if (!weapon && character && weaponTool) {
-        // print("Past first check");
-
-        //print("Past second check. Going to fire!");
-
-        weapon = createWeapon(weaponTool.Name, character, weaponTool);
-        //print(weapon);
-
-        playerWeapons.set(player, weapon);
-
-    }
     if (weapon && weaponTool) {
-
-        //print(`Weapon already exists! Firing!`);
-        const damageContext = weapon.startFiring(origin, direction);
-        //weapon.playFireSound("Fire");
+        weapon.stopFiring();
     }
-
-});
+})
 
 ReloadWeapon.OnServerEvent.Connect((player: Player) => {
     const weapon = playerWeapons.get(player);

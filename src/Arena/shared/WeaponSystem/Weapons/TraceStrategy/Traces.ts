@@ -39,7 +39,7 @@ export class ProjectileTrace implements TraceStrategy {
 
         part.Touched.Connect((hit) => {
             //this.ammoType.effect?.apply(hit);
-            print(`Projectile hit ${hit.Name}`);
+            // print(`Projectile hit ${hit.Name}`);
             part.Destroy();
             return hit;
         });

@@ -23,9 +23,11 @@ export class AutoFiring implements FiringMode {
                 const now = Workspace.GetServerTimeNow();
                 if (now - this.lastFireTime >= this.fireRate) {
                     this.lastFireTime = now;
+                    // this.fireCallback(origin, direction);
                     this.fireCallback(origin, direction);
+
                 }
-                task.wait(0.01);
+                task.wait();
             }
         });
     }

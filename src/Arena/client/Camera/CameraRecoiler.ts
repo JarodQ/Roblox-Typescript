@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { Constants } from "Arena/shared/Constants";
-import { lerp } from "Arena/shared/Utility/lerp";
+import lerp from "Common/shared/Utility/lerp"
 
 // 🔫 Internal camera recoil state
 let recoil = new Vector2(0, 0);

@@ -50,7 +50,7 @@ export abstract class Weapon implements IWeapon {
     public reload(): void {
         const needed = 10 - this.currentAmmo;
         const toReload = math.min(needed, this.reserveAmmo);
-        print(`Current Ammo: ${this.currentAmmo} | ReserveAmmo: ${this.reserveAmmo} | Ammo Needed: ${toReload}`);
+        // print(`Current Ammo: ${this.currentAmmo} | ReserveAmmo: ${this.reserveAmmo} | Ammo Needed: ${toReload}`);
         this.currentAmmo += toReload;
         this.reserveAmmo -= toReload;
     }
@@ -112,6 +112,52 @@ export abstract class Weapon implements IWeapon {
         //     }
         // }
     }
+
+    public getFireInputs(): { origin: Vector3; direction: Vector3 } {
+        const handle = this.tool.FindFirstChild("Handle") as BasePart;
+        const muzzle = handle.FindFirstChild("Muzzle") as Attachment;
+        // print(muzzle)
+        if (!muzzle || !muzzle.IsA("Attachment")) {
+            warn(`Weapon ${this.tool.Name} is missing a valid Nozzle`);
+            return {
+                origin: new Vector3(),
+                direction: new Vector3(0, 0, -1),
+            };
+        }
+
+        return {
+            origin: muzzle.WorldPosition,
+            direction: muzzle.WorldCFrame.LookVector,
+        };
+    }
+
+    // public getFireInputs(): { origin: Vector3; direction: Vector3 } {
+    //     const character = this.owner as Player | Model;
+    //     const model = character.IsA("Player") ? character.Character : character;
+
+    //     if (!model) {
+    //         warn("Character model not found");
+    //         return {
+    //             origin: new Vector3(),
+    //             direction: new Vector3(0, 0, -1),
+    //         };
+    //     }
+
+    //     const head = model.FindFirstChild("Head") as BasePart;
+    //     if (!head || !head.IsA("BasePart")) {
+    //         warn("Head not found or invalid");
+    //         return {
+    //             origin: new Vector3(),
+    //             direction: new Vector3(0, 0, -1),
+    //         };
+    //     }
+
+    //     return {
+    //         origin: head.Position,
+    //         direction: head.CFrame.LookVector,
+    //     };
+    // }
+
 }
 
 

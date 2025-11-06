@@ -22,8 +22,8 @@ type WeaponConstructor = new (
 const weaponRegistry: Record<string, WeaponConstructor> = {
     CarrotShooter_w: CarrotShooter,
     BlueberryBlaster_w: BlueberryBlaster,
-    MaizeMauler_w: BlueberryBlaster,
-    HeliosLaser_w: BlueberryBlaster,
+    MaizeMauler_w: MaizeMauler,
+    HeliosLaser_w: HeliosLaser,
 }
 
 export function createWeapon(

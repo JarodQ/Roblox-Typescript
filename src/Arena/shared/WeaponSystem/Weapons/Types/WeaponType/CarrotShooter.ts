@@ -21,7 +21,8 @@ export class CarrotShooter extends Weapon {
             this.stats.fireRate,
             (origin, direction) => {
 
-                const result = this.traceStrategy.trace(origin, direction, this.owner, this.stats.range);
+                const fireInputs = this.getFireInputs();
+                const result = this.traceStrategy.trace(fireInputs.origin, fireInputs.direction, this.owner, this.stats.range);
                 if (!result) return;
                 const context = defineContext(this.owner, result as RaycastResult, this.stats.damage)
                 // print(context);

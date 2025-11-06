@@ -4,6 +4,10 @@ const FireWeapon = new Instance("RemoteEvent");
 FireWeapon.Name = "FireWeapon";
 FireWeapon.Parent = ReplicatedStorage
 
+const StopFiring = new Instance("RemoteEvent");
+StopFiring.Name = "StopFiring";
+StopFiring.Parent = ReplicatedStorage
+
 const FireTracer = new Instance("RemoteEvent");
 FireTracer.Name = "FireTracer";
 FireTracer.Parent = ReplicatedStorage

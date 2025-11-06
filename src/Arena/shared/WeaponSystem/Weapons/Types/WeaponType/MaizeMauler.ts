@@ -16,12 +16,14 @@ export class MaizeMauler extends Weapon {
         super(owner, weaponStats, tool);
 
         this.traceStrategy = new HitscanTrace();
+        this.tool = tool;
 
         this.firingMode = new AutoFiring(
             this.stats.fireRate,
             (origin, direction) => {
-
-                const result = this.traceStrategy.trace(origin, direction, this.owner, this.stats.range);
+                print("Firing Maize Mauler")
+                const fireInputs = this.getFireInputs();
+                const result = this.traceStrategy.trace(fireInputs.origin, fireInputs.direction, this.owner, this.stats.range);
                 if (!result) return;
                 const context = defineContext(this.owner, result as RaycastResult, this.stats.damage)
                 // print(context);
@@ -30,4 +32,6 @@ export class MaizeMauler extends Weapon {
             }
         );
     }
+
+
 }

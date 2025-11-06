@@ -4,7 +4,7 @@ import { DamageContext } from "Arena/shared/Damage/DamageService";
 //Get damage RemoteEvent from replicatedStorage
 const damageEvent = ReplicatedStorage.WaitForChild("DamageEvents") as Folder;
 const toVictim = damageEvent.WaitForChild("DamageTaken") as RemoteEvent;
-print(toVictim)
+// print(toVictim)
 
 //Get Player and Player UI from StarterPlayer
 const player = Players.LocalPlayer

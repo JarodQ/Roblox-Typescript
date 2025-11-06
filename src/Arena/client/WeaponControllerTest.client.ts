@@ -56,7 +56,7 @@ for (const child of owner.GetChildren()) {
 
     const weapon = createWeapon(weaponType, owner, tool);
     weapons.push({ weapon, muzzle: nozzle });
-    print("Weapon added");
+    // print("Weapon added");
 }
 
 const TURNOFF = false;

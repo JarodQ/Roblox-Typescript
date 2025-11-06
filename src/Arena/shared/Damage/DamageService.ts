@@ -34,7 +34,7 @@ export function applyDamage(context: DamageContext) {
     if (context.victimModel === undefined) return;
     const humanoid = context.victimModel.FindFirstChildOfClass("Humanoid");
     if (!humanoid) return;
-    print(`Hit player: ${context.victimPlayer}`)
+    // print(`Hit player: ${context.victimPlayer}`)
     //humanoid.TakeDamage(context.damageAmount);
     // print(`Damage amount: ${context.damageAmount}`)
     humanoid.Health -= context.damageAmount;

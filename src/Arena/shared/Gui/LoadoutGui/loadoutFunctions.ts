@@ -22,13 +22,13 @@ export const loadoutFunctions = {
         loadLoadoutRemote.OnClientEvent.Connect((playerLoadouts, loadouts: [keyof Loadouts, Loadout][]) => {
             const selectorFrame = getGui(guiElements.frames, "Selector");
             myLoadouts = playerLoadouts;
-            print("Loadouts: ", myLoadouts)
+            // print("Loadouts: ", myLoadouts)
             if (!selectorFrame) return;
             for (const frame of selectorFrame?.GetChildren() ?? []) {
-                print("Frame: ", frame.IsA("Frame"))
+                // print("Frame: ", frame.IsA("Frame"))
                 if (frame.IsA("Frame")) {
                     const entry = loadouts.find(([key]) => key === frame.Name);
-                    print("entry: ", entry)
+                    // print("entry: ", entry)
                     if (entry) {
                         const [key, currentLoadout] = entry;
                         const loadoutButton = frame?.FindFirstChild("SelectLoadout");
@@ -107,7 +107,7 @@ export const loadoutFunctions = {
 
     },
     onPrimaryClicked(instance: Instance, guiElements: GuiElements) {
-        print("Primary Weapon Slot Selected!");
+        // print("Primary Weapon Slot Selected!");
         const primaryFrame = getGui(guiElements.frames, "Primary");
         const secondaryFrame = getGui(guiElements.frames, "Secondary");
         const utilityFrame = getGui(guiElements.frames, "Utility");
@@ -116,7 +116,7 @@ export const loadoutFunctions = {
         if (utilityFrame) utilityFrame.Visible = false;
     },
     onSecondaryClicked(instance: Instance, guiElements: GuiElements) {
-        print("Secondary Weapon selected!");
+        // print("Secondary Weapon selected!");
         const primaryFrame = getGui(guiElements.frames, "Primary");
         const secondaryFrame = getGui(guiElements.frames, "Secondary");
         const utilityFrame = getGui(guiElements.frames, "Utility");
@@ -125,7 +125,7 @@ export const loadoutFunctions = {
         if (utilityFrame) utilityFrame.Visible = false;
     },
     onUtilityClicked(instance: Instance, guiElements: GuiElements) {
-        print("Utility Selected!");
+        // print("Utility Selected!");
         const primaryFrame = getGui(guiElements.frames, "Primary");
         const secondaryFrame = getGui(guiElements.frames, "Secondary");
         const utilityFrame = getGui(guiElements.frames, "Utility");
@@ -134,19 +134,19 @@ export const loadoutFunctions = {
         if (utilityFrame) utilityFrame.Visible = true;
     },
     swapPrimary(instance: Instance, guiElements: GuiElements) {
-        print("Open Buy Store!");
+        // print("Open Buy Store!");
 
     },
     swapSecondary(instance: Instance, guiElements: GuiElements) {
-        print("Open Sell Store!");
+        // print("Open Sell Store!");
 
     },
     swapUtility(instance: Instance, guiElements: GuiElements) {
-        print("Open VIP Store!");
+        // print("Open VIP Store!");
 
     },
     saveChanges(instance: Instance, guiElements: GuiElements) {
-        print("Saving Changes to Player's Data!!!")
+        // print("Saving Changes to Player's Data!!!")
         const loadout = getGui(guiElements.txtLabels, "CurrentLoadout");
         const loadoutSelector = getGui(guiElements.frames, 'Selector');
         const primarySelect = getGui(guiElements.frames, "PrimarySelect");
@@ -168,7 +168,7 @@ export const loadoutFunctions = {
             const utiltyFrame = selectLoadout?.FindFirstChild("utility");
             const utiltyImage = utiltyFrame?.FindFirstChild("Image") as ImageLabel;
             if (primaryFrame && secondaryFrame && utiltyFrame && primaryImage && secondaryImage && utiltyImage) {
-                print("attributes: ", primaryAttribute, secondaryAttribute, utilityAttribute)
+                // print("attributes: ", primaryAttribute, secondaryAttribute, utilityAttribute)
                 if (primaryAttribute !== "") {
                     primaryFrame.SetAttribute("Weapon", primaryAttribute);
                     primaryImage.Image = WEAPON_IMAGES[primaryAttribute as keyof WeaponFlags];
@@ -197,7 +197,7 @@ export const loadoutFunctions = {
 
     },
     changeEquipment(instance: Instance, guiElements: GuiElements) {
-        print("Change Equipment Called");
+        // print("Change Equipment Called");
         if (instance.Name === "PrimaryWeapon") {
             const primarySelect = getGui(guiElements.frames, "PrimarySelect");
             const imageLabel = primarySelect?.FindFirstChild("SelectLoadout")?.FindFirstChild("Item")?.FindFirstChild("ImageLabel") as ImageLabel;
@@ -224,7 +224,7 @@ export const loadoutFunctions = {
 
 function addWeaponOption(frame: Frame, slot: number, buttonPREFAB: GuiButton, weapon: (keyof WeaponFlags)) {
     const image = WEAPON_IMAGES[weapon];
-    print(`Adding Weapon: ${weapon} Option to : ${frame} and setting Image ${image}`);
+    // print(`Adding Weapon: ${weapon} Option to : ${frame} and setting Image ${image}`);
 
     const button = buttonPREFAB.Clone();
     button.Name = frame.Name + "Weapon";
@@ -242,7 +242,7 @@ export function setLoadoutFrames(
     unlockedWeapons: (keyof WeaponFlags)[],
     loadoutTuples: [keyof Loadouts, Loadout][] // ✅ not Loadouts
 ) {
-    print("Setting Loadout Frames")
+    // print("Setting Loadout Frames")
     const primaryFrame = getGui(guiElements.frames, "Primary");
     const secondaryFrame = getGui(guiElements.frames, "Secondary");
     const utilityFrame = getGui(guiElements.frames, "Utility");
@@ -256,8 +256,8 @@ export function setLoadoutFrames(
     let utilitySlots = 1;
     for (const weapon of unlockedWeapons) {
         const slots = WEAPON_SLOT_RULES[weapon];
-        print(`iterating over unlocked weapons.\n Slots: ${slots}`);
-        print(!primaryFrame, !buttonPREFAB)
+        // print(`iterating over unlocked weapons.\n Slots: ${slots}`);
+        // print(!primaryFrame, !buttonPREFAB)
         if (!slots) continue;
 
         if (slots.includes("primary")) {
