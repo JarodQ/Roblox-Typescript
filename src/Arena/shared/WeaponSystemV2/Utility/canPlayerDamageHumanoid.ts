@@ -2,18 +2,18 @@ import { Players } from "@rbxts/services";
 
 export function canPlayerDamageHumanoid(player: Player, taggedHumanoid: Humanoid): boolean {
     // If the humanoid is already dead, no need to apply more damage
-    print("Checking if player can damage humanoid")
+    // print("Checking if player can damage humanoid")
     if (taggedHumanoid.Health <= 0) {
-        print("Tagged humanoid has no health")
+        // print("Tagged humanoid has no health")
         return false;
     }
 
     const taggedCharacter = taggedHumanoid.Parent;
     const taggedPlayer = Players.GetPlayerFromCharacter(taggedCharacter);
-    print("taggedPlayer")
+    // print("taggedPlayer")
     // If the player tagged a non-player humanoid then allow damage
     if (!taggedPlayer) {
-        print("Non Player humanoid")
+        // print("Non Player humanoid")
         return true;
     }
 

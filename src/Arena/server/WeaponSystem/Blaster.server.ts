@@ -1,6 +1,6 @@
 import { Players, ReplicatedStorage, ServerScriptService } from "@rbxts/services";
 
-import { Constants } from "Arena/shared/Constants";
+import Constants from "Arena/shared/WeaponSystemV2/Weapon/Constants";
 import validateInstance from "Common/server/Utility/validateInstance";
 import validateShootArguments from "./validateShootArguments";
 import validateShot from "./validateShot";
@@ -20,15 +20,24 @@ const eliminatedEvent = events.WaitForChild("Eliminated") as BindableEvent;
 
 
 function onShootEvent(player: Player, ...args: unknown[]) {
-    const [timestamp, blaster, origin, tagged] = args as [number, Tool, CFrame, Map<string, Humanoid>];
+    const [timestamp, blaster, origin, tagged] = args as [
+        number,
+        Tool,
+        CFrame,
+        Map<string, { humanoid: Humanoid; isCritical: boolean }>
+    ];
+    print("Validating shot")
     if (!validateShootArguments(timestamp, blaster, origin, tagged)) return;
     if (!validateShot(player, timestamp, blaster, origin)) return;
+    print("Shot validated")
+
 
     const spread = blaster.GetAttribute(Constants.SPREAD_ATTRIBUTE) as number;
     const raysPerShot = blaster.GetAttribute(Constants.RAYS_PER_SHOT_ATTRIBUTE) as number;
     const range = blaster.GetAttribute(Constants.RANGE_ATTRIBUTE) as number;
     const rayRadius = blaster.GetAttribute(Constants.RAY_RADIUS_ATTRIBUTE) as number;
-    const damage = blaster.GetAttribute(Constants.DAMAGE_ATTRIBUTE) as number;
+    const normalDamage = blaster.GetAttribute(Constants.DAMAGE_ATTRIBUTE) as number;
+    const criticalDamage = blaster.GetAttribute(Constants.CRITICAL_DAMAGE_ATTRIBUTE) as number;
 
     const ammo = blaster.GetAttribute(Constants.AMMO_ATTRIBUTE) as number;
     blaster.SetAttribute(Constants.AMMO_ATTRIBUTE, ammo - 1);
@@ -41,35 +50,32 @@ function onShootEvent(player: Player, ...args: unknown[]) {
 
     const rayResults = castRays(player, origin.Position, rayDirections, rayRadius, true);
 
-    tagged.forEach((taggedHumanoid, indexStr) => {
+    tagged.forEach(({ humanoid, isCritical }, indexStr) => {
         const index = tonumber(indexStr);
-        print("index: ", index)
         if (index === undefined) return;
 
         const rayResult = rayResults[index - 1];
         const rayDirection = rayDirections[index - 1];
-        print("RayResult: ", rayResult, " Ray Direction: ", rayDirection)
         if (!rayResult || !rayDirection) return;
 
-        if (!validateTag(player, taggedHumanoid, origin.Position, rayDirection, rayResult)) return;
-        print("Tag Validated");
-        (rayResult as RayResult).taggedHumanoid = taggedHumanoid;
+        if (!validateTag(player, humanoid, origin.Position, rayDirection, rayResult)) return;
+        (rayResult as RayResult).taggedHumanoid = humanoid;
 
-        const model = taggedHumanoid.FindFirstAncestorOfClass("Model");
+        const model = humanoid.FindFirstAncestorOfClass("Model");
         if (model) {
             const modelPosition = model.GetPivot().Position;
             const distance = modelPosition.sub(origin.Position).Magnitude;
             rayResult.position = origin.Position.add(rayDirection.Unit.mul(distance));
         }
-        print("model found");
-        if (taggedHumanoid.Health <= 0) return;
 
-        taggedHumanoid.TakeDamage(damage);
-        print("Humanoid: ", taggedHumanoid, " Took ", damage, " damage!")
-        taggedEvent.Fire(player, taggedHumanoid, damage);
+        if (humanoid.Health <= 0) return;
+        print("Applying damage")
+        const damage = isCritical ? criticalDamage : normalDamage;
+        humanoid.TakeDamage(damage);
+        taggedEvent.Fire(player, humanoid, damage);
 
-        if (taggedHumanoid.Health <= 0) {
-            eliminatedEvent.Fire(player, taggedHumanoid, damage);
+        if (humanoid.Health <= 0) {
+            eliminatedEvent.Fire(player, humanoid, damage);
         }
     });
 
@@ -91,6 +97,7 @@ function onShootEvent(player: Player, ...args: unknown[]) {
         replicateShotRemote.FireClient(otherPlayer, blaster, origin.Position, rayResults);
     }
 }
+
 
 function onReloadEvent(
     player: Player,

@@ -1,5 +1,5 @@
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "../Weapon/Constants";
 
 const laserBeamTemplate = ReplicatedStorage.WaitForChild("Blaster")
     .WaitForChild("Objects")

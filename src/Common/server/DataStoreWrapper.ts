@@ -17,7 +17,7 @@ interface IDataStore {
     ): LuaTuple<[unknown, DataStoreKeyInfo]>;
 }
 
-print("🧪 Store object:", store);
+// print("🧪 Store object:", store);
 
 function getLockKey(userId: number): string {
     return `${getPlayerKey(userId)}:lock`;
@@ -72,11 +72,11 @@ export async function loadPlayerData(userId: number): Promise<PlayerData> {
 // Saves player data using UpdateAsync + proper LuaTuple handling
 export async function savePlayerData(userId: number, data: PlayerData): Promise<void> {
     const key = getPlayerKey(userId);
-    print("🪵 store =", store);
+    // print("🪵 store =", store);
     await retryAsync(() => {
-        print("📦 About to call UpdateAsync");
+        // print("📦 About to call UpdateAsync");
         const result = store.UpdateAsync(key, (oldValue) => {
-            print(`Attempting to save User: ${key}'s date: ${data}`);
+            // print(`Attempting to save User: ${key}'s date: ${data}`);
             return $tuple(data); // ✅ Wrap the return in $tuple to satisfy roblox-ts
         }) as LuaTuple<[PlayerData | undefined, DataStoreKeyInfo]>;
 
@@ -93,13 +93,13 @@ export async function retryAsync<T>(
     let attempts = 0;
     while (true) {
         try {
-            print("🔄 retryAsync: Attempt", attempts + 1);
+            // print("🔄 retryAsync: Attempt", attempts + 1);
             const result = await fn();
-            print("✅ retryAsync succeeded");
-            print(`Async Result: ${result}`)
+            // print("✅ retryAsync succeeded");
+            // print(`Async Result: ${result}`)
             return result;
         } catch (error) {
-            print("❌ retryAsync failed:", error);
+            // print("❌ retryAsync failed:", error);
             attempts++;
             if (attempts > maxRetries) throw error;
             wait(delay * attempts);

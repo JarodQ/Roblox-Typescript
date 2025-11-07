@@ -6,19 +6,19 @@ import { Players } from "@rbxts/services";
 const player = Players.LocalPlayer!;
 const backpack = player.WaitForChild("Backpack") as Backpack;
 const blaster = script?.Parent?.Parent as Tool;
-print("Blaster found: ", blaster)
+// print("Blaster found: ", blaster)
 
 let controller: BlasterController | undefined;
 
 if (blaster && blaster.IsA("Tool")) {
     blaster.Equipped.Connect(() => {
-        print("blaster equipped")
+        // print("blaster equipped")
         if (!controller) {
             controller = new BlasterController(blaster);
         }
     });
     // controller = new BlasterController(blaster);
-    print("Controller initialized")
+    // print("Controller initialized")
     blaster.Destroying.Connect(() => {
         controller?.destroy();
     });

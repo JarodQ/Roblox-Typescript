@@ -1,4 +1,6 @@
-export const Constants = {
+// import { KeyCode } from "@rbxts/types";
+
+const Constants = {
     RAY_EXCLUDE_TAG: "RayExclude",
     NON_STATIC_TAG: "NonStatic",
 
@@ -10,6 +12,7 @@ export const Constants = {
     AMMO_ATTRIBUTE: "_ammo",
     RELOADING_ATTRIBUTE: "_reloading",
     DAMAGE_ATTRIBUTE: "damage",
+    CRITICAL_DAMAGE_ATTRIBUTE: "critDamage",
     FIRE_MODE_ATTRIBUTE: "fireMode",
     MAGAZINE_SIZE_ATTRIBUTE: "magazineSize",
     RANGE_ATTRIBUTE: "range",
@@ -23,17 +26,28 @@ export const Constants = {
     RECOIL_MAX_ATTRIBUTE: "recoilMax",
     UNANCHORED_IMPULSE_FORCE_ATTRIBUTE: "unanchoredImpulseForce",
 
+    AIM_ASSIST_RANGE_ATTRIBUTE: "aimAssistRange",
+    AIM_ASSIST_FOV_ATTRIBUTE: "aimAssistFov",
+    AIM_ASSIST_FRICTION_STRENGTH_ATTRIBUTE: "aimAssistFrictionStrength",
+    AIM_ASSIST_TRACKING_STRENGTH_ATTRIBUTE: "aimAssistTrackingStrength",
+    AIM_ASSIST_CENTERING_STRENGTH_ATTRIBUTE: "aimAssistCenteringStrength",
+
     KEYBOARD_RELOAD_KEY_CODE: Enum.KeyCode.R,
     GAMEPAD_RELOAD_KEY_CODE: Enum.KeyCode.ButtonX,
 
-    // UI
     UI_SMALL_SCREEN_THRESHOLD: 500,
     UI_SMALL_SCREEN_SCALE: 0.6,
 
-    // Audio
     HITMARKER_SOUND_DELAY: 0.1,
 
-    // ViewModel
+    AIM_ASSIST_BIND_NAME_START: "AimAssistStart",
+    AIM_ASSIST_BIND_NAME_APPLY: "AimAssistApply",
+    AIM_ASSIST_TARGET_TAG: "Target",
+
+    AIM_ASSIST_DEADZONE: 0.1,
+    AIM_ASSIST_INACTIVITY: 0.1,
+    AIM_ASSIST_MIN_RANGE: 10,
+
     VIEW_MODEL_BIND_NAME: "BlasterViewModel",
     VIEW_MODEL_OFFSET: new CFrame(0.9, -1.3, -1.3),
     VIEW_MODEL_BOBBING_SPEED: 0.4,
@@ -41,13 +55,12 @@ export const Constants = {
     VIEW_MODEL_BOBBING_TRANSITION_SPEED: 10,
     VIEW_MODEL_RELOAD_FADE_TIME: 0.1,
 
-    // Recoil
     RECOIL_BIND_NAME: "Recoiler",
     RECOIL_STOP_SPEED: 10,
     RECOIL_ZOOM_RETURN_SPEED: 20,
     RECOIL_DEFAULT_FOV: 70,
-    RECOIL_MULTIPLIER: 30,
 
-    // VFX
     LASER_BEAM_VISUAL_SPEED: 200,
 };
+
+export default Constants;

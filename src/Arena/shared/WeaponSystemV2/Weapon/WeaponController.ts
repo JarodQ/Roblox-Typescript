@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "./Constants";
 import AimAssist from "./AimAssist/AimAssistController";
 import AimAssistEnum from "./AimAssist/AimAssistEnum";
 import TouchInputController from "./TouchInputcontroller";
@@ -11,6 +11,8 @@ import disconnectAndClear from "Common/shared/Utility/disconnectAndClear";
 import { getRayDirections } from "../Utility/getRayDirection";
 import { drawRayResults } from "../Utility/drawRayResults";
 import { castRays } from "../Utility/castRays";
+
+import { ContextActionService } from "@rbxts/services";
 
 const player = Players.LocalPlayer;
 const camera = Workspace.CurrentCamera!;
@@ -53,7 +55,7 @@ export class BlasterController {
         this.reloading = blaster.GetAttribute(Constants.RELOADING_ATTRIBUTE) as boolean;
 
         this.initialize();
-        print("BlasterController Initialize for: ", blaster.Name)
+        // print("BlasterController Initialize for: ", blaster.Name)
     }
 
     private isHumanoidAlive(): boolean {
@@ -98,19 +100,31 @@ export class BlasterController {
         const rayDirections = getRayDirections(origin, raysPerShot, spread, now).map((dir) => dir.mul(range));
         const rayResults = castRays(player, origin.Position, rayDirections, rayRadius);
 
-        const tagged: Record<string, Humanoid> = {};
+        const tagged: Record<string, { humanoid: Humanoid; isCritical: boolean }> = {};
         let didTag = false;
 
         for (const [index, result] of pairs(rayResults)) {
-            print("RayResult tagged: ", result.taggedHumanoid)
             if (result.taggedHumanoid) {
-                tagged[tostring(index)] = result.taggedHumanoid;
+                tagged[tostring(index)] = {
+                    humanoid: result.taggedHumanoid,
+                    isCritical: result.isCritical ?? false,
+                };
                 didTag = true;
             }
         }
 
-        if (didTag) this.guiController.showHitmarker();
-        print("Firing shoot remote")
+
+        if (didTag) {
+            this.guiController.showHitmarker();
+
+            this.guiController.newBillboard(tagged, {
+                normal: this.blaster.GetAttribute(Constants.DAMAGE_ATTRIBUTE) as number,
+                critical: this.blaster.GetAttribute(Constants.CRITICAL_DAMAGE_ATTRIBUTE) as number,
+            });
+        }
+
+
+        // print("Firing shoot remote")
         shootRemote.FireServer(now, this.blaster, origin, tagged);
 
         const muzzlePosition = this.viewModelController.getMuzzlePosition();
@@ -255,6 +269,7 @@ export class BlasterController {
                     this.reload();
                 }
             }),
+
             UserInputService.InputChanged.Connect((input) => {
                 if (
                     input.UserInputType === Enum.UserInputType.Gamepad1 &&
@@ -268,8 +283,11 @@ export class BlasterController {
             }),
         );
 
+
         this.touchInputController.setReloadCallback(() => this.reload());
     }
+
+
 
     public destroy(): void {
         this.unequip();

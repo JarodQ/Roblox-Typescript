@@ -1,6 +1,6 @@
 
 import { ReplicatedStorage, RunService, SoundService, Workspace } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "./Constants";
 import disconnectAndClear from "Common/shared/Utility/disconnectAndClear";
 import lerp from "Common/shared/Utility/lerp";
 import bindSoundsToAnimationEvents from "Arena/shared/WeaponSystemV2/Utility/bindSoundToAnimationEvents";
@@ -58,6 +58,7 @@ class ViewModelController {
                 const track = animator.LoadAnimation(animation);
                 // this.animations[animation.Name] = track;
                 this.animations.set(animation.Name, track);
+                print("Binding animations: ", track, sounds, audioTarget)
                 if (audioTarget) bindSoundsToAnimationEvents(track, sounds, audioTarget);
             }
         }

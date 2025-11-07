@@ -1,6 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 // const Constants = require(ReplicatedStorage.WaitForChild("Blaster").WaitForChild("Constants") as ModuleScript);
-import { Constants } from "Arena/shared/Constants";
+import Constants from "Arena/shared/WeaponSystemV2/Weapon/Constants";
 
 export default function validateReload(player: Player, blaster: Tool): boolean {
     const character = player.Character;

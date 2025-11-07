@@ -1,5 +1,5 @@
 import { CollectionService, ReplicatedStorage, Workspace } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "../Weapon/Constants";
 import { canPlayerDamageHumanoid } from "./canPlayerDamageHumanoid";
 
 export interface RayResult {
@@ -7,6 +7,7 @@ export interface RayResult {
     position: Vector3;
     normal: Vector3;
     instance?: Instance;
+    isCritical?: boolean;
 }
 
 export function castRays(
@@ -57,14 +58,17 @@ export function castRays(
             rayResult.normal = raycastResult.Normal;
             rayResult.instance = raycastResult.Instance;
 
+            const hitPart = raycastResult.Instance;
             const humanoid = raycastResult.Instance.Parent?.FindFirstChildOfClass("Humanoid");
             if (humanoid && canPlayerDamageHumanoid(player, humanoid)) {
                 rayResult.taggedHumanoid = humanoid;
+                const isCriticalHit = hitPart.Name === "Head";
+                rayResult.isCritical = isCriticalHit;
             }
         }
-        print(rayResult.taggedHumanoid)
+        // print(rayResult.taggedHumanoid)
         rayResults.push(rayResult);
-        print("Printing rayresults: ", rayResults)
+        // print("Printing rayresults: ", rayResults)
     }
 
     return rayResults;

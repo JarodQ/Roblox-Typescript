@@ -1,5 +1,5 @@
 import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "./Constants";
 import lerp from "Common/shared/Utility/lerp";
 
 const camera = Workspace.CurrentCamera!;

@@ -10,6 +10,7 @@ export default function bindSoundsToAnimationEvents(
     target: Instance,
 ): void {
     animation.GetMarkerReachedSignal(SOUND_EVENT).Connect((param?: string) => {
+        print("Param: ", param)
         if (!param) return;
         const sound = sounds.FindFirstChild(param) as AudioPlayer | undefined;
         if (!sound) return;
@@ -20,6 +21,7 @@ export default function bindSoundsToAnimationEvents(
         if (!param) return;
         const folder = sounds.FindFirstChild(param) as Folder | undefined;
         if (!folder) return;
+
         playRandomSoundFromSource(folder, target);
     });
 }

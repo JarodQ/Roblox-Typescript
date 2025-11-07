@@ -1,6 +1,6 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 
-import Constants from "Arena/shared/WeaponSystemV2/Constants";
+import Constants from "Arena/shared/WeaponSystemV2/Weapon/Constants";
 
 const TIMESTAMP_BUFFER_CONSTANT = 1;
 const POSITION_BUFFER_CONSTANT = 5;

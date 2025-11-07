@@ -1,8 +1,10 @@
-import { Players, ReplicatedStorage, SoundService, TweenService, UserInputService } from "@rbxts/services";
-import Constants from "../Constants";
+import { Players, ReplicatedStorage, SoundService, TweenService, UserInputService, Debris } from "@rbxts/services";
+import Constants from "./Constants";
 import InputCategorizer from "./InputCategorizer";
 import disconnectAndClear from "Common/shared/Utility/disconnectAndClear";
 import playSoundFromSource from "../Utility/playSoundFromSource";
+
+
 
 const player = Players.LocalPlayer!;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -186,6 +188,114 @@ class GuiController {
         this.blasterGui.Destroy();
         this.reticleGui.Destroy();
     }
+
+
+    ///Test for billboardGui
+
+    private createBillboard(
+        target: Instance,
+        damage: number,
+        crit: boolean,
+    ) {
+        const duration = 0.5;
+
+        const billboard = new Instance("BillboardGui");
+        billboard.AlwaysOnTop = true;
+        billboard.StudsOffset = new Vector3(0, 5, 0);
+        billboard.Parent = target;
+
+        const text = new Instance("TextLabel");
+        text.Text = tostring(damage);
+        text.BackgroundTransparency = 1;
+        text.TextScaled = true;
+        text.TextStrokeTransparency = 0;
+        text.Parent = billboard;
+
+        if (crit) {
+            billboard.Size = new UDim2(0, 75, 0, 75);
+            text.Size = new UDim2(1, 0, 1, 0);
+            text.Font = Enum.Font.Bangers;
+            text.TextColor3 = new Color3(1, 0, 0);
+        } else {
+            billboard.Size = new UDim2(0, 50, 0, 50);
+            text.Size = new UDim2(0.9, 0, 0.9, 0);
+            text.AnchorPoint = new Vector2(0.5, 0.5);
+            text.Position = new UDim2(0.5, 0, 0.5, 0);
+            text.Font = Enum.Font.LuckiestGuy;
+            text.TextColor3 = new Color3(1, 1, 1);
+        }
+
+        const tweenInfo2 = new TweenInfo(0.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.In);
+        const tweenInfo3 = new TweenInfo(0.1, Enum.EasingStyle.Cubic, Enum.EasingDirection.In);
+        const tweenInfoText = new TweenInfo(0.25, Enum.EasingStyle.Cubic, Enum.EasingDirection.In);
+
+        const tween2 = TweenService.Create(billboard, tweenInfo2, {
+            StudsOffset: billboard.StudsOffset.add(new Vector3(-2, 1, 0)),
+            Size: new UDim2(0, 10, 0, 10),
+        });
+        const tween3 = TweenService.Create(billboard, tweenInfo3, {
+            StudsOffset: billboard.StudsOffset.add(new Vector3(-3, -2, 0)),
+        });
+        const tweenText = TweenService.Create(text, tweenInfoText, {
+            Rotation: -180,
+        });
+
+        Debris.AddItem(billboard, duration);
+
+        // Non-blocking tween sequence
+        tweenText.Play();
+        tween2.Play();
+
+        tween2.Completed.Connect(() => {
+            tween3.Play();
+        });
+    }
+
+
+    public newBillboard(
+        targets: Record<string, { humanoid: Humanoid; isCritical: boolean }> = {},
+        damage: { normal: number; critical: number },
+    ) {
+        for (const [, { humanoid, isCritical }] of pairs(targets)) {
+            const model = humanoid.Parent;
+            if (!model || !model.IsA("Model")) continue;
+
+            const existing = model.FindFirstChildOfClass("BillboardGui");
+
+            const finalDamage = (() => {
+                if (!existing) return isCritical ? damage.critical : damage.normal;
+
+                const label = existing.FindFirstChildOfClass("TextLabel");
+                const stacked = label
+                    ? (isCritical ? damage.critical : damage.normal) + (tonumber(label.Text) ?? 0)
+                    : isCritical ? damage.critical : damage.normal;
+
+                existing.Destroy();
+                return stacked;
+            })();
+
+            this.createBillboard(model, finalDamage, isCritical);
+        }
+    }
+
+
+
+    // export function damageHealth(
+    //     target: Model,
+    //     damage: number,
+    //     hit: BasePart,
+    //     shooter: Instance,
+    //     special: boolean,
+    // ) {
+    //     const humanoid = target.FindFirstChildOfClass("Humanoid");
+    //     if (!humanoid || humanoid.Health <= 0) return;
+
+    //     humanoid.Health -= damage;
+
+    //     const isCritical = hit.Name === "Head";
+    //     newBillboard(target, damage, isCritical, special);
+    // }
+
 }
 
 export default GuiController;

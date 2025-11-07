@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, UserInputService } from "@rbxts/services";
-import Constants from "../Constants";
+import Constants from "./Constants";
 import InputCategorizer from "./InputCategorizer";
 import disconnectAndClear from "Common/shared/Utility/disconnectAndClear";
 

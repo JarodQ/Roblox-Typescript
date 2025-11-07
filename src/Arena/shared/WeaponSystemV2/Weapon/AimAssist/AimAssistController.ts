@@ -1,5 +1,5 @@
 import { RunService, UserInputService } from "@rbxts/services";
-import Constants from "../../Constants";
+import Constants from "../Constants";
 import AimAssistEnum, { AimAssistEasingAttribute, AimAssistType, AimAssistSortingBehavior, AimAssistMethod } from "./AimAssistEnum";
 import TargetSelector, { SelectTargetResult } from "./TargetSelector";
 import AimAdjuster, { AimContext } from "./AimAdjuster";
