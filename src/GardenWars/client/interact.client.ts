@@ -1,22 +1,60 @@
-import { Players, ReplicatedStorage } from "@rbxts/services";
+// import { Players, ReplicatedStorage } from "@rbxts/services";
 
-const player = game.GetService("Players").LocalPlayer;
+// const player = game.GetService("Players").LocalPlayer;
+// const mouse = player.GetMouse();
+// const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
+
+// mouse.Button2Down.Connect(() => {
+//     const target = mouse.Target;
+//     if (target) {
+//         const clickPosition = mouse.Hit.Position;
+//         const playerPosition = player.Character?.PrimaryPart?.Position;
+
+//         if (playerPosition) {
+//             const distance = (clickPosition.sub(playerPosition)).Magnitude;
+//             //print(`Player is: ${distance} away from where they clicked!`);
+//             if (distance <= 30) {
+//                 const heldItem = player.Character?.FindFirstChildWhichIsA("Tool") as Tool;
+//                 interactEvent.FireServer(target, clickPosition, heldItem);
+//             }
+//         }
+//     }
+// })
+
+import { Players, ReplicatedStorage, UserInputService } from "@rbxts/services";
+
+const player = Players.LocalPlayer;
 const mouse = player.GetMouse();
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
-mouse.Button2Down.Connect(() => {
+function tryInteract() {
     const target = mouse.Target;
-    if (target) {
-        const clickPosition = mouse.Hit.Position;
-        const playerPosition = player.Character?.PrimaryPart?.Position;
+    if (!target) return;
 
-        if (playerPosition) {
-            const distance = (clickPosition.sub(playerPosition)).Magnitude;
-            //print(`Player is: ${distance} away from where they clicked!`);
-            if (distance <= 30) {
-                const heldItem = player.Character?.FindFirstChildWhichIsA("Tool") as Tool;
-                interactEvent.FireServer(target, clickPosition, heldItem);
-            }
-        }
+    const clickPosition = mouse.Hit.Position;
+    const playerPosition = player.Character?.PrimaryPart?.Position;
+    if (!playerPosition) return;
+
+    const distance = clickPosition.sub(playerPosition).Magnitude;
+    if (distance > 30) return;
+
+    const heldItem = player.Character?.FindFirstChildWhichIsA("Tool") as Tool;
+    interactEvent.FireServer(target, clickPosition, heldItem);
+}
+
+// ✅ Mouse Button 1 (left-click)
+mouse.Button1Down.Connect(() => {
+    tryInteract();
+});
+
+// ✅ Touch and Gamepad R2
+UserInputService.InputBegan.Connect((input, gameProcessed) => {
+    if (gameProcessed) return;
+
+    const isTouch = input.UserInputType === Enum.UserInputType.Touch;
+    const isGamepadR2 = input.UserInputType === Enum.UserInputType.Gamepad1 && input.KeyCode === Enum.KeyCode.ButtonR2;
+
+    if (isTouch || isGamepadR2) {
+        tryInteract();
     }
-})
+});
