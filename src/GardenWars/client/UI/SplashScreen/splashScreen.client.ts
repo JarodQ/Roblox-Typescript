@@ -3,7 +3,7 @@ import { Players, ReplicatedStorage, UserInputService, TweenService } from "@rbx
 import { StarterGui } from "@rbxts/services";
 
 // Disable toolbelt and reset button
-StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
+// StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 // pcall(() => StarterGui.SetCore("ResetButtonCallback", false));
 
 const splashProgressRemote = ReplicatedStorage.WaitForChild("SplashProgressRemote") as RemoteEvent;

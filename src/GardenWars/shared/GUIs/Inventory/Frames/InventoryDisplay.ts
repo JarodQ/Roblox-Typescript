@@ -510,7 +510,7 @@ export class InventoryDisplay {
 
         // Build a set of hotbar item IDs for fast lookup
         const hotbarItems = this.hotbarItems as (PlayerItemData | undefined)[];
-        print("hotbar items: ", hotbarItems)
+        // print("hotbar items: ", hotbarItems)
         const filteredHotbarItems: PlayerItemData[] = [];
 
         for (const item of hotbarItems) {
@@ -520,7 +520,7 @@ export class InventoryDisplay {
         }
 
         const hotbarIds = new Set(filteredHotbarItems.map((item) => item.id));
-        print("filtered hotbar items: ", hotbarIds)
+        // print("filtered hotbar items: ", hotbarIds)
 
 
         for (const [, entry] of pairs(playerData.items)) {

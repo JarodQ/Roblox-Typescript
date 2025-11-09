@@ -8,10 +8,10 @@ import { playerCache } from "Common/server/PlayerDataService";
 
 export function addPlant(player: Player, plant: Plants) {
     const data = playerCache.get(player.UserId);
-    print("CheckingData: ", player, data);
+    // print("CheckingData: ", player, data);
     if (!data) return;
     data.plants.push(plant);
-    print(`Added plant for ${player.Name}:`, plant);
+    // print(`Added plant for ${player.Name}:`, plant);
 }
 
 export function removePlant(player: Player, position: Vector3) {

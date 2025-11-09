@@ -199,7 +199,7 @@ function isBasePart(value: unknown): value is BasePart {
     return typeIs(value, "Instance") && value.IsA("BasePart");
 }
 
-function resolveInteractableFromPart(target: unknown): Interactable | undefined {
+export function resolveInteractableFromPart(target: unknown): Interactable | undefined {
     if (isBasePart(target)) {
         const root = target.FindFirstAncestorOfClass("Model") ?? target;
         return InteractionRegistry.get(root);
@@ -211,6 +211,7 @@ interactEvent.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
     const [target, clickPosition, interactee] = args;
     if (target) {
         const interactable = resolveInteractableFromPart(target);
+        print("interactable: ", interactable)
         interactable?.onInteract(player, clickPosition, interactee);
     }
 

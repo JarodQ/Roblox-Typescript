@@ -136,6 +136,7 @@ export class PlantMaster implements Harvestable {
     private stageGrowthTime: number;
     private totalGrowthTime: number;
     private grown: boolean;
+    private cancelGrowth = false;
 
 
     constructor(seed: Seed) {
@@ -148,7 +149,7 @@ export class PlantMaster implements Harvestable {
 
 
 
-    public plant(owner: Player, position: Vector3, replanting: boolean): void {
+    public plant(owner: Player, position: Vector3, replanting: boolean, onFullyGrown?: () => void): void {
         print(owner, position, replanting)
         const character = owner.Character ?? owner.CharacterAdded.Wait()[0];
         const root = character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
@@ -191,7 +192,7 @@ export class PlantMaster implements Harvestable {
         this.seedProgress = this.seedProgress.Clone();
         this.seedProgress.Parent = this.plantPart;
         this.setStageProgressBars();
-        this.trackGrowth();
+        this.trackGrowth(onFullyGrown);
         return;
     }
 
@@ -209,6 +210,29 @@ export class PlantMaster implements Harvestable {
     public isReadyToHarvest(): boolean {
         return this.grown;
     }
+
+    public forceGrow(onFullyGrown?: () => void) {
+        this.cancelGrowth = true;
+
+        while (this.growthStage < this.seed.PREFABS.size() - 1) {
+            this.evolveGrowth();
+            this.growthStage++;
+        }
+        this.grown = true;
+
+        const progressBar = this.seedProgress.GetDescendants().find(
+            (d) => d.Name === "ProgressBar" && d.IsA("Frame")
+        ) as Frame | undefined;
+
+        if (progressBar) {
+            progressBar.Position = new UDim2(0, 0, 0, 0);
+        }
+
+        if (onFullyGrown) {
+            onFullyGrown();
+        }
+    }
+
 
 
     public harvest(player: Player) {
@@ -270,25 +294,73 @@ export class PlantMaster implements Harvestable {
         }
     }
 
-    private trackGrowth(): void {
-        const progressBar: Frame = this.seedProgress.GetDescendants().find(d => d.Name === "ProgressBar" && d.IsA("Frame")) as Frame;
-        const progress = new UDim2(-1, 0, 0, 0);
+    // private trackGrowth(onFullyGrown?: () => void): void {
+    //     const progressBar: Frame = this.seedProgress.GetDescendants().find(d => d.Name === "ProgressBar" && d.IsA("Frame")) as Frame;
+    //     const progress = new UDim2(-1, 0, 0, 0);
+    //     if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;
+    //     do {
+    //         const deltaTime = DateTime.now().UnixTimestampMillis - this.growthStart;
+    //         let progress = new UDim2(math.clamp(-1 + deltaTime / this.totalGrowthTime, -1, 0), 0, 0, 0);
+    //         progressBar.Position = progress;
+    //         if (DateTime.now().UnixTimestampMillis - this.currentStageTime >= this.stageGrowthTime) {
+    //             this.currentStageTime = DateTime.now().UnixTimestampMillis;
+    //             const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
+    //             coroutine.resume(trackGrowthCoro);
+    //         }
+    //         wait();
+    //     } while (DateTime.now().UnixTimestampMillis - this.growthStart <= this.totalGrowthTime);
+    //     const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
+    //     coroutine.resume(trackGrowthCoro);
+    //     this.grown = true;
+    //     if (onFullyGrown) {
+    //         onFullyGrown();
+    //     }
+    // }
+
+    private trackGrowth(onFullyGrown?: () => void): void {
+        const progressBar = this.seedProgress.GetDescendants().find(
+            (d) => d.Name === "ProgressBar" && d.IsA("Frame")
+        ) as Frame;
+
         if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;
+
         do {
+            if (this.cancelGrowth) {
+                print("Growth tracking cancelled.");
+                return;
+            }
+
             const deltaTime = DateTime.now().UnixTimestampMillis - this.growthStart;
-            let progress = new UDim2(math.clamp(-1 + deltaTime / this.totalGrowthTime, -1, 0), 0, 0, 0);
+            const progress = new UDim2(math.clamp(-1 + deltaTime / this.totalGrowthTime, -1, 0), 0, 0, 0);
             progressBar.Position = progress;
+
             if (DateTime.now().UnixTimestampMillis - this.currentStageTime >= this.stageGrowthTime) {
                 this.currentStageTime = DateTime.now().UnixTimestampMillis;
-                const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
+                const trackGrowthCoro = coroutine.create(() => this.evolveGrowth());
                 coroutine.resume(trackGrowthCoro);
             }
+
             wait();
-        } while (DateTime.now().UnixTimestampMillis - this.growthStart <= this.totalGrowthTime);
-        const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
+        } while (
+            !this.cancelGrowth &&
+            DateTime.now().UnixTimestampMillis - this.growthStart <= this.totalGrowthTime
+        );
+
+        if (this.cancelGrowth) {
+            print("Growth tracking cancelled after loop.");
+            return;
+        }
+
+        const trackGrowthCoro = coroutine.create(() => this.evolveGrowth());
         coroutine.resume(trackGrowthCoro);
+
         this.grown = true;
+
+        if (onFullyGrown) {
+            onFullyGrown();
+        }
     }
+
 
     private setStageProgressBars() {
         const stagesFolder = this.seedProgress.GetDescendants().find(d => d.Name === "Stages" && d.IsA("Folder")) as Folder;

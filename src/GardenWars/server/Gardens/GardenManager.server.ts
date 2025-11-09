@@ -18,7 +18,7 @@ teleportToGarden.Name = "TeleportToGarden";
 teleportToGarden.Parent = ReplicatedStorage;
 
 const gardensFolder = Workspace.FindFirstChild("Gardens") as Folder | undefined
-const PlayerGardens: Map<number, PlayerGarden> = new Map();
+export const PlayerGardens: Map<number, PlayerGarden> = new Map();
 const assignedGardens: Map<number, Folder> = new Map();
 //const assignedAllotments: Map<String, PlayerAllotment> = new Map();
 
