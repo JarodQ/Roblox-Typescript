@@ -30,7 +30,6 @@ assignedGardens.set(testKey, gardensFolder?.FindFirstChildOfClass("Folder") as F
 
 function assignGarden(player: Player, gardensFolder: Folder) {
     const playerId = player.UserId;
-    print("AssigningGarden!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     let gardensArray: Folder[] = [];
     for (const [, garden] of assignedGardens) {
         gardensArray.push(garden);

@@ -179,7 +179,7 @@ export class HotbarGui extends MainGui {
                                 }
                             }
 
-                            print(this.hotbarItems)
+                            // print(this.hotbarItems)
                             requestToolEquip.FireServer(this.hotbarItems[i]);
                         });
                     },

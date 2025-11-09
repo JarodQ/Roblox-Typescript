@@ -9,6 +9,7 @@ import { loadPlayerData } from "Common/server/DataStoreWrapper";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
 import { playerCache } from "Common/server/PlayerDataService";
+import { PlantRarity } from "Common/server/Data/Template";
 
 // const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
 // const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
@@ -70,6 +71,8 @@ export function replantSavedPlants(player: Player, data: PlayerData) {
             name: plant.plantId,
             PREFABS: PREFABList,
             plantProgress: progressBar[0],
+            rarity: "Common",
+            level: 1,
         };
 
         const replantedSeed = new TestSeed1(definedSeed);
@@ -89,20 +92,12 @@ export type Seed = {
     name: string;
     PREFABS: (Part | Model)[];
     plantProgress: BillboardGui;
-}
-
-export type SeedMods = {
-    seedType: string;
-    day: Boolean
-    night: Boolean;
-    wet: Boolean;
-    charged: Boolean;
-    haste: Boolean
-    fireAspect: Boolean;
+    rarity: PlantRarity;
+    level: number;
 }
 
 export function handlePlantSeedEvent(player: Player, ...args: unknown[]) {
-    print("Handling Planting")
+    // print("Handling Planting")
     const [seedName, position] = args as [string, Vector3];
 
     const prefabList = PREFABS.getPREFAB("seeds", seedName) as Part[];
@@ -117,6 +112,8 @@ export function handlePlantSeedEvent(player: Player, ...args: unknown[]) {
         name: seedName,
         PREFABS: prefabList,
         plantProgress: progressBars[0],
+        rarity: "Common",
+        level: 1,
     };
 
     const plant = new TestSeed1(seed);
@@ -141,16 +138,24 @@ export class PlantMaster implements Harvestable {
 
     constructor(seed: Seed) {
         this.seed = seed;
+        this.seed.rarity = seed.rarity ?? "Common";
+        this.seed.level = seed.level ?? 1;
         this.seedProgress = this.seed.plantProgress;
         this.stageGrowthTime = 5 * this.growthRate * 1000; //*1000 -> Convert to milliseconds
         this.totalGrowthTime = 5 * this.growthRate * (this.seed.PREFABS.size() - 1) * 1000; //*1000 -> Convert to milliseconds
         this.grown = false;
     }
 
+    public getPlantedAt(): number {
+        return math.floor((this.growthStart ?? DateTime.now().UnixTimestampMillis) / 1000);
+    }
 
+    public getGrowthDuration(): number {
+        return math.floor(this.totalGrowthTime / 1000);
+    }
 
     public plant(owner: Player, position: Vector3, replanting: boolean, onFullyGrown?: () => void): void {
-        print(owner, position, replanting)
+        // print(owner, position, replanting)
         const character = owner.Character ?? owner.CharacterAdded.Wait()[0];
         const root = character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
         let orientation = new Vector3(0, 0, 0);;
@@ -175,7 +180,6 @@ export class PlantMaster implements Harvestable {
 
         // Add plant to player data (serialized)
         if (!replanting) {
-            print("Adding Plant: Plants.ts")
             addPlant(owner, {
                 plantId: this.seed.name,
                 position: serializeVector3(this.seedPosition),
@@ -236,10 +240,8 @@ export class PlantMaster implements Harvestable {
 
 
     public harvest(player: Player) {
-        print("Seed Name: ", this.seed.name)
         const prefab = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part;
         const plantPrefab = prefab.Clone();
-        print("Prefab: ", plantPrefab)
         let plantPosition: Vector3;
         if (this.plantPart?.IsA("Model")) {
             plantPosition = this.plantPart.GetPivot().Position;
@@ -254,10 +256,15 @@ export class PlantMaster implements Harvestable {
         removePlant(player, this.seedPosition);
         this.grown = false;
 
-        print("Prefab: ", plantPrefab)
         // Fire client-side visual event
         const harvestVisualEvent = ReplicatedStorage.WaitForChild("HarvestVisualEvent") as RemoteEvent;
         harvestVisualEvent.FireClient(player, this.seed.name, plantPosition);
+    }
+    public discardPlant(player: Player) {
+        this.plantPart?.Destroy();
+        removePlant(player, this.seedPosition);
+        this.grown = false;
+        this.plantPart = undefined;
     }
 
     // private handlePlayerData(player: Player, seedName: string) {
@@ -381,8 +388,4 @@ export class PlantMaster implements Harvestable {
 
 export class TestSeed1 extends PlantMaster {
     seedType: String = "TestSeed1";
-    wet: Boolean = true;
-    charged: Boolean = false;
-    haste: Boolean = false
-    fireAspect: Boolean = false;
 }

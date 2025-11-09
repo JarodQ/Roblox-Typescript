@@ -76,7 +76,7 @@ getPlayerData.OnServerInvoke = (player: Player) => {
 };
 
 export function findPlayerItemVariant(data: PlayerData, itemId: string) {
-    print(itemId)
+    // print(itemId)
     for (const [, entry] of pairs(data.items)) {
         for (const [, variant] of pairs(entry.variants)) {
             if (variant.id === itemId) {
@@ -102,7 +102,7 @@ export function updateFlag<
     const current = data[group][key];
     if (typeIs(current, typeOf(value))) {
         data[group][key] = value;
-        print(`Updated ${tostring(group)}.${tostring(key)} to ${value} for Player: ${player}`);
+        // print(`Updated ${tostring(group)}.${tostring(key)} to ${value} for Player: ${player}`);
     }
 }
 
@@ -144,11 +144,11 @@ updateFlagEvent.OnServerEvent.Connect((player, ...args) => {
 
     if (currentType === "boolean") {
         (target as Record<string, unknown>)[finalKey] = true;
-        print(`Set ${path} to true for Player: ${player.Name}`);
+        // print(`Set ${path} to true for Player: ${player.Name}`);
     } else if (currentType === "number" && valueType === "number") {
         const newValue = (current as number) + (value as number);
         (target as Record<string, unknown>)[finalKey] = newValue;
-        print(`Added ${value} to ${path}, new value is ${newValue} for Player: ${player.Name}`);
+        // print(`Added ${value} to ${path}, new value is ${newValue} for Player: ${player.Name}`);
     } else {
         warn(`Type mismatch at ${path}: expected ${currentType}, got ${valueType}`);
     }
@@ -192,11 +192,11 @@ export function handleUpdateFlagEvent(player: Player, ...args: unknown[]) {
 
     if (currentType === "boolean") {
         (target as Record<string, unknown>)[finalKey] = true;
-        print(`Set ${path} to true for Player: ${player.Name}`);
+        // print(`Set ${path} to true for Player: ${player.Name}`);
     } else if (currentType === "number" && valueType === "number") {
         const newValue = (current as number) + (value as number);
         (target as Record<string, unknown>)[finalKey] = newValue;
-        print(`Added ${value} to ${path}, new value is ${newValue} for Player: ${player.Name}`);
+        // print(`Added ${value} to ${path}, new value is ${newValue} for Player: ${player.Name}`);
     } else {
         warn(`Type mismatch at ${path}: expected ${currentType}, got ${valueType}`);
     }
@@ -209,16 +209,16 @@ pickupItem.OnServerEvent.Connect((player, ...args) => {
 
     const data = playerCache.get(player.UserId);
     if (!data) return;
-    print("Seed Name: ", seedName)
+    // print("Seed Name: ", seedName)
     const variant = findPlayerItemVariant(data, seedName);
-    print("Variant: ", variant)
+    // print("Variant: ", variant)
     if (!variant) {
         warn(`Player ${player.Name} does not own variant ${seedName}`);
         return;
     }
 
     variant.ownedQuantity += amount;
-    print(`Gave ${amount}x ${seedName} to ${player.Name}. New total: ${variant.ownedQuantity}`);
+    // print(`Gave ${amount}x ${seedName} to ${player.Name}. New total: ${variant.ownedQuantity}`);
 
     //savePlayerData(player.UserId, data);
 });

@@ -7,7 +7,6 @@ export interface AllotmentData {
 }
 
 export function getOptionsForAllotment(allotment: AllotmentData, localUserId: number): string[] {
-    print("Option Info: ", allotment, localUserId)
     const isOwner = allotment.ownerUserId === localUserId;
     const { state } = allotment;
 
@@ -18,7 +17,7 @@ export function getOptionsForAllotment(allotment: AllotmentData, localUserId: nu
             case 'growing':
                 return ['Grow Instantly', 'Discard'];
             case 'grown':
-                return ['Harvest', 'Sell'];
+                return ['Harvest'];
         }
     } else {
         switch (state) {
