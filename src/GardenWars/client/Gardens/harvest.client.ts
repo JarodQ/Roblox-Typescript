@@ -1,3 +1,4 @@
+throw "This module is disabled temporarily";
 import { Workspace, ReplicatedStorage, TweenService, Players, RunService } from "@rbxts/services";
 import { lowercaseFirst, findPlayerDataKeyPath } from "Common/shared/PlayerData/playerDataUtils";
 import { tweenArcPop } from "GardenWars/shared/Gardens/VisualUtils";

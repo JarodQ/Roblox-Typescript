@@ -6,7 +6,7 @@ import { createNumberDisplay } from "GardenWars/shared/CreateNumber";
 // const numberAttachment: Attachment = numberTest.FindFirstChild("Attachment") as Attachment;
 // createNumberDisplay(2147483647, numberTest.Position.add(new Vector3(0, 0, 0)), numberAttachment);
 
-const shop = Workspace.WaitForChild("ShopScene") as Model;
-const shopNumbers = shop.WaitForChild("PlaceNumbers") as BasePart;
-createNumberDisplay(2147483647, shopNumbers, .7, shopNumbers);
+// const shop = Workspace.WaitForChild("ShopScene") as Model;
+// const shopNumbers = shop.WaitForChild("PlaceNumbers") as BasePart;
+// createNumberDisplay(2147483647, shopNumbers, .7, shopNumbers);
 

@@ -1,4 +1,5 @@
 import { Players, ReplicatedStorage, Workspace } from '@rbxts/services';
+import { PlayerGarden } from 'GardenWars/server/GardensV2/PlayerGarden';
 import { getOptionsForAllotment } from 'GardenWars/shared/GardensV2/PlantingSystem';
 import { AllotmentState } from 'GardenWars/shared/GardensV2/PlantingSystem';
 import { getPREFAB } from 'GardenWars/shared/PREFABS';
@@ -6,10 +7,12 @@ import { getPREFAB } from 'GardenWars/shared/PREFABS';
 const player = Players.LocalPlayer;
 const allotmentAction = ReplicatedStorage.WaitForChild("AllotmentAction") as RemoteEvent;
 const allotmentStateChange = ReplicatedStorage.WaitForChild("AllotmentStateChange") as RemoteEvent;
+const initializePlayerGarden = ReplicatedStorage.WaitForChild("InitializePlayerGarden") as RemoteEvent;
 const gardenFolder = Workspace.WaitForChild("Gardens").WaitForChild("Garden1") as Folder;
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 const collectIncome = ReplicatedStorage.WaitForChild("CollectIncome") as RemoteEvent;
 const getPassiveIncome = ReplicatedStorage.WaitForChild("GetPassiveIncome") as RemoteFunction
+
 
 
 function createPrompt(option: string, parent: Part, allotmentId: string, isFirst: boolean) {
@@ -66,11 +69,9 @@ function setupCollectPad(allotment: Model) {
 
         const player = Players.GetPlayerFromCharacter(character);
         if (!player) return;
-        print(player, " is touching the pad!")
 
         const gardenOwner = allotment.FindFirstAncestorOfClass("Folder")?.GetAttribute("OwnerUserId") as number;
         if (player.UserId !== gardenOwner) return;
-        print("GardenOwner: ", player, " is touching the pad!")
         activeCharacters.add(character);
         collectIncome.FireServer(allotment.Name);
         updateIncomeDisplayForAllotment(allotment)
@@ -99,7 +100,7 @@ function clearOldPrompts(model: Part) {
 
 function updatePromptsForAllotment(allotment: Model) {
     const state = allotment.GetAttribute("State") as AllotmentState;
-    const ownerUserId = allotment.Parent?.GetAttribute("OwnerUserId") as number;
+    const ownerUserId = allotment.Parent?.Parent?.GetAttribute("OwnerUserId") as number;
     const options = getOptionsForAllotment({ ownerUserId, state }, player.UserId);
     const rootPart = allotment.WaitForChild("Root") as Part;
     if (!rootPart) return;
@@ -123,8 +124,9 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
     const textButton = surfaceGui.FindFirstChild("TextButton");
     if (!textButton || !textButton.IsA("TextButton")) return;
 
-    const ownerUserId = allotment.Parent?.GetAttribute("OwnerUserId") as number;
+    const ownerUserId = allotment.Parent?.Parent?.GetAttribute("OwnerUserId") as number;
     const options = getOptionsForAllotment({ ownerUserId, state }, Players.LocalPlayer.UserId);
+    print(options)
 
     if (options.size() === 0) {
         textButton.Visible = false;
@@ -154,25 +156,35 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
 
 
 // Initial setup
-gardenFolder.GetDescendants().forEach((descendant) => {
-    if (descendant.IsA("Model") && descendant.Name === "Allotment") {
-        updatePromptsForAllotment(descendant);
-        setupCollectPad(descendant)
-    }
-});
+initializePlayerGarden.OnClientEvent.Connect((...args) => {
+    const [allotmentFolder] = args as [Model];
 
-gardenFolder.DescendantAdded.Connect((descendant) => {
-    if (descendant.IsA("Model") && descendant.Name === "Allotment") {
-        descendant.GetAttributeChangedSignal("State").Connect(() => {
-            print("Signal received of changed attribute")
+    print("Client event being processed");
+
+    for (const descendant of allotmentFolder.GetChildren()) {
+        print("Descendant:", descendant);
+        if (descendant.IsA("Model")) {
             updatePromptsForAllotment(descendant);
-        });
+            setupCollectPad(descendant);
+        }
     }
-});
+})
+
+
+// gardenFolder.DescendantAdded.Connect((descendant) => {
+//     if (descendant.IsA("Model") && descendant.Name === "Allotment") {
+//         descendant.GetAttributeChangedSignal("State").Connect(() => {
+//             print("Signal received of changed attribute")
+//             updatePromptsForAllotment(descendant);
+//         });
+//     }
+// });
 
 
 allotmentStateChange.OnClientEvent.Connect((allotmentId: string, newState: AllotmentState) => {
-    const allotment = gardenFolder.FindFirstChild(allotmentId) as Model;
+    const allotments = gardenFolder.FindFirstChild("Allotments") as Model;
+    const allotment = allotments.FindFirstChild(allotmentId) as Model;
+
     print("Event received from client for: ", allotment)
     if (allotment) {
         allotment.SetAttribute("State", newState); // triggers UI refresh if you're listening to attribute changes

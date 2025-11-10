@@ -1,5 +1,4 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { playerCache } from "Common/server/PlayerDataService";
 import { shopInfo, shopList, itemInfo } from "./mainShopPrices";
 
 const shopRemoteEvent = new Instance("RemoteEvent");
@@ -36,7 +35,7 @@ shopRemoteEvent.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
 
     const amount = amountRaw;
 
-    const playerData = playerCache.get(player.UserId);
+    const playerData = undefined/////////////////////////////
     if (!playerData) return;
 
     print("🧠 Getting player's data for transaction:", playerData);

@@ -1,8 +1,8 @@
 import { Players, Workspace, RunService, ContextActionService, ReplicatedStorage } from "@rbxts/services";
-import { GuiElements, setPlayersItems } from "GardenWars/shared/Shop/guiManager";
+// import { GuiElements, setPlayersItems } from "GardenWars/shared/Shop/guiManager";
 import { getPREFAB } from "GardenWars/shared/PREFABS";
-import { setupGui } from "GardenWars/shared/Shop/guiManager";
-import { getPreviewModel } from "GardenWars/shared/Shop/shopModelController";
+// import { setupGui } from "GardenWars/shared/Shop/guiManager";
+// import { getPreviewModel } from "GardenWars/shared/Shop/shopModelController";
 import { ShopGui } from "GardenWars/shared/GUIs/ShopV2/ShopGui";
 
 
@@ -22,7 +22,7 @@ const shopCamera = shopScene.WaitForChild("shopCamera") as BasePart;
 const placeItem = shopScene.WaitForChild("PlaceItem") as BasePart;
 const spotLight = shopCamera.WaitForChild("SpotLight") as SpotLight;
 const proximityPrompt = shopCamera.WaitForChild("ProximityPrompt") as ProximityPrompt;
-setupGui(player, shopGui);
+// setupGui(player, shopGui);
 
 //Rotation logic
 let dragging = false;
@@ -177,7 +177,7 @@ function switchPreviewModel(itemId: string) {
 
 // 🎯 Triggered by proximity prompt
 proximityPrompt.Triggered.Connect(() => {
-    game.GetService("StarterGui").SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
+    // game.GetService("StarterGui").SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
     activateStoreScene();
     //setPlayersItems(player, shopGui);
     const shopGui = new ShopGui((itemId) => {

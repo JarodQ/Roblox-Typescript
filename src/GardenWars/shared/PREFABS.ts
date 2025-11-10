@@ -9,6 +9,7 @@ const NumbersPREFABS: Folder = PREFABFolder.WaitForChild("Numbers") as Folder;
 const SoundsPREFABS: Folder = PREFABFolder.WaitForChild("Sounds") as Folder;
 const ShopPREFABS: Folder = PREFABFolder.WaitForChild("Shop") as Folder;
 const ToolsPREFABS: Folder = PREFABFolder.WaitForChild("Tools") as Folder;
+const AllotmentsPREFABS: Folder = PREFABFolder.WaitForChild("Allotments") as Folder;
 
 
 export function identifyInstance(instance: Instance): "Model" | "Part" | "Other" {
@@ -63,6 +64,10 @@ export function getPREFAB(folder: string, targetPREFAB: string): unknown | undef
         case "Tools":
             targetFolder = Tools?.get(targetPREFAB);
             return targetFolder;
+        case "Allotments":
+            targetFolder = Allotments.get(targetPREFAB);
+            if (targetFolder) PREFABSList = getList(targetFolder);
+            return PREFABSList[0];
         default:
             return;
     }
@@ -106,4 +111,9 @@ for (let shopFolder of ShopPREFABS.GetChildren()) {
 const Tools: Map<string, Folder> = new Map();
 for (let toolFolder of ToolsPREFABS.GetChildren()) {
     Tools.set(toolFolder.Name, toolFolder as Folder);
+}
+
+const Allotments: Map<string, Folder> = new Map();
+for (let allotmentsFolder of AllotmentsPREFABS.GetChildren()) {
+    Allotments.set(allotmentsFolder.Name, allotmentsFolder as Folder);
 }

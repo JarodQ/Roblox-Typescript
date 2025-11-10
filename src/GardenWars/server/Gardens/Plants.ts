@@ -4,17 +4,15 @@ import * as PREFABS from "../../shared/PREFABS";
 // import * as InteractInterface from "./InteractInterface"
 import { moveInstance, tweenArcPop } from "../../shared/Gardens/VisualUtils";
 import { Interactable, InteractionRegistry } from "GardenWars/shared/InteractInterface";
-import { addPlant, removePlant } from "./PlantService";
-import { loadPlayerData } from "Common/server/DataStoreWrapper";
+// import { addPlant, removePlant } from "./PlantService";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
-import { playerCache } from "Common/server/PlayerDataService";
 import { PlantRarity } from "Common/server/Data/Template";
 
 // const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
 // const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
 
-const getPlayerData = ReplicatedStorage.WaitForChild("GetPlayerData") as RemoteFunction;
+// const getPlayerData = ReplicatedStorage.WaitForChild("GetPlayerData") as RemoteFunction;
 
 
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;
@@ -24,33 +22,7 @@ export interface Harvestable extends Interactable {
     harvest(player: Player): void;
 }
 
-// function getGrowthStage(plantedAt: number, totalGrowthTime: number, stageGrowthTime: number): number {
-//     const now = DateTime.now().UnixTimestampMillis;
-//     const elapsed = now - (plantedAt * 1000); // convert seconds to ms
-//     if (elapsed >= totalGrowthTime) return numberOfStages; // fully grown
-//     return math.floor(elapsed / stageGrowthTime);
-// }
 Players.PlayerAdded.Connect(async (player) => {
-    let data: PlayerData | undefined;
-    let attempts = 0;
-
-    // Wait up to 2 seconds (20 attempts at 0.1s)
-    while (!data && attempts < 20) {
-        // data = playerCache.get(player.UserId);
-        // data = getPlayerData.InvokeServer(player);
-        data = playerCache.get(player.UserId);
-
-        if (!data) {
-            await Promise.delay(0.1);
-            attempts++;
-        }
-    }
-
-    if (data) {
-        replantSavedPlants(player, data);
-    } else {
-        warn(`Player data not found in cache for ${player.Name}`);
-    }
 });
 
 export function replantSavedPlants(player: Player, data: PlayerData) {
@@ -180,12 +152,12 @@ export class PlantMaster implements Harvestable {
 
         // Add plant to player data (serialized)
         if (!replanting) {
-            addPlant(owner, {
-                plantId: this.seed.name,
-                position: serializeVector3(this.seedPosition),
-                rotation: serializeCFrame(new CFrame(this.seedOrientation)),
-                plantedAt: os.time(),
-            });
+            // addPlant(owner, {
+            //     plantId: this.seed.name,
+            //     position: serializeVector3(this.seedPosition),
+            //     rotation: serializeCFrame(new CFrame(this.seedOrientation)),
+            //     plantedAt: os.time(),
+            // });
         }
 
 
@@ -253,7 +225,7 @@ export class PlantMaster implements Harvestable {
 
         // Destroy the server-side plant
         this.plantPart?.Destroy();
-        removePlant(player, this.seedPosition);
+        // removePlant(player, this.seedPosition);
         this.grown = false;
 
         // Fire client-side visual event
@@ -262,7 +234,7 @@ export class PlantMaster implements Harvestable {
     }
     public discardPlant(player: Player) {
         this.plantPart?.Destroy();
-        removePlant(player, this.seedPosition);
+        // removePlant(player, this.seedPosition);
         this.grown = false;
         this.plantPart = undefined;
     }

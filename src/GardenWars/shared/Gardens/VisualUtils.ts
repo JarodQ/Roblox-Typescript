@@ -1,6 +1,6 @@
 import { Workspace, TweenService, RunService, ReplicatedStorage } from "@rbxts/services";
 
-const pickupItem = ReplicatedStorage.WaitForChild("PickupItem") as RemoteEvent;
+// const pickupItem = ReplicatedStorage.WaitForChild("PickupItem") as RemoteEvent;
 
 
 export function tweenArcPop(player: Player, dataName: string, position: Vector3, popPrefab: Instance, range?: number) {
@@ -130,7 +130,7 @@ export async function pickup(player: Player, dataName: string, pickupModel: Base
                     }
 
                     pickupModel.Destroy();
-                    pickupItem.FireServer(dataName);
+                    // pickupItem.FireServer(dataName);
                     break;
 
                     //Fire Server to change player Data HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!

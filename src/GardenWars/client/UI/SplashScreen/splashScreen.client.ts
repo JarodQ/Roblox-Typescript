@@ -1,4 +1,4 @@
-// throw "This module is disabled temporarily";
+throw "This module is disabled temporarily";
 import { Players, ReplicatedStorage, UserInputService, TweenService } from "@rbxts/services";
 import { StarterGui } from "@rbxts/services";
 

@@ -4,7 +4,7 @@ import { DEFAULT_PLAYER_DATA } from "Common/shared/PlayerData/PlayerData";
 import { findPlayerDataKeyPath } from "Common/shared/PlayerData/playerDataUtils";
 import { lowercaseFirst } from "Common/shared/PlayerData/playerDataUtils";
 
-const updateFlagByPathEvent = ReplicatedStorage.WaitForChild("UpdateFlagByPath") as RemoteEvent;
+// const updateFlagByPathEvent = ReplicatedStorage.WaitForChild("UpdateFlagByPath") as RemoteEvent;
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 
 export const interactionMap = new Map<Instance, Interactable>();
