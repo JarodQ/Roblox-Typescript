@@ -1,21 +1,15 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Players } from "@rbxts/services";
 import * as PREFABS from "../../shared/PREFABS";
-// import * as InteractInterface from "./InteractInterface"
 import { moveInstance, tweenArcPop } from "../../shared/Gardens/VisualUtils";
 import { Interactable, InteractionRegistry } from "GardenWars/shared/InteractInterface";
-// import { addPlant, removePlant } from "./PlantService";
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
-import { PlantRarity } from "Common/server/Data/Template";
-
-// const addPlantEvent = ReplicatedStorage.WaitForChild("AddPlant") as RemoteEvent;
-// const removePlantEvent = ReplicatedStorage.WaitForChild("RemovePlant") as RemoteEvent;
-
-// const getPlayerData = ReplicatedStorage.WaitForChild("GetPlayerData") as RemoteFunction;
-
+import { PlantData, PlantRarity } from "Common/server/Data/Template";
 
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;
+const plantProgressPREFABs = PREFABS.getPREFAB("UI", "PlantInfo") as BillboardGui[];
+const plantProgressPREFAB = plantProgressPREFABs[0] as BillboardGui;
 
 export interface Harvestable extends Interactable {
     isReadyToHarvest(): boolean;
@@ -25,81 +19,16 @@ export interface Harvestable extends Interactable {
 Players.PlayerAdded.Connect(async (player) => {
 });
 
-export function replantSavedPlants(player: Player, data: PlayerData) {
-    for (const plant of data.plants) {
-        const position = deserializeVector3(plant.position);
-        const orientation = deserializeCFrame(plant.position, plant.rotation);
-
-        // Get prefab list and progress bar like onInteract
-        const PREFABList = PREFABS.getPREFAB("seeds", plant.plantId) as Part[];
-        const progressBar = PREFABS.getPREFAB("UI", "ProgressBar") as BillboardGui[];
-
-        if (!PREFABList || !progressBar || PREFABList.size() === 0 || progressBar.size() === 0) {
-            warn(`Missing prefab or progress bar for plantId: ${plant.plantId}`);
-            continue;
-        }
-
-        const definedSeed: Seed = {
-            name: plant.plantId,
-            PREFABS: PREFABList,
-            plantProgress: progressBar[0],
-            rarity: "Common",
-            level: 1,
-        };
-
-        const replantedSeed = new TestSeed1(definedSeed);
-        replantedSeed.seedPosition = position;
-        replantedSeed.seedOrientation = orientation.Position; // orientation is full CFrame
-        replantedSeed.growthStart = plant.plantedAt * 1000; // convert seconds to ms
-        replantedSeed.currentStageTime = plant.plantedAt * 1000;
-        replantedSeed.plant(player, position, true);
-    }
-}
-
-export function isSeed(obj: unknown): obj is Seed {
-    if (!obj || !typeIs(obj, "Instance")) return false;
-    return "name" in obj && "PREFAB" in obj;
-}
-export type Seed = {
-    name: string;
-    PREFABS: (Part | Model)[];
-    plantProgress: BillboardGui;
-    rarity: PlantRarity;
-    level: number;
-}
-
-export function handlePlantSeedEvent(player: Player, ...args: unknown[]) {
-    // print("Handling Planting")
-    const [seedName, position] = args as [string, Vector3];
-
-    const prefabList = PREFABS.getPREFAB("seeds", seedName) as Part[];
-    const progressBars = PREFABS.getPREFAB("UI", "ProgressBar") as BillboardGui[];
-
-    if (!prefabList || !progressBars || prefabList.size() === 0 || progressBars.size() === 0) {
-        warn(`Invalid seed or UI prefab for ${seedName}`);
-        return;
-    }
-
-    const seed: Seed = {
-        name: seedName,
-        PREFABS: prefabList,
-        plantProgress: progressBars[0],
-        rarity: "Common",
-        level: 1,
-    };
-
-    const plant = new TestSeed1(seed);
-    plant.plant(player, position, false);
-}
 
 export class PlantMaster implements Harvestable {
-    public seed: Seed;
+    public plantData: PlantData
     public seedPosition: Vector3 = new Vector3(0, 0, 0);
     public seedOrientation: Vector3 = new Vector3(0, 0, 0);
-    public growthStart: number | undefined = undefined;
     public currentStageTime: number = 1;
+    private plantPREFABS: Part[];
     private plantPart: Part | Model | undefined;
-    private seedProgress: BillboardGui;
+    private plantInfoGui: BillboardGui
+    private seedProgress: Frame;
     private growthStage: number = 0;
     private growthRate: number = 1;
     private stageGrowthTime: number;
@@ -108,25 +37,37 @@ export class PlantMaster implements Harvestable {
     private cancelGrowth = false;
 
 
-    constructor(seed: Seed) {
-        this.seed = seed;
-        this.seed.rarity = seed.rarity ?? "Common";
-        this.seed.level = seed.level ?? 1;
-        this.seedProgress = this.seed.plantProgress;
-        this.stageGrowthTime = 5 * this.growthRate * 1000; //*1000 -> Convert to milliseconds
-        this.totalGrowthTime = 5 * this.growthRate * (this.seed.PREFABS.size() - 1) * 1000; //*1000 -> Convert to milliseconds
+    constructor(plantData: PlantData) {
+        // this.seed = seed;
+        this.plantPREFABS = PREFABS.getPREFAB("seeds", plantData.plantId) as Part[];
+        // this.seed.rarity = seed.rarity ?? "Common";
+        // this.seed.level = seed.level ?? 1;
+        // this.seedProgress = this.seed.plantProgress;
+        this.plantInfoGui = plantProgressPREFAB
+        this.seedProgress = plantProgressPREFAB.FindFirstChild("Frame")?.FindFirstChild("ProgressBar") as Frame;
+        print("Progress Bar: ", this.seedProgress)
+        this.stageGrowthTime = 5 * this.growthRate; // seconds
+        this.totalGrowthTime = 5 * this.growthRate * (this.plantPREFABS.size() - 1); // seconds
         this.grown = false;
+        this.plantData = plantData;
     }
 
     public getPlantedAt(): number {
-        return math.floor((this.growthStart ?? DateTime.now().UnixTimestampMillis) / 1000);
+        return this.plantData.plantedAt;
     }
+
+
+    public getGrown(): boolean {
+        return os.time() - this.plantData.plantedAt >= this.totalGrowthTime;
+    }
+
+
 
     public getGrowthDuration(): number {
-        return math.floor(this.totalGrowthTime / 1000);
+        return math.floor(this.totalGrowthTime);
     }
 
-    public plant(owner: Player, position: Vector3, replanting: boolean, onFullyGrown?: () => void): void {
+    public plant(owner: Player, position: Vector3, onFullyGrown?: () => void): void {
         // print(owner, position, replanting)
         const character = owner.Character ?? owner.CharacterAdded.Wait()[0];
         const root = character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
@@ -136,10 +77,9 @@ export class PlantMaster implements Harvestable {
         }
         this.growthStage = this.computeGrowthStage();
         const stageName = `Stage${this.growthStage}`;
-        this.plantPart = this.seed.PREFABS.find((part) => part.Name === stageName)?.Clone();
-        if (this.plantPart && this.growthStage >= this.seed.PREFABS.size() - 1) {
+        this.plantPart = this.plantPREFABS.find((part) => part.Name === stageName)?.Clone();
+        if (this.plantPart && this.growthStage >= this.plantPREFABS.size() - 1) {
             this.grown = true;
-            InteractionRegistry.register(this.plantPart, this);
             // return;
         }
 
@@ -150,23 +90,17 @@ export class PlantMaster implements Harvestable {
         this.seedPosition = position;
         if (orientation) this.seedOrientation = orientation;
 
-        // Add plant to player data (serialized)
-        if (!replanting) {
-            // addPlant(owner, {
-            //     plantId: this.seed.name,
-            //     position: serializeVector3(this.seedPosition),
-            //     rotation: serializeCFrame(new CFrame(this.seedOrientation)),
-            //     plantedAt: os.time(),
-            // });
-        }
-
 
         moveInstance(this.plantPart, position, orientation);
         if (orientation) this.seedOrientation = orientation
-        if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;
-        this.currentStageTime = DateTime.now().UnixTimestampMillis;
-        this.seedProgress = this.seedProgress.Clone();
-        this.seedProgress.Parent = this.plantPart;
+        // if (!this.growthStart) this.growthStart = os.time();
+
+        this.currentStageTime = os.time();
+        this.plantInfoGui = this.plantInfoGui.Clone();
+        this.plantInfoGui.Parent = this.plantPart.FindFirstChild("Root");
+        this.seedProgress = this.plantInfoGui.GetDescendants().find(
+            (d) => d.Name === "ProgressBar" && d.IsA("Frame")
+        ) as Frame;
         this.setStageProgressBars();
         this.trackGrowth(onFullyGrown);
         return;
@@ -190,9 +124,9 @@ export class PlantMaster implements Harvestable {
     public forceGrow(onFullyGrown?: () => void) {
         this.cancelGrowth = true;
 
-        while (this.growthStage < this.seed.PREFABS.size() - 1) {
+        while (this.growthStage < this.plantPREFABS.size() - 1) {
             this.evolveGrowth();
-            this.growthStage++;
+            // this.growthStage++;
         }
         this.grown = true;
 
@@ -212,7 +146,7 @@ export class PlantMaster implements Harvestable {
 
 
     public harvest(player: Player) {
-        const prefab = PREFABS.getPREFAB("Drops", this.seed.name) as Model | Part;
+        const prefab = PREFABS.getPREFAB("Drops", this.plantData.plantId) as Model | Part;
         const plantPrefab = prefab.Clone();
         let plantPosition: Vector3;
         if (this.plantPart?.IsA("Model")) {
@@ -230,7 +164,7 @@ export class PlantMaster implements Harvestable {
 
         // Fire client-side visual event
         const harvestVisualEvent = ReplicatedStorage.WaitForChild("HarvestVisualEvent") as RemoteEvent;
-        harvestVisualEvent.FireClient(player, this.seed.name, plantPosition);
+        harvestVisualEvent.FireClient(player, this.plantData.plantId, plantPosition);
     }
     public discardPlant(player: Player) {
         this.plantPart?.Destroy();
@@ -246,62 +180,35 @@ export class PlantMaster implements Harvestable {
     // }
 
     private computeGrowthStage(): number {
-        if (!this.growthStart) return 0;
-        const now = DateTime.now().UnixTimestampMillis;
-        const elapsed = now - this.growthStart;
-        if (elapsed >= this.totalGrowthTime) return this.seed.PREFABS.size() - 1;
+        const now = os.time();
+        const elapsed = now - this.plantData.plantedAt;
+        if (elapsed >= this.totalGrowthTime) return this.plantPREFABS.size() - 1;
         return math.floor(elapsed / this.stageGrowthTime);
     }
+
 
     private evolveGrowth() {
 
         if (this.plantPart) {
             this.growthStage++;
             //const newPlantPart = this.seed.PREFABS[this.growthStage].Clone();
-            const newPlantPart = this.seed.PREFABS.find((part) => part.Name === `Stage${this.growthStage}`)?.Clone();
+            const newPlantPart = this.plantPREFABS.find((part) => part.Name === `Stage${this.growthStage}`)?.Clone();
             if (!newPlantPart) {
                 return;
             }
             newPlantPart.Parent = Workspace;
             moveInstance(newPlantPart, this.seedPosition, this.seedOrientation);
-            this.seedProgress.Parent = newPlantPart;
+            this.plantInfoGui.Parent = newPlantPart;
             this.plantPart.Destroy();
             this.plantPart = newPlantPart;
-            if (!this.seed.PREFABS[this.growthStage + 1]) {
-                InteractionRegistry.register(this.plantPart, this);
-            }
         }
     }
 
-    // private trackGrowth(onFullyGrown?: () => void): void {
-    //     const progressBar: Frame = this.seedProgress.GetDescendants().find(d => d.Name === "ProgressBar" && d.IsA("Frame")) as Frame;
-    //     const progress = new UDim2(-1, 0, 0, 0);
-    //     if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;
-    //     do {
-    //         const deltaTime = DateTime.now().UnixTimestampMillis - this.growthStart;
-    //         let progress = new UDim2(math.clamp(-1 + deltaTime / this.totalGrowthTime, -1, 0), 0, 0, 0);
-    //         progressBar.Position = progress;
-    //         if (DateTime.now().UnixTimestampMillis - this.currentStageTime >= this.stageGrowthTime) {
-    //             this.currentStageTime = DateTime.now().UnixTimestampMillis;
-    //             const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
-    //             coroutine.resume(trackGrowthCoro);
-    //         }
-    //         wait();
-    //     } while (DateTime.now().UnixTimestampMillis - this.growthStart <= this.totalGrowthTime);
-    //     const trackGrowthCoro = coroutine.create(() => { this.evolveGrowth() })
-    //     coroutine.resume(trackGrowthCoro);
-    //     this.grown = true;
-    //     if (onFullyGrown) {
-    //         onFullyGrown();
-    //     }
-    // }
-
     private trackGrowth(onFullyGrown?: () => void): void {
+        print("TrackingGrowth: ", this.seedProgress.GetDescendants())
         const progressBar = this.seedProgress.GetDescendants().find(
-            (d) => d.Name === "ProgressBar" && d.IsA("Frame")
+            (d) => d.Name === "MoveProgress" && d.IsA("Frame")
         ) as Frame;
-
-        if (!this.growthStart) this.growthStart = DateTime.now().UnixTimestampMillis;
 
         do {
             if (this.cancelGrowth) {
@@ -309,12 +216,12 @@ export class PlantMaster implements Harvestable {
                 return;
             }
 
-            const deltaTime = DateTime.now().UnixTimestampMillis - this.growthStart;
-            const progress = new UDim2(math.clamp(-1 + deltaTime / this.totalGrowthTime, -1, 0), 0, 0, 0);
-            progressBar.Position = progress;
+            const deltaTime = os.time() - this.plantData.plantedAt;
+            const progress = new UDim2(math.clamp(deltaTime / this.totalGrowthTime, 0, 1), 0, 0, 0);
+            progressBar.Position = new UDim2(progress.X.Scale, 0, 0, 0);
 
-            if (DateTime.now().UnixTimestampMillis - this.currentStageTime >= this.stageGrowthTime) {
-                this.currentStageTime = DateTime.now().UnixTimestampMillis;
+            if (os.time() - this.currentStageTime >= this.stageGrowthTime) {
+                this.currentStageTime = os.time();
                 const trackGrowthCoro = coroutine.create(() => this.evolveGrowth());
                 coroutine.resume(trackGrowthCoro);
             }
@@ -322,7 +229,7 @@ export class PlantMaster implements Harvestable {
             wait();
         } while (
             !this.cancelGrowth &&
-            DateTime.now().UnixTimestampMillis - this.growthStart <= this.totalGrowthTime
+            os.time() - this.plantData.plantedAt <= this.totalGrowthTime
         );
 
         if (this.cancelGrowth) {
@@ -341,9 +248,10 @@ export class PlantMaster implements Harvestable {
     }
 
 
+
     private setStageProgressBars() {
         const stagesFolder = this.seedProgress.GetDescendants().find(d => d.Name === "Stages" && d.IsA("Folder")) as Folder;
-        const numOfStages: number = this.seed.PREFABS.size() - 1;
+        const numOfStages: number = this.plantPREFABS.size() - 1;
         for (let i: number = 1; i < numOfStages; i++) {
             const imageLabel: ImageLabel = new Instance("ImageLabel");
             imageLabel.Parent = stagesFolder;

@@ -1,9 +1,9 @@
 // Template.ts
 export type PlantRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
-export type GrownPlantData = {
+export type PlantData = {
     plantId: string;
-    allotmentIndex: number;
+    allotmentIndex: string;
     plantedAt: number;
     growthDuration: number;
     rarity: PlantRarity;
@@ -17,14 +17,14 @@ export type PlayerTemplate = {
     Gold: number;
     Valor: number;
     Inventory: string[];
-    GrownPlants: GrownPlantData[];
+    Plants: PlantData[];
 };
 
 export const templateData: PlayerTemplate = {
     Gold: 10,
     Valor: 5,
     Inventory: [],
-    GrownPlants: [],
+    Plants: [],
 };
 
 

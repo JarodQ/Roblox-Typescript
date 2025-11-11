@@ -128,7 +128,7 @@ interactEvent.OnServerEvent.Connect((player: Player, target: unknown, clickPosit
         const allotments: Instance[] = playerGarden.getAllotments();
         const allotment: Instance | undefined = allotments.find(value => value.Name === instance.Name);
         if (allotment && playerGarden.getOwner() === player) {
-            playerGarden.onInteract(player, hitPos, allotment, interactable as Tool);
+            // playerGarden.onInteract(player, hitPos, allotment, interactable as Tool);
         }
         //print(`PlayerGarden: ${playerGarden}`);
     }

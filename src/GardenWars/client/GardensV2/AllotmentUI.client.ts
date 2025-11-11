@@ -8,7 +8,7 @@ const player = Players.LocalPlayer;
 const allotmentAction = ReplicatedStorage.WaitForChild("AllotmentAction") as RemoteEvent;
 const allotmentStateChange = ReplicatedStorage.WaitForChild("AllotmentStateChange") as RemoteEvent;
 const initializePlayerGarden = ReplicatedStorage.WaitForChild("InitializePlayerGarden") as RemoteEvent;
-const gardenFolder = Workspace.WaitForChild("Gardens").WaitForChild("Garden1") as Folder;
+let allotmentsFolder: Model
 const interactEvent = ReplicatedStorage.WaitForChild("InteractEvent") as RemoteEvent;
 const collectIncome = ReplicatedStorage.WaitForChild("CollectIncome") as RemoteEvent;
 const getPassiveIncome = ReplicatedStorage.WaitForChild("GetPassiveIncome") as RemoteFunction
@@ -72,8 +72,9 @@ function setupCollectPad(allotment: Model) {
 
         const gardenOwner = allotment.FindFirstAncestorOfClass("Folder")?.GetAttribute("OwnerUserId") as number;
         if (player.UserId !== gardenOwner) return;
+        print("Pad touched sending event to collect passive")
         activeCharacters.add(character);
-        collectIncome.FireServer(allotment.Name);
+        collectIncome.FireServer(allotment);
         updateIncomeDisplayForAllotment(allotment)
     });
 
@@ -126,7 +127,6 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
 
     const ownerUserId = allotment.Parent?.Parent?.GetAttribute("OwnerUserId") as number;
     const options = getOptionsForAllotment({ ownerUserId, state }, Players.LocalPlayer.UserId);
-    print(options)
 
     if (options.size() === 0) {
         textButton.Visible = false;
@@ -157,12 +157,11 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
 
 // Initial setup
 initializePlayerGarden.OnClientEvent.Connect((...args) => {
-    const [allotmentFolder] = args as [Model];
+    [allotmentsFolder] = args as [Model];
 
     print("Client event being processed");
 
-    for (const descendant of allotmentFolder.GetChildren()) {
-        print("Descendant:", descendant);
+    for (const descendant of allotmentsFolder.GetChildren()) {
         if (descendant.IsA("Model")) {
             updatePromptsForAllotment(descendant);
             setupCollectPad(descendant);
@@ -182,10 +181,9 @@ initializePlayerGarden.OnClientEvent.Connect((...args) => {
 
 
 allotmentStateChange.OnClientEvent.Connect((allotmentId: string, newState: AllotmentState) => {
-    const allotments = gardenFolder.FindFirstChild("Allotments") as Model;
-    const allotment = allotments.FindFirstChild(allotmentId) as Model;
+    const allotment = allotmentsFolder.FindFirstChild(allotmentId) as Model;
 
-    print("Event received from client for: ", allotment)
+    print("Event received from client for allotment: ", allotment)
     if (allotment) {
         allotment.SetAttribute("State", newState); // triggers UI refresh if you're listening to attribute changes
         updatePromptsForAllotment(allotment);
@@ -193,7 +191,7 @@ allotmentStateChange.OnClientEvent.Connect((allotmentId: string, newState: Allot
 });
 
 function updateIncomeDisplayForAllotment(allotment: Model) {
-    if (!allotment.IsA("Model") || allotment.Name !== "Allotment") return;
+    if (!allotment.IsA("Model")) return;
 
     const collectPad = allotment.FindFirstChild("Collect");
     if (!collectPad || !collectPad.IsA("BasePart")) return;
@@ -212,13 +210,13 @@ function startIncomeUpdater() {
 
     task.spawn(() => {
         while (true) {
-            for (const child of gardenFolder.GetChildren()) {
-                if (child.IsA("Model") && child.Name === "Allotment") {
-                    updateIncomeDisplayForAllotment(child); // ✅ child is now typed as Model
+            if (allotmentsFolder) {
+                for (const child of allotmentsFolder.GetChildren()) {
+                    if (child.IsA("Model")) {
+                        updateIncomeDisplayForAllotment(child); // ✅ child is now typed as Model
+                    }
                 }
             }
-
-
             wait(updateInterval);
         }
     });

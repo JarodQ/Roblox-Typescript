@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { PlayerTemplate, templateData, GrownPlantData } from "./Template";
+import { PlayerTemplate, templateData, PlantData } from "./Template";
 import ProfileStore from "@rbxts/profile-store";
 import { getIncomeRate } from "GardenWars/server/GardensV2/IncomeRates";
 
@@ -39,34 +39,32 @@ export const DataManager = {
         updateValor.FireClient(player, profile.Data.Valor);
     },
 
-    AddPlant(player: Player, plant: GrownPlantData) {
+    AddPlant(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
-        print("Player profile: ", profile)
         if (!profile) return;
         print("adding grownplants to data: ", plant)
-        profile.Data.GrownPlants.push(plant);
+        profile.Data.Plants.push(plant);
     },
 
-    RemovePlant(player: Player, plant: GrownPlantData) {
+    RemovePlant(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
-        print("Player profile: ", profile);
         if (!profile) return;
-
-        const index = profile.Data.GrownPlants.findIndex(p => p.allotmentIndex === plant.allotmentIndex);
+        print("Removing Plant from player data")
+        const index = profile.Data.Plants.findIndex(p => p.allotmentIndex === plant.allotmentIndex);
         if (index === -1) {
             print("Plant not found in GrownPlants");
             return;
         }
 
-        profile.Data.GrownPlants.remove(index);
+        profile.Data.Plants.remove(index);
         print("Removed plant from GrownPlants:", plant);
     },
 
-    UpdatePlant(player: Player, allotmentIndex: number, updates: Partial<GrownPlantData>) {
+    UpdatePlant(player: Player, allotmentIndex: string, updates: Partial<PlantData>) {
         const profile = Profiles.get(player);
         if (!profile) return;
 
-        const plant = profile.Data.GrownPlants.find(p => p.allotmentIndex === allotmentIndex);
+        const plant = profile.Data.Plants.find(p => p.allotmentIndex === allotmentIndex);
         if (!plant) return;
 
         for (const [key, value] of pairs(updates)) {
@@ -76,7 +74,7 @@ export const DataManager = {
         }
     },
 
-    CollectPassiveIncome(player: Player, plant: GrownPlantData) {
+    CollectPassiveIncome(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
         if (!profile) return;
 
