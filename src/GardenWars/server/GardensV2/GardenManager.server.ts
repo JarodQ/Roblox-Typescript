@@ -94,8 +94,10 @@ Players.PlayerAdded.Connect(function (player: Player) {
                 allotments: allotments,
             })
             PlayerGardens.set(player.UserId, newGarden);
-            reassignGrownPlants(player, assignedGarden);
             initializePlayerGarden.FireAllClients(newGarden.getAllotmentFolder())
+
+            reassignGrownPlants(player, assignedGarden);
+            // initializePlayerGarden.FireAllClients(newGarden.getAllotmentFolder())
         }
     }
 });
@@ -137,7 +139,7 @@ export function reassignGrownPlants(player: Player, garden: Folder) {
         // };
 
         // 🌱 Spawn coroutine for each plant
-        const plant = new TestSeed1(plantData);
+        const plant = new TestSeed1(allotment, plantData);
         task.spawn(() => {
             plant.plant(player, rootPart.Position, () => {
                 allotment.SetAttribute("State", "grown");

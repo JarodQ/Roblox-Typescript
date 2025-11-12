@@ -1,8 +1,10 @@
 // Template.ts
-export type PlantRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+export type PlantRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythical";
+export type PlantId = "carrotShooter" | "blueberryBlaster" | "maizeMauler" | "heliosLaser";
 
 export type PlantData = {
-    plantId: string;
+    plantId: PlantId;
+    plantName: string;
     allotmentIndex: string;
     plantedAt: number;
     growthDuration: number;

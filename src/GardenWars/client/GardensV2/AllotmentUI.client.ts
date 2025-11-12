@@ -21,6 +21,7 @@ function createPrompt(option: string, parent: Part, allotmentId: string, isFirst
     prompt.ObjectText = "Allotment";
     prompt.HoldDuration = 0;
     prompt.RequiresLineOfSight = false;
+    prompt.MaxActivationDistance = 15;
     prompt.Exclusivity = Enum.ProximityPromptExclusivity.AlwaysShow;
     prompt.Name = `Prompt_${option}`;
 
@@ -39,24 +40,24 @@ function setupCollectPad(allotment: Model) {
     const collectPad = allotment.FindFirstChild("Collect");
     if (!collectPad || !collectPad.IsA("BasePart")) return;
 
-    let display = collectPad.FindFirstChild("IncomeDisplay") as BillboardGui;
-    if (!display) {
-        display = new Instance("BillboardGui");
-        display.Name = "IncomeDisplay";
-        display.Size = new UDim2(0, 200, 0, 50);
-        display.Adornee = collectPad;
-        display.AlwaysOnTop = true;
-        display.Parent = collectPad;
+    // let display = collectPad.FindFirstChild("IncomeDisplay") as BillboardGui;
+    // if (!display) {
+    //     display = new Instance("BillboardGui");
+    //     display.Name = "IncomeDisplay";
+    //     display.Size = new UDim2(0, 200, 0, 50);
+    //     display.Adornee = collectPad;
+    //     display.AlwaysOnTop = true;
+    //     display.Parent = collectPad;
 
-        const label = new Instance("TextLabel");
-        label.Name = "TextLabel";
-        label.Size = new UDim2(1, 0, 1, 0);
-        label.BackgroundTransparency = 1;
-        label.TextColor3 = new Color3(1, 1, 0);
-        label.TextScaled = true;
-        label.Text = "Income: $0";
-        label.Parent = display;
-    }
+    //     const label = new Instance("TextLabel");
+    //     label.Name = "TextLabel";
+    //     label.Size = new UDim2(1, 0, 1, 0);
+    //     label.BackgroundTransparency = 1;
+    //     label.TextColor3 = new Color3(1, 1, 0);
+    //     label.TextScaled = true;
+    //     label.Text = "Income: $0";
+    //     label.Parent = display;
+    // }
 
     // ✅ Per-character debounce
     const activeCharacters = new Set<Model>();
@@ -75,7 +76,7 @@ function setupCollectPad(allotment: Model) {
         print("Pad touched sending event to collect passive")
         activeCharacters.add(character);
         collectIncome.FireServer(allotment);
-        updateIncomeDisplayForAllotment(allotment)
+        // updateIncomeDisplayForAllotment(allotment)
     });
 
     collectPad.TouchEnded.Connect((hit) => {
@@ -117,17 +118,18 @@ const buttonConnections = new Map<TextButton, RBXScriptConnection>();
 
 function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
     const infoPlate = allotment.FindFirstChild("InfoPlate");
+    // print("UpdatingInfoPlate")
     if (!infoPlate || !infoPlate.IsA("BasePart")) return;
 
     const surfaceGui = infoPlate.FindFirstChild("SurfaceGui");
     if (!surfaceGui || !surfaceGui.IsA("SurfaceGui")) return;
 
-    const textButton = surfaceGui.FindFirstChild("TextButton");
+    const textButton = surfaceGui.FindFirstChild("CostButton");
     if (!textButton || !textButton.IsA("TextButton")) return;
 
     const ownerUserId = allotment.Parent?.Parent?.GetAttribute("OwnerUserId") as number;
     const options = getOptionsForAllotment({ ownerUserId, state }, Players.LocalPlayer.UserId);
-
+    // print("Checking options: ", options)
     if (options.size() === 0) {
         textButton.Visible = false;
         return;
@@ -135,7 +137,10 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
 
     const primaryOption = options[0];
     textButton.Visible = true;
-    textButton.Text = primaryOption === "Sell" ? "$8.93k" : primaryOption;
+    if (state !== "grown") {
+        print("Setting allotmentUI infoplate")
+        textButton.Text = primaryOption;
+    }
 
     // Disconnect previous connection if it exists
     const existing = buttonConnections.get(textButton);
@@ -146,7 +151,10 @@ function updateInfoPlateButton(allotment: Model, state: AllotmentState) {
     // Connect new action
     const connection = textButton.Activated.Connect(() => {
         const allotmentAction = ReplicatedStorage.WaitForChild("AllotmentAction") as RemoteEvent;
-        allotmentAction.FireServer(allotment.Name, primaryOption);
+        if (state !== "grown") {
+            allotmentAction.FireServer(allotment.Name, primaryOption);
+        }
+        else allotmentAction.FireServer(allotment.Name, "Level Up");
     });
 
     buttonConnections.set(textButton, connection);
@@ -183,46 +191,46 @@ initializePlayerGarden.OnClientEvent.Connect((...args) => {
 allotmentStateChange.OnClientEvent.Connect((allotmentId: string, newState: AllotmentState) => {
     const allotment = allotmentsFolder.FindFirstChild(allotmentId) as Model;
 
-    print("Event received from client for allotment: ", allotment)
+    // print("Event received from client for allotment: ", allotment)
     if (allotment) {
         allotment.SetAttribute("State", newState); // triggers UI refresh if you're listening to attribute changes
         updatePromptsForAllotment(allotment);
     }
 });
 
-function updateIncomeDisplayForAllotment(allotment: Model) {
-    if (!allotment.IsA("Model")) return;
+// function updateIncomeDisplayForAllotment(allotment: Model) {
+//     if (!allotment.IsA("Model")) return;
 
-    const collectPad = allotment.FindFirstChild("Collect");
-    if (!collectPad || !collectPad.IsA("BasePart")) return;
+//     const collectPad = allotment.FindFirstChild("Collect");
+//     if (!collectPad || !collectPad.IsA("BasePart")) return;
 
-    const gui = collectPad.FindFirstChild("IncomeDisplay") as BillboardGui;
-    const label = gui?.FindFirstChild("TextLabel") as TextLabel;
-    if (!label) return;
+//     const gui = collectPad.FindFirstChild("IncomeDisplay") as BillboardGui;
+//     const label = gui?.FindFirstChild("TextLabel") as TextLabel;
+//     if (!label) return;
 
-    const income = getPassiveIncome.InvokeServer(allotment) as number;
-    label.Text = `Income: $${income}`;
-}
+//     const income = getPassiveIncome.InvokeServer(allotment) as number;
+//     label.Text = `Income: $${income}`;
+// }
 
 
 function startIncomeUpdater() {
     const updateInterval = 1; // seconds
 
-    task.spawn(() => {
-        while (true) {
-            if (allotmentsFolder) {
-                for (const child of allotmentsFolder.GetChildren()) {
-                    if (child.IsA("Model")) {
-                        updateIncomeDisplayForAllotment(child); // ✅ child is now typed as Model
-                    }
-                }
-            }
-            wait(updateInterval);
-        }
-    });
+    // task.spawn(() => {
+    //     while (true) {
+    //         if (allotmentsFolder) {
+    //             for (const child of allotmentsFolder.GetChildren()) {
+    //                 if (child.IsA("Model")) {
+    //                     updateIncomeDisplayForAllotment(child); // ✅ child is now typed as Model
+    //                 }
+    //             }
+    //         }
+    //         wait(updateInterval);
+    //     }
+    // });
 }
 
-startIncomeUpdater();
+// startIncomeUpdater();
 
 
 

@@ -5,9 +5,9 @@ import { getPREFAB } from 'GardenWars/shared/PREFABS';
 import { TestSeed1 } from '../Gardens/Plants';
 import { PlantMaster } from '../Gardens/Plants';
 import DataManager, { Profiles } from 'Common/server/Data/DataManager';
-import { getIncomeRate } from './IncomeRates';
-import { PlantRarity } from 'Common/server/Data/Template';
+import { PlantId, PlantRarity } from 'Common/server/Data/Template';
 import { PlantData } from 'Common/server/Data/Template';
+import PlantInfoDictionary from './PlantInfo';
 
 const gardenFolder = Workspace.WaitForChild('Gardens') as Folder;
 const allotmentAction = ReplicatedStorage.WaitForChild("AllotmentAction") as RemoteEvent;
@@ -60,7 +60,7 @@ allotmentAction.OnServerEvent.Connect((player, ...args: unknown[]) => {
             warn(`No tool equipped by ${player.Name}, cannot plant.`);
             return;
         }
-        const seedPlanted = plantSeedAtAllotment(player, allotment, tool.Name);
+        const seedPlanted = plantSeedAtAllotment(player, allotment, tool);
         if (seedPlanted) {
             allotment.SetAttribute("State", newState.state);
         }
@@ -113,6 +113,22 @@ allotmentAction.OnServerEvent.Connect((player, ...args: unknown[]) => {
             allotment.SetAttribute("State", "empty");
         }
     }
+    else if (state === "grown" && action === "Level Up") {
+        const plant = activePlants.get(allotment);
+        if (!plant) {
+            warn(`No active plant found for allotment ${allotment.Name}`);
+            return;
+        }
+
+        const profile = Profiles.get(player)
+        const playerGold = profile?.Data.Gold;
+        const upgradeCost = PlantInfoDictionary.getLevelUpCost(plant.plantData.plantId, plant.plantData.rarity, plant.plantData.level);
+        print("Checking plantData: ", plant.allotmentModel.Name)
+        if (plant.plantData && playerGold && playerGold >= upgradeCost) {
+            plant.levelUp();
+            DataManager.LevelUpPlant(player, plant.allotmentModel.Name, plant.plantData)
+        }
+    }
 
 
     allotmentStateChange.FireAllClients(allotment.Name, allotment.GetAttribute("State"));
@@ -142,7 +158,7 @@ getPassiveIncome.OnServerInvoke = (player: Player, ...args: unknown[]): number =
 
     const incomeStart = math.max(grownAt, plant.lastCollectedAt ?? grownAt);
     const elapsed = now - incomeStart;
-    const rate = getIncomeRate(plant.plantId, plant.rarity, plant.level);
+    const rate = PlantInfoDictionary.getIncomeRate(plant.plantId, plant.rarity, plant.level);
     return math.floor(elapsed * rate);
 };
 
@@ -176,15 +192,17 @@ function getPlantFromAllotment(player: Player, allotment: Model): PlantData | un
 }
 
 
-function plantSeedAtAllotment(player: Player, allotment: Model, seedName: string): boolean {
+function plantSeedAtAllotment(player: Player, allotment: Model, tool: Tool): boolean {
     const rootPart = allotment.FindFirstChild("Root") as Part;
+    const plantId = tool.GetAttribute("plantId") as string;
+    const seedName = tool.GetAttribute("plantName") as string;
     if (!rootPart) return false;
 
-    const prefabList = getPREFAB("seeds", seedName) as Part[];
+    const prefabList = getPREFAB("seeds", plantId) as Part[];
     const progressBars = getPREFAB("UI", "ProgressBar") as BillboardGui[];
 
     if (!prefabList || !progressBars || prefabList.size() === 0 || progressBars.size() === 0) {
-        warn(`Missing prefab or progress bar for seed: ${seedName}`);
+        warn(`Missing prefab or progress bar for seed: ${plantId}`);
         return false;
     }
 
@@ -196,16 +214,17 @@ function plantSeedAtAllotment(player: Player, allotment: Model, seedName: string
     //     level: allotment.GetAttribute("Level") as number,
     // };
     const plantData = {
-        plantId: seedName,
+        plantId: plantId as PlantId,
+        plantName: seedName,
         allotmentIndex: allotment.Name,
         plantedAt: os.time(),
         growthDuration: 1,
         rarity: "Common" as PlantRarity,
-        level: 1,
+        level: 0,
         lastCollected: os.time(),
     }
 
-    const plant = new TestSeed1(plantData);
+    const plant = new TestSeed1(allotment, plantData);
     activePlants.set(allotment, plant);
     const plantingCoro = coroutine.create(() => {
         plant.plant(player, rootPart.Position, () => {

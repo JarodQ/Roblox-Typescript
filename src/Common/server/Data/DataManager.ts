@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { PlayerTemplate, templateData, PlantData } from "./Template";
 import ProfileStore from "@rbxts/profile-store";
-import { getIncomeRate } from "GardenWars/server/GardensV2/IncomeRates";
+import PlantInfoDictionary from "GardenWars/server/GardensV2/PlantInfo";
 
 // RemoteEvents
 const updateGold = ReplicatedStorage.WaitForChild("UpdateGold") as RemoteEvent;
@@ -42,14 +42,12 @@ export const DataManager = {
     AddPlant(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
         if (!profile) return;
-        print("adding grownplants to data: ", plant)
         profile.Data.Plants.push(plant);
     },
 
     RemovePlant(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
         if (!profile) return;
-        print("Removing Plant from player data")
         const index = profile.Data.Plants.findIndex(p => p.allotmentIndex === plant.allotmentIndex);
         if (index === -1) {
             print("Plant not found in GrownPlants");
@@ -57,7 +55,6 @@ export const DataManager = {
         }
 
         profile.Data.Plants.remove(index);
-        print("Removed plant from GrownPlants:", plant);
     },
 
     UpdatePlant(player: Player, allotmentIndex: string, updates: Partial<PlantData>) {
@@ -74,6 +71,22 @@ export const DataManager = {
         }
     },
 
+    LevelUpPlant(player: Player, allotmentIndex: string, plantData: PlantData) {
+        const profile = Profiles.get(player);
+        if (!profile) return;
+
+        const plant = profile.Data.Plants.find(p => p.allotmentIndex === allotmentIndex);
+        if (!plant) return;
+
+        const cost = PlantInfoDictionary.getLevelUpCost(plant.plantId, plant.rarity, plant.level);
+        print("profile gold: ", profile.Data.Gold, " upgradecost: ", cost)
+        if (profile.Data.Gold >= cost) {
+            plant.level += 1;
+            this.AddGold(player, -1 * cost);
+        }
+
+    },
+
     CollectPassiveIncome(player: Player, plant: PlantData) {
         const profile = Profiles.get(player);
         if (!profile) return;
@@ -88,7 +101,7 @@ export const DataManager = {
 
         const incomeStart = math.max(grownAt, plant.lastCollectedAt ?? grownAt);
         const elapsed = now - incomeStart;
-        const rate = getIncomeRate(plant.plantId, plant.rarity, plant.level);
+        const rate = PlantInfoDictionary.getIncomeRate(plant.plantId, plant.rarity, plant.level);
         const income = math.floor(elapsed * rate);
 
         if (income <= 0) {
