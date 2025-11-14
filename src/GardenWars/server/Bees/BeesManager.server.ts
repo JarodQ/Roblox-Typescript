@@ -1,10 +1,13 @@
-import { Bee, BeeType } from "./Bees";
+import { Workspace } from "@rbxts/services";
+import { Beehive } from "./Beehive";
 
-// 🐝 How many bees to spawn
-const BEE_COUNT = 30;
+const beehiveFolder = Workspace.WaitForChild("Beehives") as Folder;
 
-for (let i = 0; i < BEE_COUNT; i++) {
-    const bee = new Bee(BeeType.WorkerBee);
-    // No need to call roam or aggro manually — handled inside the class
+// 🐝 Create Beehive instances for each hive model
+for (const hiveModel of beehiveFolder.GetChildren()) {
+    if (hiveModel.IsA("Model")) {
+        const level = hiveModel.GetAttribute("Level") as number;
+
+        new Beehive(hiveModel, level);
+    }
 }
-

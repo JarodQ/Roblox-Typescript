@@ -7,7 +7,7 @@ import { PlantMaster } from '../Gardens/Plants';
 import DataManager, { Profiles } from 'Common/server/Data/DataManager';
 import { PlantId, PlantRarity } from 'Common/server/Data/Template';
 import { PlantData } from 'Common/server/Data/Template';
-import PlantInfoDictionary from './PlantInfo';
+import { PlantInfoDictionary } from './PlantInfo';
 
 const gardenFolder = Workspace.WaitForChild('Gardens') as Folder;
 const allotmentAction = ReplicatedStorage.WaitForChild("AllotmentAction") as RemoteEvent;
@@ -206,13 +206,6 @@ function plantSeedAtAllotment(player: Player, allotment: Model, tool: Tool): boo
         return false;
     }
 
-    // const seed = {
-    //     name: seedName,
-    //     PREFABS: prefabList,
-    //     plantProgress: progressBars[0],
-    //     rarity: allotment.GetAttribute("Rarity") as PlantRarity,
-    //     level: allotment.GetAttribute("Level") as number,
-    // };
     const plantData = {
         plantId: plantId as PlantId,
         plantName: seedName,

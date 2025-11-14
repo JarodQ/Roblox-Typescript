@@ -6,7 +6,7 @@ import { Interactable, InteractionRegistry } from "GardenWars/shared/InteractInt
 import { PlayerData } from "Common/shared/PlayerData/PlayerData";
 import { serializeVector3, serializeCFrame, deserializeVector3, deserializeCFrame } from "Common/shared/PlayerData/Utils/Serialize";
 import { PlantData, PlantRarity, PlantId } from "Common/server/Data/Template";
-import PlantInfoDictionary from "../GardensV2/PlantInfo";
+import { PlantInfoDictionary } from "../GardensV2/PlantInfo";
 import { formatTime, formatNumberCompact } from "Common/shared/Utility/format";
 
 const DropsPrefabsFolder = ReplicatedStorage.FindFirstChild("PREFABS")!.FindFirstChild("Drops")!;

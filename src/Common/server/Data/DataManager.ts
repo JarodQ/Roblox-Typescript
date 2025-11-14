@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { PlayerTemplate, templateData, PlantData } from "./Template";
 import ProfileStore from "@rbxts/profile-store";
-import PlantInfoDictionary from "GardenWars/server/GardensV2/PlantInfo";
+import { PlantInfoDictionary } from "GardenWars/server/GardensV2/PlantInfo";
 
 // RemoteEvents
 const updateGold = ReplicatedStorage.WaitForChild("UpdateGold") as RemoteEvent;

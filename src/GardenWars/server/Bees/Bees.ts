@@ -3,12 +3,15 @@ import { getPREFAB } from "GardenWars/shared/PREFABS";
 
 const beehiveFolder = Workspace.WaitForChild("Beehives") as Folder;
 
-export enum BeeType {
-    WorkerBee = "WorkerBee",
-    DroneBee = "DroneBee",
-    KingBee = "KingBee",
-    QueenBee = "QueenBee",
-}
+export type BeeType = "WorkerBee" | "DroneBee" | "KingBee" | "QueenBee";
+
+export const AllBeeTypes: BeeType[] = [
+    "WorkerBee",
+    "DroneBee",
+    "KingBee",
+    "QueenBee",
+];
+
 
 export enum BeeActionState {
     Resting = "resting",
@@ -33,27 +36,28 @@ export class Bee {
     private readonly defenseRadius = 50;
     private targetPlayer?: Player;
 
-    constructor(beeType: BeeType) {
-        // 🐝 Get prefab and clone
+    constructor(beeType: BeeType, beehiveModel: Model) {
         const prefab = getPREFAB("Bees", beeType) as Model;
         this.model = prefab.Clone();
         this.model.Parent = Workspace;
-        this.monitorHealth();
-        // 🏠 Assign random beehive
-        const beehives = beehiveFolder.GetChildren().filter((child) => child.IsA("Model"));
-        this.beehiveModel = beehives[math.random(0, beehives.size() - 1)] as Model;
 
-        // 📍 Position above hive
-        const offset = new Vector3(0, 5, 0);
+        this.monitorHealth();
+        this.playIdleAnimation(); // 🕺 Play animation on spawn
+
+        // 🏠 Assign random beehive
+        // const beehives = beehiveFolder.GetChildren().filter((child) => child.IsA("Model"));
+        // this.beehiveModel = beehives[math.random(0, beehives.size() - 1)] as Model;
+        this.beehiveModel = beehiveModel;
+        const offset = new Vector3(0, 10, 0);
         const targetCFrame = this.beehiveModel.PrimaryPart!.CFrame.add(offset);
         this.model.PivotTo(targetCFrame);
 
         this.roamPoint = this.model.PrimaryPart?.Position ?? new Vector3(0, 0, 0);
 
-        // 🐾 Start behavior
         this.roam();
         this.startAggroLoop();
     }
+
 
     public setState(newState: BeeActionState) {
         this.state = newState;
@@ -62,6 +66,36 @@ export class Bee {
     public getState(): BeeActionState {
         return this.state;
     }
+
+    private playIdleAnimation() {
+        const humanoid = this.model.FindFirstChildOfClass("Humanoid");
+        if (!humanoid) return;
+        // 🔍 Find Animator directly (not via AnimationController)
+        const animator = humanoid.FindFirstChildOfClass("Animator");
+        if (!animator) {
+            warn("🐝 Animator not found inside Humanoid.");
+            return;
+        }
+        const animFolder = this.model.FindFirstChild("Anims") as Folder;
+        if (!animFolder) return;
+
+        const animation = animFolder.FindFirstChildOfClass("Animation");
+        if (!animation || animation.AnimationId === "") {
+            warn("🐝 Animation missing or AnimationId not set.");
+            return;
+        }
+
+        const track = animator.LoadAnimation(animation);
+        track.Looped = true;
+        track.Priority = Enum.AnimationPriority.Idle;
+        track.Play();
+
+        print(`🐝 Playing idle animation: ${animation.Name}`);
+    }
+
+
+
+
 
     private monitorHealth() {
         const humanoid = this.model.FindFirstChildOfClass("Humanoid");
