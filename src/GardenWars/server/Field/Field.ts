@@ -23,16 +23,28 @@ export class Field {
     }
 
     private getRandomLevel(): number {
-        return math.random(this.level, this.level + 2); // slight variation
+        return math.random(this.level, this.level + 2);
+    }
+
+    private spawnPlant() {
+        const plantId = this.getWeightedPlantId();
+        const rarity = this.getWeightedRarity();
+        const level = this.getRandomLevel();
+
+        new FieldPlant(
+            this.fieldRegion,
+            plantId,
+            rarity,
+            level,
+            this.respawnDelay,
+            () => this.spawnPlant() // 👈 callback for respawn
+        );
     }
 
     private spawnInitialPlants() {
         for (let i = 0; i < this.spawnCount; i++) {
-            const plantId = this.getWeightedPlantId();
-            const rarity = this.getWeightedRarity();
-            const level = this.getRandomLevel();
-
-            new FieldPlant(this.fieldRegion, plantId, rarity, level, this.respawnDelay);
+            this.spawnPlant();
         }
     }
 }
+

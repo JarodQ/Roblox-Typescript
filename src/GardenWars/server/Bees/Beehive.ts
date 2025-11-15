@@ -1,5 +1,7 @@
 import { Bee, AllBeeTypes, BeeType } from "./Bees";
 import { Workspace } from "@rbxts/services";
+import { BeeRegistry } from "./Bees";
+
 
 export class Beehive {
     private readonly model: Model;
@@ -51,6 +53,7 @@ export class Beehive {
             this.activeBees.delete(bee);
             this.scheduleRespawn();
         });
+        BeeRegistry.set(bee.getModel(), bee);
     }
 
     private scheduleRespawn() {

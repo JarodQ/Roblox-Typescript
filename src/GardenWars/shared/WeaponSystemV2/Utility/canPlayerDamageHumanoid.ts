@@ -13,7 +13,6 @@ export function canPlayerDamageHumanoid(player: Player, taggedHumanoid: Humanoid
     // print("taggedPlayer")
     // If the player tagged a non-player humanoid then allow damage
     if (!taggedPlayer) {
-        // print("Non Player humanoid")
         return true;
     }
 

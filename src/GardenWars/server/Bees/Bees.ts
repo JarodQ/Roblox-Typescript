@@ -1,10 +1,11 @@
 import { Workspace, Players } from "@rbxts/services";
 import { getPREFAB } from "GardenWars/shared/PREFABS";
+import { HarvestEvent, StingEvent } from "./BeeEvents";
 
 const beehiveFolder = Workspace.WaitForChild("Beehives") as Folder;
+export const BeeRegistry = new Map<Model, Bee>();
 
 export type BeeType = "WorkerBee" | "DroneBee" | "KingBee" | "QueenBee";
-
 export const AllBeeTypes: BeeType[] = [
     "WorkerBee",
     "DroneBee",
@@ -12,13 +13,27 @@ export const AllBeeTypes: BeeType[] = [
     "QueenBee",
 ];
 
-
 export enum BeeActionState {
     Resting = "resting",
     Roaming = "roaming",
     Attacking = "attacking",
     Returning = "returning",
 }
+
+const baseTrigger = Workspace.WaitForChild("BaseBarrier") as BasePart;
+
+baseTrigger.Touched.Connect((hit) => {
+    // Check if the thing that touched is a Bee model
+    const model = hit.Parent as Model;
+    if (!model) return;
+
+    // If you keep track of Bee instances (e.g. in a global array or Map)
+    const beeInstance = BeeRegistry.get(model); // 👈 your registry lookup
+    if (beeInstance) {
+        beeInstance.setState(BeeActionState.Roaming); // reset state
+        beeInstance.roam();              // call roam logic
+    }
+});
 
 export class Bee {
     private model: Model;
@@ -54,6 +69,15 @@ export class Bee {
 
         this.roamPoint = this.model.PrimaryPart?.Position ?? new Vector3(0, 0, 0);
 
+        HarvestEvent.Event.Connect((player: Player) => {
+            // 👇 Check aggro when notified
+            this.checkAggro(player, true);
+        });
+
+        StingEvent.Event.Connect((player: Player, position: Vector3) => {
+            // 👇 If this bee was the attacker, you could handle extra logic
+        });
+
         this.roam();
         this.startAggroLoop();
     }
@@ -65,6 +89,10 @@ export class Bee {
 
     public getState(): BeeActionState {
         return this.state;
+    }
+
+    public getModel(): Model {
+        return this.model;
     }
 
     private playIdleAnimation() {
@@ -263,7 +291,11 @@ export class Bee {
 
         });
 
-        print(`${this.model.Name} stung ${this.targetPlayer.Name} and flung them in an arc!`);
+        const stingPos = this.model.PrimaryPart?.Position;
+        if (stingPos) {
+            StingEvent.Fire(this.targetPlayer, stingPos);
+        }
+
         this.roam();
     }
 

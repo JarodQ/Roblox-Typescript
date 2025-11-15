@@ -282,25 +282,6 @@ class GuiController {
             this.createBillboard(model, finalDamage, isCritical);
         }
     }
-
-
-
-    // export function damageHealth(
-    //     target: Model,
-    //     damage: number,
-    //     hit: BasePart,
-    //     shooter: Instance,
-    //     special: boolean,
-    // ) {
-    //     const humanoid = target.FindFirstChildOfClass("Humanoid");
-    //     if (!humanoid || humanoid.Health <= 0) return;
-
-    //     humanoid.Health -= damage;
-
-    //     const isCritical = hit.Name === "Head";
-    //     newBillboard(target, damage, isCritical, special);
-    // }
-
 }
 
 export default GuiController;

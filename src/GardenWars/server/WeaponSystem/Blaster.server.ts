@@ -26,10 +26,11 @@ function onShootEvent(player: Player, ...args: unknown[]) {
         CFrame,
         Map<string, { humanoid: Humanoid; isCritical: boolean }>
     ];
-    // print("Validating shot")
+    print("Validating shot")
     if (!validateShootArguments(timestamp, blaster, origin, tagged)) return;
+    print("Validated shoot arguments")
     if (!validateShot(player, timestamp, blaster, origin)) return;
-    // print("Shot validated")
+    print("Shot validated")
 
 
     const spread = blaster.GetAttribute(Constants.SPREAD_ATTRIBUTE) as number;

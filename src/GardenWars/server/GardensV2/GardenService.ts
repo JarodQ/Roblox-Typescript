@@ -196,6 +196,7 @@ function plantSeedAtAllotment(player: Player, allotment: Model, tool: Tool): boo
     const rootPart = allotment.FindFirstChild("Root") as Part;
     const plantId = tool.GetAttribute("plantId") as string;
     const seedName = tool.GetAttribute("plantName") as string;
+    const plantRarity = tool.GetAttribute("PlantRarity") as PlantRarity; // 👈 read rarity from tool
     if (!rootPart) return false;
 
     const prefabList = getPREFAB("seeds", plantId) as Part[];
@@ -212,10 +213,10 @@ function plantSeedAtAllotment(player: Player, allotment: Model, tool: Tool): boo
         allotmentIndex: allotment.Name,
         plantedAt: os.time(),
         growthDuration: 1,
-        rarity: "Common" as PlantRarity,
+        rarity: plantRarity, // 👈 use the tool’s rarity
         level: 0,
         lastCollected: os.time(),
-    }
+    };
 
     const plant = new TestSeed1(allotment, plantData);
     activePlants.set(allotment, plant);
@@ -226,11 +227,11 @@ function plantSeedAtAllotment(player: Player, allotment: Model, tool: Tool): boo
         });
     });
     coroutine.resume(plantingCoro);
-    DataManager.AddPlant(player, plantData)
-
+    DataManager.AddPlant(player, plantData);
 
     return true;
 }
+
 
 
 
